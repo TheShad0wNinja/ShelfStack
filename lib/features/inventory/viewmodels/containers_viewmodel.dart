@@ -22,6 +22,12 @@ class ContainersViewModel extends ChangeNotifier {
   int get totalItems =>
       _containers.fold(0, (sum, container) => sum + container.items.length);
 
+  List<models.Container> get recentContainers {
+    final sorted = List<models.Container>.from(_containers);
+    sorted.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+    return sorted;
+  }
+
   ContainersViewModel() {
     loadContainers();
   }

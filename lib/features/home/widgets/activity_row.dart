@@ -1,21 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:shelfstack/data/models/container.dart' as models;
 import 'package:shelfstack/features/inventory/screens/container_details_screen.dart';
 
 class ActivityRow extends StatelessWidget {
-  final String? photoUrl;
-  final String title;
-  final int itemCount;
-  final String location;
-  final String? containerId;
+  final models.Container container;
 
-  const ActivityRow({
-    super.key,
-    this.photoUrl,
-    required this.title,
-    required this.itemCount,
-    required this.location,
-    this.containerId,
-  });
+  const ActivityRow({super.key, required this.container});
 
   @override
   Widget build(BuildContext context) {
@@ -26,16 +16,14 @@ class ActivityRow extends StatelessWidget {
       borderRadius: BorderRadius.circular(10),
       color: Colors.white,
       child: InkWell(
-        onTap: containerId != null
-            ? () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) =>
-                        ContainerDetailsScreen(containerId: containerId!),
-                  ),
-                );
-              }
-            : null,
+        onTap: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) =>
+                  ContainerDetailsScreen(containerId: container.id),
+            ),
+          );
+        },
         borderRadius: BorderRadius.circular(10),
         child: Padding(
           padding: const EdgeInsets.all(10.0),
@@ -46,18 +34,17 @@ class ActivityRow extends StatelessWidget {
               Container(
                 width: 50,
                 height: 50,
-
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(8),
                   color: Colors.grey.shade300,
-                  image: photoUrl != null
+                  image: container.photoUrl != null
                       ? DecorationImage(
-                          image: NetworkImage(photoUrl!),
+                          image: NetworkImage(container.photoUrl!),
                           fit: BoxFit.cover,
                         )
                       : null,
                 ),
-                child: photoUrl == null
+                child: container.photoUrl == null
                     ? const Icon(
                         Icons.inventory_2_outlined,
                         size: 48,
@@ -75,7 +62,10 @@ class ActivityRow extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(title, style: theme.textTheme.bodyMedium),
+                          Text(
+                            container.name,
+                            style: theme.textTheme.bodyMedium,
+                          ),
                           Row(
                             spacing: 5,
                             children: [
@@ -88,7 +78,7 @@ class ActivityRow extends StatelessWidget {
                                     size: 12,
                                   ),
                                   Text(
-                                    "$itemCount items",
+                                    "${container.items.length} items",
                                     style: theme.textTheme.bodySmall?.copyWith(
                                       color: Colors.grey.shade600,
                                     ),
@@ -104,7 +94,7 @@ class ActivityRow extends StatelessWidget {
                                     size: 12,
                                   ),
                                   Text(
-                                    location,
+                                    container.location.label,
                                     style: theme.textTheme.bodySmall?.copyWith(
                                       color: Colors.grey.shade600,
                                     ),

@@ -32,9 +32,10 @@ class MyApp extends StatelessWidget {
         title: 'ShelfStack',
         home: Consumer<NavigationViewModel>(
           builder: (context, vm, child) => Scaffold(
+            extendBody: true,
             body: SafeArea(
               top: true,
-              bottom: true,
+              bottom: false,
               child: IndexedStack(index: vm.currentIndex, children: screens),
             ),
             bottomNavigationBar: const NavBar(),

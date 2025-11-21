@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:shelfstack/features/inventory/screens/container_details_screen.dart';
+import 'package:provider/provider.dart';
 import 'package:shelfstack/core/widgets/rounded_appbar.dart';
+import 'package:shelfstack/features/inventory/viewmodels/containers_viewmodel.dart';
+import 'package:shelfstack/features/inventory/viewmodels/add_item_viewmodel.dart';
 
-class AddItemScreen extends StatefulWidget {
+class AddItemScreen extends StatelessWidget {
   final String containerId;
   final String containerName;
   final String containerLocation;
@@ -15,58 +17,61 @@ class AddItemScreen extends StatefulWidget {
   });
 
   @override
-  State<AddItemScreen> createState() => _AddItemScreenState();
+  Widget build(BuildContext context) {
+    return ChangeNotifierProvider(
+      create: (_) => AddItemViewModel(),
+      child: _AddItemContent(
+        containerId: containerId,
+        containerName: containerName,
+        containerLocation: containerLocation,
+      ),
+    );
+  }
 }
 
-class _AddItemScreenState extends State<AddItemScreen> {
-  final _nameController = TextEditingController();
-  final _descriptionController = TextEditingController();
+class _AddItemContent extends StatefulWidget {
+  final String containerId;
+  final String containerName;
+  final String containerLocation;
+
+  const _AddItemContent({
+    required this.containerId,
+    required this.containerName,
+    required this.containerLocation,
+  });
+
+  @override
+  State<_AddItemContent> createState() => _AddItemContentState();
+}
+
+class _AddItemContentState extends State<_AddItemContent> {
   final _tagController = TextEditingController();
-  final List<String> _tags = [];
-  String? _photoUrl;
 
   @override
   void dispose() {
-    _nameController.dispose();
-    _descriptionController.dispose();
     _tagController.dispose();
     super.dispose();
-  }
-
-  void _addTag() {
-    final tag = _tagController.text.trim();
-    if (tag.isNotEmpty && !_tags.contains(tag)) {
-      setState(() {
-        _tags.add(tag);
-        _tagController.clear();
-      });
-    }
-  }
-
-  void _removeTag(String tag) {
-    setState(() {
-      _tags.remove(tag);
-    });
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
+    final vm = context.watch<AddItemViewModel>();
 
     return Scaffold(
       backgroundColor: const Color(0xFFF1F5F9),
       appBar: RoundedAppBar(
-        height: 88,
-        padding: const EdgeInsets.fromLTRB(16, 25, 16, 2),
+        height: 80,
+        padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             IconButton(
               onPressed: () => Navigator.of(context).pop(),
               icon: Container(
-                width: 28,
-                height: 28,
+                width: 32,
+                height: 32,
                 decoration: BoxDecoration(
                   color: Colors.grey.shade200,
                   shape: BoxShape.circle,
@@ -76,412 +81,253 @@ class _AddItemScreenState extends State<AddItemScreen> {
             ),
             Text(
               'Add Item',
-              style: textTheme.titleSmall?.copyWith(
+              style: textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w600,
               ),
             ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text(
-                'Save',
-                style: textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: theme.colorScheme.primary,
-                ),
-              ),
-            ),
+            const SizedBox(width: 32), // Spacer for alignment
           ],
         ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-        child: Column(
-          children: [
-            _buildPhotoSection(),
-            const SizedBox(height: 24),
-            _buildNameDescriptionSection(),
-            const SizedBox(height: 24),
-            _buildTagsSection(),
-            const SizedBox(height: 24),
-            _buildStoredInSection(),
-            const SizedBox(height: 24),
-            _buildExternalDocumentsSection(),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPhotoSection() {
-    final theme = Theme.of(context);
-    final textTheme = theme.textTheme;
-
-    return Material(
-      elevation: 1,
-      borderRadius: BorderRadius.circular(12),
-      color: Colors.white,
-      child: Container(
-        padding: const EdgeInsets.all(14),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Item Photo', style: textTheme.bodySmall),
-            const SizedBox(height: 10),
-            Container(
-              width: double.infinity,
-              height: 112,
-              decoration: BoxDecoration(
-                color: Colors.grey.shade200,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: Theme.of(context).colorScheme.primary,
-                  width: 1,
+            // Photo Upload Section
+            Center(
+              child: GestureDetector(
+                onTap: () {
+                  // Mock photo upload
+                  vm.updatePhotoUrl(
+                    'https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=400',
+                  );
+                },
+                child: Container(
+                  width: 120,
+                  height: 120,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: Colors.grey.shade300),
+                    image: vm.photoUrl != null
+                        ? DecorationImage(
+                            image: NetworkImage(vm.photoUrl!),
+                            fit: BoxFit.cover,
+                          )
+                        : null,
+                  ),
+                  child: vm.photoUrl == null
+                      ? Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.camera_alt_outlined,
+                              size: 32,
+                              color: theme.colorScheme.primary,
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Add Photo',
+                              style: textTheme.labelSmall?.copyWith(
+                                color: theme.colorScheme.primary,
+                              ),
+                            ),
+                          ],
+                        )
+                      : null,
                 ),
               ),
-              child: _photoUrl != null
-                  ? ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: Image.network(_photoUrl!, fit: BoxFit.cover),
-                    )
-                  : Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.add_photo_alternate_outlined,
-                          size: 32,
-                          color: Colors.grey.shade500,
-                        ),
-                        const SizedBox(height: 10),
-                        Text(
-                          'Add Photo',
-                          style: textTheme.labelSmall?.copyWith(
-                            color: Colors.grey.shade500,
-                          ),
-                        ),
-                      ],
-                    ),
             ),
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: () {},
-                    icon: const Icon(
-                      Icons.camera_alt,
-                      size: 20,
-                      color: Colors.white,
+            const SizedBox(height: 24),
+
+            // Container Info Card
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.grey.shade200),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE3F2FD),
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                    label: Text(
-                      'Take Photo',
-                      style: textTheme.bodyMedium?.copyWith(
-                        color: Colors.white,
-                      ),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.primary,
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
+                    child: Icon(
+                      Icons.inventory_2_outlined,
+                      color: theme.colorScheme.primary,
                     ),
                   ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () {},
-                    icon: Icon(
-                      Icons.photo_library_outlined,
-                      size: 20,
-                      color: Colors.grey.shade600,
-                    ),
-                    label: Text(
-                      'Choose',
-                      style: textTheme.bodyMedium?.copyWith(
-                        color: Colors.grey.shade600,
+                  const SizedBox(width: 16),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Adding to Container',
+                        style: textTheme.labelSmall?.copyWith(
+                          color: Colors.grey.shade600,
+                        ),
                       ),
-                    ),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      side: BorderSide(color: Colors.grey.shade400, width: 1),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                      const SizedBox(height: 4),
+                      Text(
+                        widget.containerName,
+                        style: textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                    ),
+                      Text(
+                        widget.containerLocation,
+                        style: textTheme.bodySmall?.copyWith(
+                          color: Colors.grey.shade600,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ],
-        ),
-      ),
-    );
-  }
+            const SizedBox(height: 24),
 
-  Widget _buildNameDescriptionSection() {
-    final theme = Theme.of(context);
-    final textTheme = theme.textTheme;
-
-    return Material(
-      elevation: 1,
-      borderRadius: BorderRadius.circular(12),
-      color: Colors.white,
-      child: Container(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Item Name *', style: textTheme.bodySmall),
-            const SizedBox(height: 10),
+            // Name Field
+            Text('Item Name', style: textTheme.titleSmall),
+            const SizedBox(height: 8),
             TextField(
-              controller: _nameController,
+              onChanged: vm.updateName,
               decoration: InputDecoration(
-                hintText: 'e.g. Spare Spatula',
-                hintStyle: textTheme.bodySmall?.copyWith(
-                  color: Colors.grey.shade500,
-                ),
+                hintText: 'e.g., Spare Keys',
                 filled: true,
-                fillColor: Colors.grey.shade200,
+                fillColor: Colors.white,
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
                 ),
-                contentPadding: const EdgeInsets.all(10),
+                contentPadding: const EdgeInsets.all(16),
               ),
             ),
-            const SizedBox(height: 10),
-            Text('Description', style: textTheme.bodySmall),
-            const SizedBox(height: 10),
+            const SizedBox(height: 20),
+
+            // Description Field
+            Text('Description', style: textTheme.titleSmall),
+            const SizedBox(height: 8),
             TextField(
-              controller: _descriptionController,
+              onChanged: vm.updateDescription,
               maxLines: 3,
               decoration: InputDecoration(
-                hintText: 'Details about this item...',
-                hintStyle: textTheme.bodySmall?.copyWith(
-                  color: Colors.grey.shade500,
-                ),
+                hintText: 'Add details about the item...',
                 filled: true,
-                fillColor: Colors.grey.shade200,
+                fillColor: Colors.white,
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
                 ),
-                contentPadding: const EdgeInsets.all(10),
+                contentPadding: const EdgeInsets.all(16),
               ),
             ),
-          ],
-        ),
-      ),
-    );
-  }
+            const SizedBox(height: 20),
 
-  Widget _buildTagsSection() {
-    final theme = Theme.of(context);
-    final textTheme = theme.textTheme;
-
-    return Material(
-      elevation: 1,
-      borderRadius: BorderRadius.circular(12),
-      color: Colors.white,
-      child: Container(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Add Tags', style: textTheme.bodySmall),
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _tagController,
-                    onSubmitted: (_) => _addTag(),
-                    decoration: InputDecoration(
-                      hintText: 'Type a tag...',
-                      hintStyle: textTheme.bodySmall?.copyWith(
-                        color: Colors.grey.shade500,
-                      ),
-                      filled: true,
-                      fillColor: Colors.grey.shade200,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide.none,
-                      ),
-                      contentPadding: const EdgeInsets.all(10),
-                    ),
-                  ),
+            // Tags Section
+            Text('Tags', style: textTheme.titleSmall),
+            const SizedBox(height: 8),
+            TextField(
+              controller: _tagController,
+              onSubmitted: (value) {
+                if (value.isNotEmpty) {
+                  vm.addTag(value);
+                  _tagController.clear();
+                }
+              },
+              decoration: InputDecoration(
+                hintText: 'Type and press enter to add tags',
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
                 ),
-                const SizedBox(width: 10),
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: IconButton(
-                    onPressed: _addTag,
-                    icon: const Icon(Icons.add, color: Colors.white, size: 20),
-                    padding: EdgeInsets.zero,
-                  ),
+                contentPadding: const EdgeInsets.all(16),
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.add),
+                  onPressed: () {
+                    if (_tagController.text.isNotEmpty) {
+                      vm.addTag(_tagController.text);
+                      _tagController.clear();
+                    }
+                  },
                 ),
-              ],
+              ),
             ),
-            if (_tags.isNotEmpty) ...[
-              const SizedBox(height: 10),
+            if (vm.tags.isNotEmpty) ...[
+              const SizedBox(height: 12),
               Wrap(
                 spacing: 8,
                 runSpacing: 8,
-                children: _tags.map((tag) {
+                children: vm.tags.map((tag) {
                   return Chip(
                     label: Text(tag),
-                    onDeleted: () => _removeTag(tag),
-                    deleteIcon: const Icon(Icons.close, size: 16),
+                    deleteIcon: const Icon(Icons.close, size: 18),
+                    onDeleted: () => vm.removeTag(tag),
                     backgroundColor: const Color(0xFFE3F2FD),
-                    labelStyle: textTheme.labelSmall?.copyWith(
-                      color: const Color(0xFF1976D2),
-                    ),
+                    labelStyle: TextStyle(color: theme.colorScheme.primary),
+                    side: BorderSide.none,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
-                      side: const BorderSide(color: Color(0x00ffffff)),
                     ),
                   );
                 }).toList(),
               ),
             ],
-          ],
-        ),
-      ),
-    );
-  }
+            const SizedBox(height: 32),
 
-  Widget _buildStoredInSection() {
-    final theme = Theme.of(context);
-    final textTheme = theme.textTheme;
-
-    return Material(
-      elevation: 1,
-      borderRadius: BorderRadius.circular(12),
-      color: Colors.white,
-      child: Container(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Stored In', style: textTheme.bodySmall),
-            const SizedBox(height: 10),
-            InkWell(
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) =>
-                        ContainerDetailsScreen(containerId: widget.containerId),
+            // Save Button
+            SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton(
+                onPressed: vm.isLoading
+                    ? null
+                    : () async {
+                        final containersVm = context
+                            .read<ContainersViewModel>();
+                        final success = await vm.saveItem(
+                          widget.containerId,
+                          containersVm,
+                        );
+                        if (success && context.mounted) {
+                          Navigator.of(context).pop();
+                        } else if (vm.error != null && context.mounted) {
+                          ScaffoldMessenger.of(
+                            context,
+                          ).showSnackBar(SnackBar(content: Text(vm.error!)));
+                        }
+                      },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: theme.colorScheme.primary,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                );
-              },
-              borderRadius: BorderRadius.circular(10),
-              child: Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade200,
-                  borderRadius: BorderRadius.circular(10),
+                  elevation: 0,
                 ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.primary,
-                        borderRadius: BorderRadius.circular(10),
+                child: vm.isLoading
+                    ? const SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : const Text(
+                        'Save Item',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                      child: const Icon(
-                        Icons.inventory_2_outlined,
-                        color: Colors.white,
-                        size: 20,
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            widget.containerName,
-                            style: textTheme.bodySmall,
-                          ),
-                          Text(
-                            widget.containerLocation,
-                            style: textTheme.labelSmall?.copyWith(
-                              color: Colors.grey.shade600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 10),
-            OutlinedButton(
-              onPressed: () {},
-              style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                side: BorderSide(color: theme.colorScheme.primary, width: 1),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              child: SizedBox(
-                width: double.infinity,
-                child: Text(
-                  'Change Container',
-                  textAlign: TextAlign.center,
-                  style: textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.primary,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildExternalDocumentsSection() {
-    final theme = Theme.of(context);
-    final textTheme = theme.textTheme;
-
-    return Material(
-      elevation: 1,
-      borderRadius: BorderRadius.circular(12),
-      color: Colors.white,
-      child: Container(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('External Documents', style: textTheme.bodySmall),
-            const SizedBox(height: 10),
-            OutlinedButton.icon(
-              onPressed: () {},
-              icon: const Icon(Icons.link, size: 20, color: Colors.black87),
-              label: Text(
-                'Link Attachment',
-                style: textTheme.bodyMedium?.copyWith(color: Colors.black87),
-              ),
-              style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                side: BorderSide(color: Colors.grey.shade500, width: 1),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                minimumSize: const Size(double.infinity, 40),
               ),
             ),
           ],

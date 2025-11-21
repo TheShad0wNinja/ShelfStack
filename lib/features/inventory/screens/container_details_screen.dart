@@ -6,49 +6,43 @@ import 'package:shelfstack/features/inventory/screens/edit_container_screen.dart
 import 'package:shelfstack/features/inventory/widgets/item_card.dart';
 import 'package:shelfstack/core/widgets/rounded_appbar.dart';
 import 'package:shelfstack/features/inventory/viewmodels/containers_viewmodel.dart';
+import 'package:shelfstack/features/inventory/viewmodels/container_details_viewmodel.dart';
 
-class ContainerDetailsScreen extends StatefulWidget {
+class ContainerDetailsScreen extends StatelessWidget {
   final String containerId;
 
   const ContainerDetailsScreen({super.key, required this.containerId});
 
   @override
-  State<ContainerDetailsScreen> createState() => _ContainerDetailsScreenState();
+  Widget build(BuildContext context) {
+    return ChangeNotifierProvider(
+      create: (_) => ContainerDetailsViewModel(),
+      child: _ContainerDetailsContent(containerId: containerId),
+    );
+  }
 }
 
-class _ContainerDetailsScreenState extends State<ContainerDetailsScreen> {
-  models.Container? _container;
-  bool _isLoading = false;
-  String? _error;
+class _ContainerDetailsContent extends StatefulWidget {
+  final String containerId;
 
+  const _ContainerDetailsContent({required this.containerId});
+
+  @override
+  State<_ContainerDetailsContent> createState() =>
+      _ContainerDetailsContentState();
+}
+
+class _ContainerDetailsContentState extends State<_ContainerDetailsContent> {
   @override
   void initState() {
     super.initState();
-    _loadContainer();
-  }
-
-  Future<void> _loadContainer() async {
-    setState(() {
-      _isLoading = true;
-      _error = null;
-    });
-
-    try {
-      final containersVm = Provider.of<ContainersViewModel>(
-        context,
-        listen: false,
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final containersVm = context.read<ContainersViewModel>();
+      context.read<ContainerDetailsViewModel>().loadContainer(
+        widget.containerId,
+        containersVm,
       );
-      final container = await containersVm.getContainerById(widget.containerId);
-      setState(() {
-        _container = container;
-        _isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        _error = e.toString();
-        _isLoading = false;
-      });
-    }
+    });
   }
 
   @override
@@ -56,32 +50,36 @@ class _ContainerDetailsScreenState extends State<ContainerDetailsScreen> {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFF1F5F9),
-      appBar: RoundedAppBar(
-        height: 345,
-        padding: const EdgeInsets.fromLTRB(20, 25, 20, 24),
-        child: _isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : _error != null || _container == null
-            ? Center(
-                child: Text(
-                  _error ?? 'Container not found',
-                  style: textTheme.bodyMedium?.copyWith(color: Colors.red),
-                ),
-              )
-            : _buildAppBarContent(context, _container!),
-      ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _error != null || _container == null
-          ? Center(
-              child: Text(
-                _error ?? 'Container not found',
-                style: textTheme.bodyMedium?.copyWith(color: Colors.red),
-              ),
-            )
-          : _buildBody(context, _container!),
+    return Consumer<ContainerDetailsViewModel>(
+      builder: (context, vm, child) {
+        return Scaffold(
+          backgroundColor: const Color(0xFFF1F5F9),
+          appBar: RoundedAppBar(
+            height: 345,
+            padding: const EdgeInsets.fromLTRB(20, 25, 20, 24),
+            child: vm.isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : vm.error != null || vm.container == null
+                ? Center(
+                    child: Text(
+                      vm.error ?? 'Container not found',
+                      style: textTheme.bodyMedium?.copyWith(color: Colors.red),
+                    ),
+                  )
+                : _buildAppBarContent(context, vm.container!),
+          ),
+          body: vm.isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : vm.error != null || vm.container == null
+              ? Center(
+                  child: Text(
+                    vm.error ?? 'Container not found',
+                    style: textTheme.bodyMedium?.copyWith(color: Colors.red),
+                  ),
+                )
+              : _buildBody(context, vm.container!),
+        );
+      },
     );
   }
 
