@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shelfstack/data/models/container.dart' as models;
 import 'package:shelfstack/data/models/item.dart';
-import 'package:shelfstack/ui/screens/container_details_screen.dart';
-import 'package:shelfstack/ui/screens/edit_item_screen.dart';
+import 'package:shelfstack/features/inventory/screens/container_details_screen.dart';
+import 'package:shelfstack/features/inventory/screens/edit_item_screen.dart';
 
 class SearchResultCard extends StatelessWidget {
   final models.Container? container;

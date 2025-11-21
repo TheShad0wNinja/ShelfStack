@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shelfstack/data/models/container.dart' as models;
 import 'package:shelfstack/data/models/item.dart';
-import 'package:shelfstack/ui/widgets/search_result_card.dart';
-import 'package:shelfstack/ui/widgets/rounded_appbar.dart';
-import 'package:shelfstack/viewmodels/containers_viewmodel.dart';
+import 'package:shelfstack/features/search/widgets/search_result_card.dart';
+import 'package:shelfstack/core/widgets/rounded_appbar.dart';
+import 'package:shelfstack/features/inventory/viewmodels/containers_viewmodel.dart';
 
 enum SearchFilter { all, containersOnly, itemsOnly }
 

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shelfstack/viewmodels/navigation_viewmodel.dart';
+import 'package:shelfstack/core/viewmodels/navigation_viewmodel.dart';
 
 class NavBar extends StatelessWidget {
   const NavBar({super.key});

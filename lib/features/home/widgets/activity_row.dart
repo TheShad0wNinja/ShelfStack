@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:shelfstack/ui/screens/container_details_screen.dart';
+import 'package:shelfstack/features/inventory/screens/container_details_screen.dart';
 
 class ActivityRow extends StatelessWidget {
   final String? photoUrl;

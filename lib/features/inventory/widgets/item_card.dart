@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shelfstack/data/models/item.dart';
-import 'package:shelfstack/ui/screens/edit_item_screen.dart';
+import 'package:shelfstack/features/inventory/screens/edit_item_screen.dart';
 
 class ItemCard extends StatelessWidget {
   final Item item;

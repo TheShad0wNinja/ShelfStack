@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:shelfstack/ui/screens/container_details_screen.dart';
-import 'package:shelfstack/ui/widgets/rounded_appbar.dart';
+import 'package:shelfstack/features/inventory/screens/container_details_screen.dart';
+import 'package:shelfstack/core/widgets/rounded_appbar.dart';
 
 class AddItemScreen extends StatefulWidget {
   final String containerId;

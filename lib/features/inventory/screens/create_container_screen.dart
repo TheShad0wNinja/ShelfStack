@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:shelfstack/ui/widgets/rounded_appbar.dart';
+import 'package:shelfstack/core/widgets/rounded_appbar.dart';
 
 class CreateContainerScreen extends StatefulWidget {
   const CreateContainerScreen({super.key});

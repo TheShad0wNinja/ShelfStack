@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shelfstack/data/models/container.dart' as models;
-import 'package:shelfstack/ui/screens/add_item_screen.dart';
-import 'package:shelfstack/ui/screens/edit_container_screen.dart';
-import 'package:shelfstack/ui/widgets/item_card.dart';
-import 'package:shelfstack/ui/widgets/rounded_appbar.dart';
-import 'package:shelfstack/viewmodels/containers_viewmodel.dart';
+import 'package:shelfstack/features/inventory/screens/add_item_screen.dart';
+import 'package:shelfstack/features/inventory/screens/edit_container_screen.dart';
+import 'package:shelfstack/features/inventory/widgets/item_card.dart';
+import 'package:shelfstack/core/widgets/rounded_appbar.dart';
+import 'package:shelfstack/features/inventory/viewmodels/containers_viewmodel.dart';
 
 class ContainerDetailsScreen extends StatefulWidget {
   final String containerId;

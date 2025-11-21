@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:shelfstack/ui/screens/create_container_screen.dart';
-import 'package:shelfstack/ui/widgets/activity_row.dart';
-import 'package:shelfstack/viewmodels/containers_viewmodel.dart';
+import 'package:shelfstack/features/inventory/screens/create_container_screen.dart';
+import 'package:shelfstack/features/home/widgets/activity_row.dart';
+import 'package:shelfstack/features/inventory/viewmodels/containers_viewmodel.dart';
 
-import '../widgets/rounded_appbar.dart';
+import 'package:shelfstack/core/widgets/rounded_appbar.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
