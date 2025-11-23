@@ -28,7 +28,7 @@ class NavBar extends StatelessWidget {
               NavigationDestination(
                 icon: Icon(Icons.inventory_2_outlined),
                 selectedIcon: Icon(Icons.inventory),
-                label: 'Inventory',
+                label: 'Containers',
               ),
               NavigationDestination(
                 icon: Icon(Icons.search_outlined, size: 30),
