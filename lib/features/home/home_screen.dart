@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
 import 'package:shelfstack/features/inventory/screens/create_container_screen.dart';
 import 'package:shelfstack/features/home/widgets/activity_row.dart';
-import 'package:shelfstack/features/inventory/viewmodels/containers_viewmodel.dart';
+import 'package:shelfstack/data/models/container.dart' as models;
+import 'package:shelfstack/data/models/location.dart';
 
 import 'package:shelfstack/core/widgets/rounded_appbar.dart';
 
@@ -92,15 +92,11 @@ class HomeScreen extends StatelessWidget {
                                 color: Colors.grey.shade600,
                               ),
                             ),
-                            Consumer<ContainersViewModel>(
-                              builder: (context, vm, child) {
-                                return Text(
-                                  "${vm.totalContainers}",
-                                  style: textTheme.titleMedium?.copyWith(
-                                    height: 1.1,
-                                  ),
-                                );
-                              },
+                            Text(
+                              "12",
+                              style: textTheme.titleMedium?.copyWith(
+                                height: 1.1,
+                              ),
                             ),
                           ],
                         ),
@@ -138,15 +134,11 @@ class HomeScreen extends StatelessWidget {
                                 color: Colors.grey.shade600,
                               ),
                             ),
-                            Consumer<ContainersViewModel>(
-                              builder: (context, vm, child) {
-                                return Text(
-                                  "${vm.totalItems}",
-                                  style: textTheme.titleMedium?.copyWith(
-                                    height: 1.1,
-                                  ),
-                                );
-                              },
+                            Text(
+                              "45",
+                              style: textTheme.titleMedium?.copyWith(
+                                height: 1.1,
+                              ),
                             ),
                           ],
                         ),
@@ -270,45 +262,31 @@ class HomeScreen extends StatelessWidget {
                 children: [
                   Text("Recent Activities", style: textTheme.titleSmall),
                   const SizedBox(height: 10),
-                  Consumer<ContainersViewModel>(
-                    builder: (context, vm, child) {
-                      if (vm.isLoading) {
-                        return const Center(child: CircularProgressIndicator());
-                      }
-
-                      final recentContainers = vm.recentContainers;
-
-                      if (recentContainers.isEmpty) {
-                        return Center(
-                          child: Padding(
-                            padding: const EdgeInsets.all(20.0),
-                            child: Text(
-                              'No recent activity',
-                              style: textTheme.bodyMedium?.copyWith(
-                                color: Colors.grey,
-                              ),
-                            ),
-                          ),
-                        );
-                      }
-
-                      return ListView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        padding: EdgeInsets.zero,
-                        itemCount: recentContainers.length > 5
-                            ? 5
-                            : recentContainers.length,
-                        itemBuilder: (context, index) {
-                          final container = recentContainers[index];
-                          return Column(
-                            children: [
-                              ActivityRow(container: container),
-                              if (index != recentContainers.length - 1)
-                                const SizedBox(height: 10),
-                            ],
-                          );
-                        },
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    padding: EdgeInsets.zero,
+                    itemCount: 3,
+                    itemBuilder: (context, index) {
+                      final container = models.Container(
+                        id: 'static-$index',
+                        name: 'Static Container $index',
+                        tags: ['static', 'demo'],
+                        location: Location(
+                          latitude: 0,
+                          longitude: 0,
+                          label: 'Static Location',
+                          address: '123 Static St',
+                        ),
+                        createdAt: DateTime.now(),
+                        updatedAt: DateTime.now(),
+                        items: [],
+                      );
+                      return Column(
+                        children: [
+                          ActivityRow(container: container),
+                          if (index != 2) const SizedBox(height: 10),
+                        ],
                       );
                     },
                   ),

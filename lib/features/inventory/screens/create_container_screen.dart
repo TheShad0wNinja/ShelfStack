@@ -45,6 +45,19 @@ class _CreateContainerScreenState extends State<CreateContainerScreen> {
     });
   }
 
+  void _createContainer() {
+    // Simulate success
+    if (!mounted) return;
+
+    Navigator.of(context).pop();
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Container created successfully (Static)'),
+        backgroundColor: Colors.green,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -76,9 +89,7 @@ class _CreateContainerScreenState extends State<CreateContainerScreen> {
               ),
             ),
             TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
+              onPressed: _createContainer,
               child: Text(
                 'Save',
                 style: textTheme.titleSmall?.copyWith(

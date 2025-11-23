@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+
 import 'package:shelfstack/core/widgets/rounded_appbar.dart';
-import 'package:shelfstack/features/inventory/viewmodels/containers_viewmodel.dart';
-import 'package:shelfstack/features/inventory/viewmodels/add_item_viewmodel.dart';
 
 class AddItemScreen extends StatelessWidget {
   final String containerId;
@@ -18,13 +16,10 @@ class AddItemScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => AddItemViewModel(),
-      child: _AddItemContent(
-        containerId: containerId,
-        containerName: containerName,
-        containerLocation: containerLocation,
-      ),
+    return _AddItemContent(
+      containerId: containerId,
+      containerName: containerName,
+      containerLocation: containerLocation,
     );
   }
 }
@@ -45,10 +40,16 @@ class _AddItemContent extends StatefulWidget {
 }
 
 class _AddItemContentState extends State<_AddItemContent> {
+  final _nameController = TextEditingController();
+  final _descriptionController = TextEditingController();
   final _tagController = TextEditingController();
+  final List<String> _tags = [];
+  String? _photoUrl;
 
   @override
   void dispose() {
+    _nameController.dispose();
+    _descriptionController.dispose();
     _tagController.dispose();
     super.dispose();
   }
@@ -57,7 +58,6 @@ class _AddItemContentState extends State<_AddItemContent> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
-    final vm = context.watch<AddItemViewModel>();
 
     return Scaffold(
       backgroundColor: const Color(0xFFF1F5F9),
@@ -99,9 +99,10 @@ class _AddItemContentState extends State<_AddItemContent> {
               child: GestureDetector(
                 onTap: () {
                   // Mock photo upload
-                  vm.updatePhotoUrl(
-                    'https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=400',
-                  );
+                  setState(() {
+                    _photoUrl =
+                        'https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=400';
+                  });
                 },
                 child: Container(
                   width: 120,
@@ -110,14 +111,14 @@ class _AddItemContentState extends State<_AddItemContent> {
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(color: Colors.grey.shade300),
-                    image: vm.photoUrl != null
+                    image: _photoUrl != null
                         ? DecorationImage(
-                            image: NetworkImage(vm.photoUrl!),
+                            image: NetworkImage(_photoUrl!),
                             fit: BoxFit.cover,
                           )
                         : null,
                   ),
-                  child: vm.photoUrl == null
+                  child: _photoUrl == null
                       ? Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
@@ -196,7 +197,7 @@ class _AddItemContentState extends State<_AddItemContent> {
             Text('Item Name', style: textTheme.titleSmall),
             const SizedBox(height: 8),
             TextField(
-              onChanged: vm.updateName,
+              controller: _nameController,
               decoration: InputDecoration(
                 hintText: 'e.g., Spare Keys',
                 filled: true,
@@ -214,7 +215,7 @@ class _AddItemContentState extends State<_AddItemContent> {
             Text('Description', style: textTheme.titleSmall),
             const SizedBox(height: 8),
             TextField(
-              onChanged: vm.updateDescription,
+              controller: _descriptionController,
               maxLines: 3,
               decoration: InputDecoration(
                 hintText: 'Add details about the item...',
@@ -235,9 +236,11 @@ class _AddItemContentState extends State<_AddItemContent> {
             TextField(
               controller: _tagController,
               onSubmitted: (value) {
-                if (value.isNotEmpty) {
-                  vm.addTag(value);
-                  _tagController.clear();
+                if (value.isNotEmpty && !_tags.contains(value)) {
+                  setState(() {
+                    _tags.add(value);
+                    _tagController.clear();
+                  });
                 }
               },
               decoration: InputDecoration(
@@ -252,24 +255,31 @@ class _AddItemContentState extends State<_AddItemContent> {
                 suffixIcon: IconButton(
                   icon: const Icon(Icons.add),
                   onPressed: () {
-                    if (_tagController.text.isNotEmpty) {
-                      vm.addTag(_tagController.text);
-                      _tagController.clear();
+                    if (_tagController.text.isNotEmpty &&
+                        !_tags.contains(_tagController.text)) {
+                      setState(() {
+                        _tags.add(_tagController.text);
+                        _tagController.clear();
+                      });
                     }
                   },
                 ),
               ),
             ),
-            if (vm.tags.isNotEmpty) ...[
+            if (_tags.isNotEmpty) ...[
               const SizedBox(height: 12),
               Wrap(
                 spacing: 8,
                 runSpacing: 8,
-                children: vm.tags.map((tag) {
+                children: _tags.map((tag) {
                   return Chip(
                     label: Text(tag),
                     deleteIcon: const Icon(Icons.close, size: 18),
-                    onDeleted: () => vm.removeTag(tag),
+                    onDeleted: () {
+                      setState(() {
+                        _tags.remove(tag);
+                      });
+                    },
                     backgroundColor: const Color(0xFFE3F2FD),
                     labelStyle: TextStyle(color: theme.colorScheme.primary),
                     side: BorderSide.none,
@@ -287,23 +297,15 @@ class _AddItemContentState extends State<_AddItemContent> {
               width: double.infinity,
               height: 50,
               child: ElevatedButton(
-                onPressed: vm.isLoading
-                    ? null
-                    : () async {
-                        final containersVm = context
-                            .read<ContainersViewModel>();
-                        final success = await vm.saveItem(
-                          widget.containerId,
-                          containersVm,
-                        );
-                        if (success && context.mounted) {
-                          Navigator.of(context).pop();
-                        } else if (vm.error != null && context.mounted) {
-                          ScaffoldMessenger.of(
-                            context,
-                          ).showSnackBar(SnackBar(content: Text(vm.error!)));
-                        }
-                      },
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Item added successfully (Static)'),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: theme.colorScheme.primary,
                   foregroundColor: Colors.white,
@@ -312,22 +314,10 @@ class _AddItemContentState extends State<_AddItemContent> {
                   ),
                   elevation: 0,
                 ),
-                child: vm.isLoading
-                    ? const SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: CircularProgressIndicator(
-                          color: Colors.white,
-                          strokeWidth: 2,
-                        ),
-                      )
-                    : const Text(
-                        'Save Item',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
+                child: const Text(
+                  'Save Item',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                ),
               ),
             ),
           ],

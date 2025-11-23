@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:shelfstack/data/models/container.dart' as models;
+import 'package:shelfstack/data/models/location.dart';
+import 'package:shelfstack/data/models/item.dart';
 import 'package:shelfstack/features/inventory/screens/add_item_screen.dart';
 import 'package:shelfstack/features/inventory/screens/edit_container_screen.dart';
 import 'package:shelfstack/features/inventory/widgets/item_card.dart';
 import 'package:shelfstack/core/widgets/rounded_appbar.dart';
-import 'package:shelfstack/features/inventory/viewmodels/containers_viewmodel.dart';
-import 'package:shelfstack/features/inventory/viewmodels/container_details_viewmodel.dart';
 
 class ContainerDetailsScreen extends StatelessWidget {
   final String containerId;
@@ -15,10 +14,7 @@ class ContainerDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => ContainerDetailsViewModel(),
-      child: _ContainerDetailsContent(containerId: containerId),
-    );
+    return _ContainerDetailsContent(containerId: containerId);
   }
 }
 
@@ -36,50 +32,50 @@ class _ContainerDetailsContentState extends State<_ContainerDetailsContent> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final containersVm = context.read<ContainersViewModel>();
-      context.read<ContainerDetailsViewModel>().loadContainer(
-        widget.containerId,
-        containersVm,
-      );
-    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final textTheme = theme.textTheme;
+    final container = models.Container(
+      id: widget.containerId,
+      name: 'Static Container Details',
+      tags: ['static', 'details'],
+      location: Location(
+        latitude: 0,
+        longitude: 0,
+        label: 'Static Location',
+        address: '123 Static St',
+      ),
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+      items: [
+        Item(
+          id: '1',
+          name: 'Static Item 1',
+          containerId: widget.containerId,
+          tags: ['item'],
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        ),
+        Item(
+          id: '2',
+          name: 'Static Item 2',
+          containerId: widget.containerId,
+          tags: ['item'],
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        ),
+      ],
+    );
 
-    return Consumer<ContainerDetailsViewModel>(
-      builder: (context, vm, child) {
-        return Scaffold(
-          backgroundColor: const Color(0xFFF1F5F9),
-          appBar: RoundedAppBar(
-            height: 345,
-            padding: const EdgeInsets.fromLTRB(20, 25, 20, 24),
-            child: vm.isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : vm.error != null || vm.container == null
-                ? Center(
-                    child: Text(
-                      vm.error ?? 'Container not found',
-                      style: textTheme.bodyMedium?.copyWith(color: Colors.red),
-                    ),
-                  )
-                : _buildAppBarContent(context, vm.container!),
-          ),
-          body: vm.isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : vm.error != null || vm.container == null
-              ? Center(
-                  child: Text(
-                    vm.error ?? 'Container not found',
-                    style: textTheme.bodyMedium?.copyWith(color: Colors.red),
-                  ),
-                )
-              : _buildBody(context, vm.container!),
-        );
-      },
+    return Scaffold(
+      backgroundColor: const Color(0xFFF1F5F9),
+      appBar: RoundedAppBar(
+        height: 345,
+        padding: const EdgeInsets.fromLTRB(20, 25, 20, 24),
+        child: _buildAppBarContent(context, container),
+      ),
+      body: _buildBody(context, container),
     );
   }
 

@@ -1,19 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:shelfstack/data/models/container.dart' as models;
+import 'package:shelfstack/data/models/item.dart';
+import 'package:shelfstack/data/models/location.dart';
 import 'package:shelfstack/features/search/widgets/search_result_card.dart';
 import 'package:shelfstack/core/widgets/rounded_appbar.dart';
-import 'package:shelfstack/features/inventory/viewmodels/containers_viewmodel.dart';
-import 'package:shelfstack/features/search/search_viewmodel.dart';
 
 class SearchScreen extends StatelessWidget {
   const SearchScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => SearchViewModel(),
-      child: const _SearchScreenContent(),
-    );
+    return const _SearchScreenContent();
   }
 }
 
@@ -30,13 +27,6 @@ class _SearchScreenContentState extends State<_SearchScreenContent> {
   @override
   void initState() {
     super.initState();
-    // Initialize controller with current query if any
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final vm = context.read<SearchViewModel>();
-      if (vm.query.isNotEmpty) {
-        _searchController.text = vm.query;
-      }
-    });
   }
 
   @override
@@ -49,7 +39,6 @@ class _SearchScreenContentState extends State<_SearchScreenContent> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
-    final containersVm = context.read<ContainersViewModel>();
 
     return Scaffold(
       appBar: RoundedAppBar(
@@ -57,36 +46,28 @@ class _SearchScreenContentState extends State<_SearchScreenContent> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Consumer<SearchViewModel>(
-              builder: (context, vm, child) {
-                return TextField(
-                  controller: _searchController,
-                  onChanged: (value) => vm.updateQuery(value, containersVm),
-                  decoration: InputDecoration(
-                    prefixIcon: const Icon(Icons.search),
-                    hintText: 'Search Items or containers...',
-                    filled: true,
-                    fillColor: theme.scaffoldBackgroundColor,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                      borderSide: BorderSide.none,
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      vertical: 0,
-                      horizontal: 16,
-                    ),
-                    suffixIcon: vm.query.isNotEmpty
-                        ? IconButton(
-                            icon: const Icon(Icons.clear),
-                            onPressed: () {
-                              _searchController.clear();
-                              vm.clearSearch();
-                            },
-                          )
-                        : null,
-                  ),
-                );
-              },
+            TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                prefixIcon: const Icon(Icons.search),
+                hintText: 'Search Items or containers...',
+                filled: true,
+                fillColor: theme.scaffoldBackgroundColor,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                  borderSide: BorderSide.none,
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  vertical: 0,
+                  horizontal: 16,
+                ),
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.clear),
+                  onPressed: () {
+                    _searchController.clear();
+                  },
+                ),
+              ),
             ),
             const SizedBox(height: 16),
             Row(
@@ -97,45 +78,25 @@ class _SearchScreenContentState extends State<_SearchScreenContent> {
               ],
             ),
             const SizedBox(height: 4),
-            Consumer<SearchViewModel>(
-              builder: (context, vm, child) {
-                return Row(
-                  spacing: 10,
-                  children: [
-                    ChoiceChip(
-                      label: const Text('All'),
-                      selected: vm.selectedFilter == SearchFilter.all,
-                      onSelected: (selected) {
-                        if (selected) {
-                          vm.updateFilter(SearchFilter.all, containersVm);
-                        }
-                      },
-                    ),
-                    ChoiceChip(
-                      label: const Text('Containers Only'),
-                      selected:
-                          vm.selectedFilter == SearchFilter.containersOnly,
-                      onSelected: (selected) {
-                        if (selected) {
-                          vm.updateFilter(
-                            SearchFilter.containersOnly,
-                            containersVm,
-                          );
-                        }
-                      },
-                    ),
-                    ChoiceChip(
-                      label: const Text('Items Only'),
-                      selected: vm.selectedFilter == SearchFilter.itemsOnly,
-                      onSelected: (selected) {
-                        if (selected) {
-                          vm.updateFilter(SearchFilter.itemsOnly, containersVm);
-                        }
-                      },
-                    ),
-                  ],
-                );
-              },
+            Row(
+              spacing: 10,
+              children: [
+                ChoiceChip(
+                  label: const Text('All'),
+                  selected: true,
+                  onSelected: (selected) {},
+                ),
+                ChoiceChip(
+                  label: const Text('Containers Only'),
+                  selected: false,
+                  onSelected: (selected) {},
+                ),
+                ChoiceChip(
+                  label: const Text('Items Only'),
+                  selected: false,
+                  onSelected: (selected) {},
+                ),
+              ],
             ),
             const SizedBox(height: 12),
             Row(
@@ -165,106 +126,84 @@ class _SearchScreenContentState extends State<_SearchScreenContent> {
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 16),
-        child: Consumer<SearchViewModel>(
-          builder: (context, vm, child) {
-            return Column(
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+                Text('2 Results Found', style: textTheme.bodySmall),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      '${vm.totalResults} Results Found',
-                      style: textTheme.bodySmall,
+                      'Sort by: ',
+                      style: textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.primary,
+                      ),
                     ),
-                    Row(
-                      children: [
-                        Text(
-                          'Sort by: ',
-                          style: textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.primary,
-                          ),
-                        ),
-                        Text(
-                          'Date',
-                          style: textTheme.bodySmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: theme.colorScheme.primary,
-                          ),
-                        ),
-                        Icon(
-                          Icons.arrow_drop_down,
-                          color: theme.colorScheme.primary,
-                        ),
-                      ],
+                    Text(
+                      'Date',
+                      style: textTheme.bodySmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: theme.colorScheme.primary,
+                      ),
+                    ),
+                    Icon(
+                      Icons.arrow_drop_down,
+                      color: theme.colorScheme.primary,
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
-                Expanded(
-                  child: vm.isSearching
-                      ? const Center(child: CircularProgressIndicator())
-                      : vm.query.isEmpty
-                      ? Center(
-                          child: Text(
-                            'Start typing to search...',
-                            style: textTheme.bodyMedium?.copyWith(
-                              color: Colors.grey,
-                            ),
-                          ),
-                        )
-                      : vm.totalResults == 0
-                      ? Center(
-                          child: Text(
-                            'No results found',
-                            style: textTheme.bodyMedium?.copyWith(
-                              color: Colors.grey,
-                            ),
-                          ),
-                        )
-                      : ListView(
-                          padding: const EdgeInsets.only(bottom: 100),
-                          children: [
-                            ...vm.containerResults.map((container) {
-                              return Column(
-                                children: [
-                                  SearchResultCard.container(
-                                    container: container,
-                                  ),
-                                  const SizedBox(height: 10),
-                                ],
-                              );
-                            }),
-                            const SizedBox(height: 10),
-                            ...vm.itemResults.map((item) {
-                              final containerName =
-                                  containersVm.getContainerNameById(
-                                    item.containerId,
-                                  ) ??
-                                  'Unknown';
-                              final containerLocation =
-                                  containersVm.getContainerLocationById(
-                                    item.containerId,
-                                  ) ??
-                                  'Unknown';
-
-                              return Column(
-                                children: [
-                                  SearchResultCard.item(
-                                    item: item,
-                                    containerName: containerName,
-                                    containerId: item.containerId,
-                                    containerLocation: containerLocation,
-                                  ),
-                                  const SizedBox(height: 10),
-                                ],
-                              );
-                            }),
-                          ],
-                        ),
-                ),
               ],
-            );
-          },
+            ),
+            const SizedBox(height: 16),
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.only(bottom: 100),
+                children: [
+                  Column(
+                    children: [
+                      SearchResultCard.container(
+                        container: models.Container(
+                          id: 'static-1',
+                          name: 'Static Container',
+                          tags: ['static'],
+                          location: Location(
+                            latitude: 0,
+                            longitude: 0,
+                            label: 'Static Location',
+                            address: '123 Static St',
+                          ),
+                          createdAt: DateTime.now(),
+                          updatedAt: DateTime.now(),
+                          items: [],
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Column(
+                    children: [
+                      SearchResultCard.item(
+                        item: Item(
+                          id: 'static-item-1',
+                          name: 'Static Item',
+                          containerId: 'static-1',
+                          tags: ['static'],
+                          createdAt: DateTime.now(),
+                          updatedAt: DateTime.now(),
+                        ),
+                        containerName: 'Static Container',
+                        containerId: 'static-1',
+                        containerLocation: 'Static Location',
+                      ),
+                      const SizedBox(height: 10),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
