@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shelfstack/core/widgets/rounded_appbar.dart';
 import 'package:shelfstack/core/widgets/search_field.dart';
+import 'package:shelfstack/data/repositories/container_repository.dart';
 import 'package:shelfstack/features/inventory/viewmodels/containers_screen_viewmodel.dart';
-import 'package:shelfstack/features/inventory/viewmodels/containers_viewmodel.dart';
 import 'package:shelfstack/features/inventory/widgets/container_row.dart';
 
 class ContainersScreen extends StatelessWidget {
@@ -11,17 +11,9 @@ class ContainersScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProxyProvider<
-      ContainersViewModel,
-      ContainersScreenViewModel
-    >(
+    return ChangeNotifierProvider<ContainersScreenViewModel>(
       create: (context) =>
-          ContainersScreenViewModel(context.read<ContainersViewModel>()),
-      update: (context, vm, prevVM) {
-        final newVm = prevVM ?? ContainersScreenViewModel(vm);
-        newVm.updateContainersVM(vm);
-        return newVm;
-      },
+          ContainersScreenViewModel(context.read<ContainerRepository>()),
       child: _ContainerScreenContent(),
     );
   }
@@ -62,7 +54,7 @@ class _ContainerScreenContentState extends State<_ContainerScreenContent> {
           children: [
             SearchField(
               hintText: "Search Containers...",
-              controller: _searchController ,
+              controller: _searchController,
             ),
           ],
         ),

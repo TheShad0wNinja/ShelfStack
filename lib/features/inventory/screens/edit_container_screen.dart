@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shelfstack/data/models/container.dart' as models;
 import 'package:shelfstack/core/widgets/rounded_appbar.dart';
+import 'package:shelfstack/features/inventory/viewmodels/container_edit_viewmodel.dart';
 
 class EditContainerScreen extends StatefulWidget {
   final models.Container container;
@@ -13,8 +15,8 @@ class EditContainerScreen extends StatefulWidget {
 
 class _EditContainerScreenState extends State<EditContainerScreen> {
   late final TextEditingController _nameController;
-  final _tagController = TextEditingController();
   late final TextEditingController _locationLabelController;
+  final _tagController = TextEditingController();
   late List<String> _tags;
   String? _locationAddress;
 
@@ -27,6 +29,17 @@ class _EditContainerScreenState extends State<EditContainerScreen> {
     );
     _tags = List.from(widget.container.tags);
     _locationAddress = widget.container.location.address;
+
+    _nameController.addListener(
+      () => context.read<ContainerEditViewModel>().updateName(
+        _nameController.text,
+      ),
+    );
+    _locationLabelController.addListener(
+      () => context.read<ContainerEditViewModel>().updateLocationLabel(
+        _locationLabelController.text,
+      ),
+    );
   }
 
   @override
@@ -44,6 +57,7 @@ class _EditContainerScreenState extends State<EditContainerScreen> {
         _tags.add(tag);
         _tagController.clear();
       });
+      context.read<ContainerEditViewModel>().updateTags(_tags);
     }
   }
 
@@ -91,9 +105,14 @@ class _EditContainerScreenState extends State<EditContainerScreen> {
               ),
             ),
             TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
+              onPressed: () => context
+                  .read<ContainerEditViewModel>()
+                  .save(context)
+                  .then((_) {
+                    if (mounted) {
+                      Navigator.of(context).pop(true);
+                    }
+                  }),
               child: Text(
                 'Save',
                 style: textTheme.titleSmall?.copyWith(

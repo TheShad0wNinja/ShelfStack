@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shelfstack/data/models/container.dart' as models;
 import 'package:shelfstack/data/models/item.dart';
-import 'package:shelfstack/features/inventory/viewmodels/containers_viewmodel.dart';
+import 'package:shelfstack/data/repositories/container_repository.dart';
 
 enum SearchFilter { all, containersOnly, itemsOnly }
 
@@ -19,17 +19,17 @@ class SearchViewModel extends ChangeNotifier {
   bool get isSearching => _isSearching;
   int get totalResults => _containerResults.length + _itemResults.length;
 
-  void updateQuery(String newQuery, ContainersViewModel containersVm) {
+  void updateQuery(String newQuery, ContainerRepository repository) {
     _query = newQuery;
-    _performSearch(containersVm);
+    _performSearch(repository);
   }
 
-  void updateFilter(SearchFilter newFilter, ContainersViewModel containersVm) {
+  void updateFilter(SearchFilter newFilter, ContainerRepository repository) {
     _selectedFilter = newFilter;
-    _performSearch(containersVm);
+    _performSearch(repository);
   }
 
-  Future<void> _performSearch(ContainersViewModel containersVm) async {
+  Future<void> _performSearch(ContainerRepository repository) async {
     if (_query.isEmpty) {
       _containerResults = [];
       _itemResults = [];
@@ -43,14 +43,14 @@ class SearchViewModel extends ChangeNotifier {
 
     if (_selectedFilter == SearchFilter.all ||
         _selectedFilter == SearchFilter.containersOnly) {
-      _containerResults = await containersVm.searchContainers(_query);
+      _containerResults = await repository.searchContainers(_query);
     } else {
       _containerResults = [];
     }
 
     if (_selectedFilter == SearchFilter.all ||
         _selectedFilter == SearchFilter.itemsOnly) {
-      _itemResults = await containersVm.searchItems(_query);
+      _itemResults = await repository.searchItems(_query);
     } else {
       _itemResults = [];
     }

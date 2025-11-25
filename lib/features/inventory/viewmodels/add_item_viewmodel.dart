@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shelfstack/data/models/item.dart';
-import 'package:shelfstack/features/inventory/viewmodels/containers_viewmodel.dart';
+import 'package:shelfstack/data/repositories/container_repository.dart';
 
 class AddItemViewModel extends ChangeNotifier {
   String _name = '';
@@ -46,7 +46,7 @@ class AddItemViewModel extends ChangeNotifier {
 
   Future<bool> saveItem(
     String containerId,
-    ContainersViewModel containersVm,
+    ContainerRepository repository,
   ) async {
     if (_name.isEmpty) {
       _error = 'Name is required';
@@ -59,10 +59,7 @@ class AddItemViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final container = await containersVm.getContainerById(containerId);
-      if (container == null) {
-        throw Exception('Container not found');
-      }
+      final container = await repository.fetchContainerById(containerId);
 
       final newItem = Item(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -80,7 +77,7 @@ class AddItemViewModel extends ChangeNotifier {
         updatedAt: DateTime.now(),
       );
 
-      await containersVm.updateContainer(updatedContainer);
+      await repository.updateContainer(updatedContainer);
 
       _isLoading = false;
       notifyListeners();

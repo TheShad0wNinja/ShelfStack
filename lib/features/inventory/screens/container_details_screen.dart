@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:shelfstack/core/extensions/string_extensions.dart';
 import 'package:shelfstack/data/models/container.dart' as models;
 import 'package:shelfstack/data/models/location.dart';
 import 'package:shelfstack/data/models/item.dart';
 import 'package:shelfstack/features/inventory/screens/add_item_screen.dart';
 import 'package:shelfstack/features/inventory/screens/edit_container_screen.dart';
+import 'package:shelfstack/data/repositories/container_repository.dart';
+import 'package:shelfstack/features/inventory/viewmodels/container_details_viewmodel.dart';
+import 'package:shelfstack/features/inventory/viewmodels/container_edit_viewmodel.dart';
 import 'package:shelfstack/features/inventory/widgets/item_card.dart';
 import 'package:shelfstack/core/widgets/rounded_appbar.dart';
 
@@ -32,50 +37,42 @@ class _ContainerDetailsContentState extends State<_ContainerDetailsContent> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => context.read<ContainerDetailsViewModel>().loadContainer(
+        widget.containerId,
+        context.read<ContainerRepository>(),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final container = models.Container(
-      id: widget.containerId,
-      name: 'Static Container Details',
-      tags: ['static', 'details'],
-      location: Location(
-        latitude: 0,
-        longitude: 0,
-        label: 'Static Location',
-        address: '123 Static St',
-      ),
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
-      items: [
-        Item(
-          id: '1',
-          name: 'Static Item 1',
-          containerId: widget.containerId,
-          tags: ['item'],
-          createdAt: DateTime.now(),
-          updatedAt: DateTime.now(),
-        ),
-        Item(
-          id: '2',
-          name: 'Static Item 2',
-          containerId: widget.containerId,
-          tags: ['item'],
-          createdAt: DateTime.now(),
-          updatedAt: DateTime.now(),
-        ),
-      ],
-    );
+    return Consumer<ContainerDetailsViewModel>(
+      builder: (context, vm, child) {
+        if (vm.isLoading) {
+          return Scaffold(body: Center(child: CircularProgressIndicator()));
+        }
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFF1F5F9),
-      appBar: RoundedAppBar(
-        height: 345,
-        padding: const EdgeInsets.fromLTRB(20, 25, 20, 24),
-        child: _buildAppBarContent(context, container),
-      ),
-      body: _buildBody(context, container),
+        if (vm.error != null) {
+          return Scaffold(
+            body: Center(
+              child: Text(
+                "Error Loading container: ${vm.error}",
+                style: Theme.of(context).textTheme.headlineMedium,
+              ),
+            ),
+          );
+        }
+        return Scaffold(
+          backgroundColor: const Color(0xFFF1F5F9),
+          appBar: RoundedAppBar(
+            height: 345,
+            padding: const EdgeInsets.fromLTRB(20, 25, 20, 24),
+            child: _buildAppBarContent(context, vm.container!),
+          ),
+          body: _buildBody(context, vm.container!),
+        );
+      },
     );
   }
 
@@ -130,14 +127,15 @@ class _ContainerDetailsContentState extends State<_ContainerDetailsContent> {
                 height: 96,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFFE3F2FD), width: 2),
+                  border: Border.all(
+                    color: Colors.blue.withAlpha(50),
+                    width: 2,
+                  ),
                   color: Colors.grey.shade100,
                   image: container.photoUrl != null
                       ? DecorationImage(
-                          image: NetworkImage(
-                            "https://sp-ao.shortpixel.ai/client/to_webp,q_glossy,ret_img,w_300,h_300/https://prooftag.net/wp-content/uploads/2021/07/QR-Code.png",
-                          ),
-                          fit: BoxFit.fitWidth,
+                          image: NetworkImage(container.photoUrl!),
+                          fit: BoxFit.cover,
                         )
                       : null,
                 ),
@@ -172,37 +170,12 @@ class _ContainerDetailsContentState extends State<_ContainerDetailsContent> {
                   ),
                 ],
               ),
-              const SizedBox(height: 4),
-              if (container.tags.isNotEmpty)
-                Wrap(
-                  spacing: 10,
-                  runSpacing: 10,
-                  alignment: WrapAlignment.center,
-                  children: container.tags.map((tag) {
-                    return Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFE3F2FD),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        tag,
-                        style: textTheme.labelSmall?.copyWith(
-                          color: const Color(0xFF1976D2),
-                          height: 1.4,
-                          letterSpacing: 0.10,
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                ),
+              const SizedBox(height: 8),
+              _buildTagSections(container),
             ],
           ),
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 15),
         Row(
           children: [
             Expanded(
@@ -211,13 +184,26 @@ class _ContainerDetailsContentState extends State<_ContainerDetailsContent> {
                 icon: Icons.edit_outlined,
                 label: 'Edit',
                 isPrimary: false,
-                onTap: () {
-                  Navigator.of(context).push(
+                onTap: () async {
+                  final result = await Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (context) =>
-                          EditContainerScreen(container: container),
+                          ChangeNotifierProvider<ContainerEditViewModel>(
+                            create: (context) => ContainerEditViewModel(
+                              container,
+                              context.read<ContainerRepository>(),
+                            ),
+                            child: EditContainerScreen(container: container),
+                          ),
                     ),
                   );
+
+                  if (result == true && context.mounted) {
+                    context.read<ContainerDetailsViewModel>().loadContainer(
+                      container.id,
+                      context.read<ContainerRepository>(),
+                    );
+                  }
                 },
               ),
             ),
@@ -254,6 +240,39 @@ class _ContainerDetailsContentState extends State<_ContainerDetailsContent> {
           ],
         ),
       ],
+    );
+  }
+
+  Widget _buildTagSections(models.Container container) {
+    final tags = container.tags;
+    return SizedBox(
+      height: 22,
+      child: Center(
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: tags.asMap().entries.map((entry) {
+              final index = entry.key;
+              final tag = entry.value;
+              return Padding(
+                padding: EdgeInsets.only(
+                  right: index != tags.length - 1 ? 10.0 : 0,
+                ),
+                child: Badge(
+                  label: Text(tag.toTitleCase()),
+                  backgroundColor: Colors.blue.withAlpha(50),
+                  textColor: Colors.blue.shade800,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 2,
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ),
+      ),
     );
   }
 

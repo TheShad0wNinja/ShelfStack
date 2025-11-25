@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shelfstack/data/models/container.dart' as models;
-import 'package:shelfstack/features/inventory/viewmodels/containers_viewmodel.dart';
+import 'package:shelfstack/data/repositories/container_repository.dart';
 
 class ContainerDetailsViewModel extends ChangeNotifier {
   models.Container? _container;
@@ -13,14 +13,14 @@ class ContainerDetailsViewModel extends ChangeNotifier {
 
   Future<void> loadContainer(
     String containerId,
-    ContainersViewModel containersVm,
+    ContainerRepository repository,
   ) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
-      _container = await containersVm.getContainerById(containerId);
+      _container = await repository.fetchContainerById(containerId);
     } catch (e) {
       _error = e.toString();
     } finally {

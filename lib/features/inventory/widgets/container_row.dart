@@ -22,11 +22,10 @@ class ContainerRow extends StatelessWidget {
         onTap: () {
           Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (context) =>
-                  ChangeNotifierProvider(
-                    create: (_) => ContainerDetailsViewModel(),
-                    child: ContainerDetailsScreen(containerId: container.id),
-                  ),
+              builder: (context) => ChangeNotifierProvider(
+                create: (_) => ContainerDetailsViewModel(),
+                child: ContainerDetailsScreen(containerId: container.id),
+              ),
             ),
           );
         },
@@ -45,17 +44,17 @@ class ContainerRow extends StatelessWidget {
                   color: Colors.grey.shade300,
                   image: container.photoUrl != null
                       ? DecorationImage(
-                    image: NetworkImage(container.photoUrl!),
-                    fit: BoxFit.cover,
-                  )
+                          image: NetworkImage(container.photoUrl!),
+                          fit: BoxFit.cover,
+                        )
                       : null,
                 ),
                 child: container.photoUrl == null
                     ? const Icon(
-                  Icons.inventory_2_outlined,
-                  size: 48,
-                  color: Colors.grey,
-                )
+                        Icons.inventory_2_outlined,
+                        size: 48,
+                        color: Colors.grey,
+                      )
                     : null,
               ),
               Expanded(
@@ -109,7 +108,7 @@ class ContainerRow extends StatelessWidget {
                             ],
                           ),
                           const SizedBox(height: 4),
-                          _tagSections()
+                          _tagSections(),
                         ],
                       ),
                     ),
@@ -126,14 +125,19 @@ class ContainerRow extends StatelessWidget {
   Widget _tagSections() {
     return Wrap(
       spacing: 4,
-      children: [
-        ...container.tags.map((tag) => Badge(
-            label: Text(tag.toTitleCase()),
-          backgroundColor: Colors.blue.withAlpha(50),
-          textColor: Colors.blue.shade800,
-          padding: EdgeInsetsGeometry.symmetric(horizontal: 10, vertical: 2),
-        ))
-      ],
+      children: container.tags
+          .map(
+            (tag) => Badge(
+              label: Text(tag.toTitleCase()),
+              backgroundColor: Colors.blue.withAlpha(50),
+              textColor: Colors.blue.shade800,
+              padding: EdgeInsetsGeometry.symmetric(
+                horizontal: 10,
+                vertical: 2,
+              ),
+            ),
+          )
+          .toList(),
     );
   }
 }

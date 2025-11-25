@@ -7,7 +7,8 @@ import 'package:shelfstack/features/search/search_screen.dart';
 import 'package:shelfstack/features/settings/settings_screen.dart';
 import 'package:shelfstack/core/theme/main_theme.dart';
 import 'package:shelfstack/core/widgets/navbar.dart';
-import 'package:shelfstack/features/inventory/viewmodels/containers_viewmodel.dart';
+import 'package:shelfstack/data/repositories/container_repository.dart';
+import 'package:shelfstack/data/repositories/container_repository_fake.dart';
 import 'package:shelfstack/core/viewmodels/navigation_viewmodel.dart';
 
 class MyApp extends StatelessWidget {
@@ -26,7 +27,7 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => NavigationViewModel()),
-        ChangeNotifierProvider(create: (_) => ContainersViewModel()),
+        Provider<ContainerRepository>(create: (_) => ContainerRepositoryFake()),
       ],
       child: MaterialApp(
         title: 'ShelfStack',
