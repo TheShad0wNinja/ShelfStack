@@ -14,19 +14,16 @@ class RoundedAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.borderRadius = 12,
     this.backgroundColor = Colors.white,
     this.elevation = 1,
-    this.padding = const EdgeInsets.fromLTRB(16, 10, 16, 16),
+    this.padding = const EdgeInsets.fromLTRB(16, 12, 16, 12),
     required this.child,
   });
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-
     return Material(
       color: backgroundColor,
       elevation: elevation,
       surfaceTintColor: Colors.transparent,
-      // avoid M3 tint
       borderRadius: BorderRadius.vertical(
         bottom: Radius.circular(borderRadius),
       ),

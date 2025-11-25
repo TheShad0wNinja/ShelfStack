@@ -215,14 +215,14 @@ class ContainerRepositoryFake implements ContainerRepository {
     if (query.isEmpty) return List.from(_containers);
 
     return _containers
-        .where(
-          (container) =>
-              container.name.toLowerCase().contains(query.toLowerCase()) ||
-              container.tags.any(
-                (tag) => tag.toLowerCase().contains(query.toLowerCase()),
-              ),
-        )
-        .toList();
+        .where((c) =>
+          c.name.toLowerCase().contains(query.toLowerCase()) ||
+          c.location.address.toLowerCase().contains(query.toLowerCase()) ||
+          c.location.label.toLowerCase().contains(query.toLowerCase()) ||
+          c.tags.any(
+                  (t) => t.toLowerCase().contains(query.toLowerCase())
+          )
+        ).toList();
   }
 
   @override

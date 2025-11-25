@@ -15,7 +15,7 @@ class NavBar extends StatelessWidget {
           builder: (context, vm, child) => NavigationBar(
             backgroundColor: Colors.white.withAlpha(
               200,
-            ), // Semi-transparent white
+            ),
             elevation: 0,
             selectedIndex: vm.currentIndex,
             onDestinationSelected: (int index) => vm.setIndex(index),

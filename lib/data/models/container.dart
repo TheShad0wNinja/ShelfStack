@@ -45,4 +45,9 @@ class Container {
       tags: tags ?? this.tags,
     );
   }
+
+  @override
+  String toString() {
+    return 'Container{id: $id, name: $name, photoUrl: $photoUrl, createdAt: $createdAt, updatedAt: $updatedAt, items: $items, tags: $tags, location: $location}';
+  }
 }
