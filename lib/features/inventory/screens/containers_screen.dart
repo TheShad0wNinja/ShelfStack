@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shelfstack/core/widgets/rounded_appbar.dart';
-import 'package:shelfstack/core/widgets/search_field.dart';
+
 import 'package:shelfstack/data/repositories/container_repository.dart';
 import 'package:shelfstack/features/inventory/viewmodels/containers_screen_viewmodel.dart';
 import 'package:shelfstack/features/inventory/widgets/container_row.dart';
@@ -47,16 +46,20 @@ class _ContainerScreenContentState extends State<_ContainerScreenContent> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: RoundedAppBar(
-        height: 72,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SearchField(
-              hintText: "Search Containers...",
+      appBar: AppBar(
+        title: const Text('Containers'),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(60),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            child: TextField(
               controller: _searchController,
+              decoration: const InputDecoration(
+                hintText: "Search Containers...",
+                prefixIcon: Icon(Icons.search),
+              ),
             ),
-          ],
+          ),
         ),
       ),
       body: Padding(

@@ -28,4 +28,22 @@ class ContainerDetailsViewModel extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  Future<void> deleteContainer(
+    String containerId,
+    ContainerRepository repository,
+  ) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      await repository.deleteContainer(containerId);
+    } catch (e) {
+      _error = e.toString();
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
 }

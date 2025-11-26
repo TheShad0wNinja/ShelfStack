@@ -11,10 +11,7 @@ class ActivityRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Material(
-      elevation: 1,
-      borderRadius: BorderRadius.circular(10),
-      color: Colors.white,
+    return Card(
       child: InkWell(
         onTap: () {
           Navigator.of(context).push(
@@ -24,19 +21,18 @@ class ActivityRow extends StatelessWidget {
             ),
           );
         },
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(12),
         child: Padding(
-          padding: const EdgeInsets.all(10.0),
+          padding: const EdgeInsets.all(12.0),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
-            spacing: 10,
             children: [
               Container(
-                width: 50,
-                height: 50,
+                width: 56,
+                height: 56,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8),
-                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(12),
+                  color: theme.colorScheme.surfaceContainerHighest,
                   image: container.photoUrl != null
                       ? DecorationImage(
                           image: NetworkImage(container.photoUrl!),
@@ -45,75 +41,56 @@ class ActivityRow extends StatelessWidget {
                       : null,
                 ),
                 child: container.photoUrl == null
-                    ? const Icon(
+                    ? Icon(
                         Icons.inventory_2_outlined,
-                        size: 48,
-                        color: Colors.grey,
+                        size: 32,
+                        color: theme.colorScheme.onSurfaceVariant,
                       )
                     : null,
               ),
+              const SizedBox(width: 16),
               Expanded(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  spacing: 10,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Texts
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            container.name,
-                            style: theme.textTheme.bodyMedium,
+                    Text(container.name, style: theme.textTheme.titleMedium),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.inventory_2_outlined,
+                          color: theme.colorScheme.onSurfaceVariant,
+                          size: 16,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          "${container.items.length} items",
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
                           ),
-                          Row(
-                            spacing: 5,
-                            children: [
-                              Row(
-                                spacing: 2,
-                                children: [
-                                  const Icon(
-                                    Icons.inventory_2_outlined,
-                                    color: Colors.grey,
-                                    size: 12,
-                                  ),
-                                  Text(
-                                    "${container.items.length} items",
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      color: Colors.grey.shade600,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Row(
-                                spacing: 2,
-                                children: [
-                                  const Icon(
-                                    Icons.location_on_outlined,
-                                    color: Colors.grey,
-                                    size: 12,
-                                  ),
-                                  Text(
-                                    container.location.label,
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      color: Colors.grey.shade600,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
+                        ),
+                        const SizedBox(width: 16),
+                        Icon(
+                          Icons.location_on_outlined,
+                          color: theme.colorScheme.onSurfaceVariant,
+                          size: 16,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          container.location.label,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
                           ),
-                        ],
-                      ),
-                    ),
-                    // Arrow Icon
-                    IconButton(
-                      onPressed: () {},
-                      icon: const Icon(Icons.qr_code_scanner_outlined),
-                      color: Colors.blueAccent,
+                        ),
+                      ],
                     ),
                   ],
                 ),
+              ),
+              IconButton(
+                onPressed: () {},
+                icon: const Icon(Icons.qr_code_scanner_outlined),
+                color: theme.colorScheme.primary,
               ),
             ],
           ),

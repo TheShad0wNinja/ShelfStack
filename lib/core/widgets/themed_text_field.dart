@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
-class SearchField extends StatelessWidget {
+class ThemedTextField extends StatelessWidget {
   final String hintText;
   final TextEditingController? controller;
   final ValueChanged<String>? onChanged;
 
-  const SearchField({
+  const ThemedTextField({
     super.key,
-    this.hintText = 'Search...',
+    this.hintText = '',
     this.controller,
     this.onChanged,
   });
@@ -21,7 +21,7 @@ class SearchField extends StatelessWidget {
       keyboardType: TextInputType.text,
       decoration: InputDecoration(
         prefixIcon: const Icon(Icons.search, color: Colors.grey),
-        hintText: hintText,
+        hintText: 'Search containers...',
         hintStyle: TextStyle(color: Colors.grey),
         filled: true,
         fillColor: theme.colorScheme.surface,

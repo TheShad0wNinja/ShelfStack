@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:shelfstack/core/widgets/rounded_appbar.dart';
+import 'package:shelfstack/core/widgets/styled_app_bar.dart';
 
 class CreateContainerScreen extends StatefulWidget {
   const CreateContainerScreen({super.key});
@@ -60,49 +60,15 @@ class _CreateContainerScreenState extends State<CreateContainerScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final textTheme = theme.textTheme;
-
     return Scaffold(
-      appBar: RoundedAppBar(
-        height: 88,
-        padding: const EdgeInsets.fromLTRB(16, 25, 16, 2),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            IconButton(
-              onPressed: () => Navigator.of(context).pop(),
-              icon: Container(
-                width: 28,
-                height: 28,
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade200,
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.arrow_back, size: 18),
-              ),
-            ),
-            Text(
-              'Create Container',
-              style: textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            TextButton(
-              onPressed: _createContainer,
-              child: Text(
-                'Save',
-                style: textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: theme.colorScheme.primary,
-                ),
-              ),
-            ),
-          ],
-        ),
+      appBar: StyledAppBar(
+        title: const Text('Create Container'),
+        actions: [
+          TextButton(onPressed: _createContainer, child: const Text('Save')),
+        ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+        padding: const EdgeInsets.all(16),
         child: Column(
           children: [
             _buildQRCodePreview(),
@@ -119,44 +85,43 @@ class _CreateContainerScreenState extends State<CreateContainerScreen> {
   }
 
   Widget _buildQRCodePreview() {
-    final theme = Theme.of(context);
-    final textTheme = theme.textTheme;
-
-    return Material(
-      elevation: 1,
-      borderRadius: BorderRadius.circular(12),
-      color: Colors.white,
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(14),
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
         child: Column(
           children: [
             Text(
               'QR Code Preview',
-              style: textTheme.bodySmall?.copyWith(
-                color: const Color(0xFF6A7282),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 16),
             Container(
-              width: 96,
-              height: 96,
+              width: 120,
+              height: 120,
               decoration: BoxDecoration(
-                color: Colors.grey.shade200,
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                   color: Theme.of(context).colorScheme.primary,
-                  width: 1,
+                  width: 2,
                 ),
               ),
               child: Center(
-                child: Text(
-                  'QR code will be\ngenerated upon saving',
-                  textAlign: TextAlign.center,
-                  style: textTheme.labelSmall?.copyWith(
-                    color: Colors.grey.shade500,
-                  ),
+                child: Icon(
+                  Icons.qr_code,
+                  size: 64,
+                  color: Theme.of(context).colorScheme.primary,
                 ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'QR code will be\ngenerated upon saving',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
           ],
@@ -166,34 +131,22 @@ class _CreateContainerScreenState extends State<CreateContainerScreen> {
   }
 
   Widget _buildNameSection() {
-    final theme = Theme.of(context);
-    final textTheme = theme.textTheme;
-
-    return Material(
-      borderRadius: BorderRadius.circular(12),
-      color: Colors.white,
-      elevation: 1,
-      child: Container(
-        padding: const EdgeInsets.all(14),
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Container Name *', style: textTheme.bodySmall),
-            const SizedBox(height: 10),
+            Text(
+              'Container Name',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 16),
             TextField(
               controller: _nameController,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
+                labelText: 'Name',
                 hintText: 'e.g. Kitchen Supplies',
-                hintStyle: textTheme.bodySmall?.copyWith(
-                  color: Colors.grey.shade500,
-                ),
-                filled: true,
-                fillColor: Colors.grey.shade200,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide.none,
-                ),
-                contentPadding: const EdgeInsets.all(10),
               ),
             ),
           ],
@@ -203,20 +156,14 @@ class _CreateContainerScreenState extends State<CreateContainerScreen> {
   }
 
   Widget _buildTagsSection() {
-    final theme = Theme.of(context);
-    final textTheme = theme.textTheme;
-
-    return Material(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(12),
-      elevation: 1,
-      child: Container(
-        padding: const EdgeInsets.all(14),
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Add Tags', style: textTheme.bodySmall),
-            const SizedBox(height: 10),
+            Text('Tags', style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 16),
             Row(
               children: [
                 Expanded(
@@ -224,54 +171,26 @@ class _CreateContainerScreenState extends State<CreateContainerScreen> {
                     controller: _tagController,
                     onSubmitted: (_) => _addTag(),
                     decoration: InputDecoration(
+                      labelText: 'Add Tag',
                       hintText: 'Type a tag...',
-                      hintStyle: textTheme.bodySmall?.copyWith(
-                        color: Colors.grey.shade500,
+                      suffixIcon: IconButton(
+                        onPressed: _addTag,
+                        icon: const Icon(Icons.add),
                       ),
-                      filled: true,
-                      fillColor: Colors.grey.shade200,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide.none,
-                      ),
-                      contentPadding: const EdgeInsets.all(10),
                     ),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: IconButton(
-                    onPressed: _addTag,
-                    icon: const Icon(Icons.add, color: Colors.white, size: 20),
-                    padding: EdgeInsets.zero,
                   ),
                 ),
               ],
             ),
             if (_tags.isNotEmpty) ...[
-              const SizedBox(height: 10),
+              const SizedBox(height: 16),
               Wrap(
                 spacing: 8,
                 runSpacing: 8,
                 children: _tags.map((tag) {
-                  return Chip(
+                  return InputChip(
                     label: Text(tag),
                     onDeleted: () => _removeTag(tag),
-                    deleteIcon: const Icon(Icons.close, size: 16),
-                    backgroundColor: const Color(0xFFE3F2FD),
-                    labelStyle: textTheme.labelSmall?.copyWith(
-                      color: const Color(0xFF1976D2),
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      side: const BorderSide(color: Color(0x00ffffff)),
-                    ),
                   );
                 }).toList(),
               ),
@@ -283,103 +202,51 @@ class _CreateContainerScreenState extends State<CreateContainerScreen> {
   }
 
   Widget _buildLocationSection() {
-    final theme = Theme.of(context);
-    final textTheme = theme.textTheme;
-
-    return Material(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(12),
-      elevation: 1,
-      child: Container(
-        padding: const EdgeInsets.all(14),
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                const Icon(
-                  Icons.location_on_outlined,
-                  size: 14,
-                  color: Colors.black,
-                ),
-                const SizedBox(width: 3),
-                Text('Location', style: textTheme.bodySmall),
-              ],
-            ),
-            const SizedBox(height: 10),
+            Text('Location', style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 16),
             Container(
+              height: 120,
               width: double.infinity,
-              height: 112,
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 28),
               decoration: BoxDecoration(
-                color: const Color(0xFFBBDEFB),
-                borderRadius: BorderRadius.circular(10),
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(12),
               ),
               child: Center(
-                child: Container(
-                  width: 20,
-                  height: 20,
-                  padding: const EdgeInsets.all(2),
-                  decoration: BoxDecoration(
-                    color: Colors.amber.shade500,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: const Icon(
-                    Icons.location_on,
-                    color: Colors.white,
-                    size: 16,
-                  ),
+                child: Icon(
+                  Icons.map,
+                  size: 48,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
             ),
-            const SizedBox(height: 10),
-            ElevatedButton.icon(
-              onPressed: _useCurrentLocation,
-              icon: const Icon(
-                Icons.my_location,
-                size: 20,
-                color: Colors.white,
-              ),
-              label: Text(
-                'Use Current Location',
-                style: textTheme.bodyMedium?.copyWith(color: Colors.white),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: theme.colorScheme.primary,
-                padding: const EdgeInsets.symmetric(
-                  vertical: 8,
-                  horizontal: 10,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                minimumSize: const Size(double.infinity, 40),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.tonalIcon(
+                onPressed: _useCurrentLocation,
+                icon: const Icon(Icons.my_location),
+                label: const Text('Use Current Location'),
               ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 16),
             TextField(
               controller: _locationLabelController,
-              decoration: InputDecoration(
-                hintText: 'Location label...',
-                hintStyle: textTheme.bodySmall?.copyWith(
-                  color: Colors.grey.shade500,
-                ),
-                filled: true,
-                fillColor: Colors.grey.shade200,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide.none,
-                ),
-                contentPadding: const EdgeInsets.all(10),
+              decoration: const InputDecoration(
+                labelText: 'Location Label',
+                hintText: 'e.g. Storage Room',
               ),
             ),
             if (_locationAddress != null) ...[
-              const SizedBox(height: 10),
+              const SizedBox(height: 8),
               Text(
-                _locationAddress!,
-                style: textTheme.labelSmall?.copyWith(
-                  color: Colors.grey.shade600,
-                ),
+                'Address: $_locationAddress',
+                style: Theme.of(context).textTheme.bodySmall,
               ),
             ],
           ],

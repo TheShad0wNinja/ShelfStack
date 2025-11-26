@@ -14,10 +14,8 @@ class ContainerRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Material(
-      elevation: 1,
-      borderRadius: BorderRadius.circular(10),
-      color: Colors.white,
+    return Card(
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () {
           Navigator.of(context).push(
@@ -29,19 +27,17 @@ class ContainerRow extends StatelessWidget {
             ),
           );
         },
-        borderRadius: BorderRadius.circular(10),
         child: Padding(
-          padding: const EdgeInsets.all(10.0),
+          padding: const EdgeInsets.all(12.0),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
-            spacing: 10,
             children: [
               Container(
-                width: 50,
-                height: 50,
+                width: 56,
+                height: 56,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8),
-                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(12),
+                  color: theme.colorScheme.surfaceContainerHighest,
                   image: container.photoUrl != null
                       ? DecorationImage(
                           image: NetworkImage(container.photoUrl!),
@@ -50,70 +46,59 @@ class ContainerRow extends StatelessWidget {
                       : null,
                 ),
                 child: container.photoUrl == null
-                    ? const Icon(
+                    ? Icon(
                         Icons.inventory_2_outlined,
-                        size: 48,
-                        color: Colors.grey,
+                        size: 32,
+                        color: theme.colorScheme.onSurfaceVariant,
                       )
                     : null,
               ),
+              const SizedBox(width: 16),
               Expanded(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  spacing: 10,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            container.name,
-                            style: theme.textTheme.bodyMedium,
+                    Text(container.name, style: theme.textTheme.titleMedium),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.inventory_2_outlined,
+                          size: 16,
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          "${container.items.length} items",
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
                           ),
-                          Row(
-                            spacing: 5,
-                            children: [
-                              Row(
-                                spacing: 2,
-                                children: [
-                                  const Icon(
-                                    Icons.inventory_2_outlined,
-                                    color: Colors.grey,
-                                    size: 12,
-                                  ),
-                                  Text(
-                                    "${container.items.length} items",
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      color: Colors.grey.shade600,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Row(
-                                spacing: 2,
-                                children: [
-                                  const Icon(
-                                    Icons.location_on_outlined,
-                                    color: Colors.grey,
-                                    size: 12,
-                                  ),
-                                  Text(
-                                    container.location.label,
-                                    style: theme.textTheme.bodySmall?.copyWith(
-                                      color: Colors.grey.shade600,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
+                        ),
+                        const SizedBox(width: 12),
+                        Icon(
+                          Icons.location_on_outlined,
+                          size: 16,
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          container.location.label,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
                           ),
-                          const SizedBox(height: 4),
-                          _tagSections(),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
+                    if (container.tags.isNotEmpty) ...[
+                      const SizedBox(height: 8),
+                      _tagSections(context),
+                    ],
                   ],
                 ),
+              ),
+              Icon(
+                Icons.chevron_right,
+                color: theme.colorScheme.onSurfaceVariant,
               ),
             ],
           ),
@@ -122,22 +107,24 @@ class ContainerRow extends StatelessWidget {
     );
   }
 
-  Widget _tagSections() {
+  Widget _tagSections(BuildContext context) {
     return Wrap(
-      spacing: 4,
-      children: container.tags
-          .map(
-            (tag) => Badge(
-              label: Text(tag.toTitleCase()),
-              backgroundColor: Colors.blue.withAlpha(50),
-              textColor: Colors.blue.shade800,
-              padding: EdgeInsetsGeometry.symmetric(
-                horizontal: 10,
-                vertical: 2,
-              ),
+      spacing: 8,
+      children: container.tags.take(3).map((tag) {
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.secondaryContainer,
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: Text(
+            tag.toTitleCase(),
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: Theme.of(context).colorScheme.onSecondaryContainer,
             ),
-          )
-          .toList(),
+          ),
+        );
+      }).toList(),
     );
   }
 }

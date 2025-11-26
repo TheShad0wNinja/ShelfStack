@@ -6,14 +6,14 @@ class ItemCard extends StatelessWidget {
   final Item item;
   final String containerId;
   final String containerName;
-  final String containerLocation;
+  final String containerLocationLabel;
 
   const ItemCard({
     super.key,
     required this.item,
     required this.containerId,
     required this.containerName,
-    required this.containerLocation,
+    required this.containerLocationLabel,
   });
 
   @override
@@ -21,10 +21,8 @@ class ItemCard extends StatelessWidget {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
 
-    return Material(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(12),
-      elevation: 1,
+    return Card(
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () {
           Navigator.of(context).push(
@@ -33,18 +31,13 @@ class ItemCard extends StatelessWidget {
                 item: item,
                 containerId: containerId,
                 containerName: containerName,
-                containerLocation: containerLocation,
+                containerLocation: containerLocationLabel,
               ),
             ),
           );
         },
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          padding: const EdgeInsets.all(5),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-          ),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -55,7 +48,7 @@ class ItemCard extends StatelessWidget {
                   width: double.infinity,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(8),
-                    color: Colors.grey.shade300,
+                    color: theme.colorScheme.surfaceContainerHighest,
                     image: item.photoUrl != null
                         ? DecorationImage(
                             image: NetworkImage(item.photoUrl!),
@@ -64,63 +57,48 @@ class ItemCard extends StatelessWidget {
                         : null,
                   ),
                   child: item.photoUrl == null
-                      ? const Center(
+                      ? Center(
                           child: Icon(
                             Icons.inventory_2_outlined,
                             size: 48,
-                            color: Colors.grey,
+                            color: theme.colorScheme.onSurfaceVariant,
                           ),
                         )
                       : null,
                 ),
               ),
-              const SizedBox(height: 10),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      item.name,
-                      textAlign: TextAlign.center,
-                      style: textTheme.bodySmall?.copyWith(
-                        height: 1.25,
-                        letterSpacing: 0.12,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    if (item.tags.isNotEmpty) ...[
-                      const SizedBox(height: 5),
-                      Wrap(
-                        spacing: 5,
-                        runSpacing: 5,
-                        children: item.tags.take(3).map((tag) {
-                          return Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.blue.withAlpha(30),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              tag,
-                              style: textTheme.labelSmall?.copyWith(
-                                color: Colors.blueAccent,
-                                height: 1.4,
-                                letterSpacing: 0.10,
-                              ),
-                            ),
-                          );
-                        }).toList(),
-                      ),
-                    ],
-                  ],
-                ),
+              const SizedBox(height: 12),
+              Text(
+                item.name,
+                style: textTheme.titleSmall,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
+              if (item.tags.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 4,
+                  runSpacing: 4,
+                  children: item.tags.take(3).map((tag) {
+                    return Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.secondaryContainer,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        tag,
+                        style: textTheme.labelSmall?.copyWith(
+                          color: theme.colorScheme.onSecondaryContainer,
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ],
             ],
           ),
         ),

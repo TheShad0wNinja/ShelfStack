@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
+
 import 'package:provider/provider.dart';
 import 'package:shelfstack/core/extensions/string_extensions.dart';
 import 'package:shelfstack/data/models/container.dart' as models;
-import 'package:shelfstack/data/models/location.dart';
-import 'package:shelfstack/data/models/item.dart';
+
 import 'package:shelfstack/features/inventory/screens/add_item_screen.dart';
 import 'package:shelfstack/features/inventory/screens/edit_container_screen.dart';
 import 'package:shelfstack/data/repositories/container_repository.dart';
+import 'package:shelfstack/features/inventory/viewmodels/add_item_viewmodel.dart';
 import 'package:shelfstack/features/inventory/viewmodels/container_details_viewmodel.dart';
 import 'package:shelfstack/features/inventory/viewmodels/container_edit_viewmodel.dart';
 import 'package:shelfstack/features/inventory/widgets/item_card.dart';
-import 'package:shelfstack/core/widgets/rounded_appbar.dart';
 
 class ContainerDetailsScreen extends StatelessWidget {
   final String containerId;
@@ -19,7 +21,10 @@ class ContainerDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _ContainerDetailsContent(containerId: containerId);
+    return ChangeNotifierProvider(
+      create: (_) => ContainerDetailsViewModel(),
+      child: _ContainerDetailsContent(containerId: containerId),
+    );
   }
 }
 
@@ -64,332 +69,335 @@ class _ContainerDetailsContentState extends State<_ContainerDetailsContent> {
           );
         }
         return Scaffold(
-          backgroundColor: const Color(0xFFF1F5F9),
-          appBar: RoundedAppBar(
-            height: 345,
-            padding: const EdgeInsets.fromLTRB(20, 25, 20, 24),
-            child: _buildAppBarContent(context, vm.container!),
+          body: CustomScrollView(
+            slivers: [
+              SliverAppBar(
+                expandedHeight: 270,
+                pinned: true,
+                stretch: true,
+                backgroundColor: Colors.white,
+                surfaceTintColor: Colors.white,
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.vertical(
+                    bottom: Radius.circular(24),
+                  ),
+                ),
+                leading: IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+                title: Text(
+                  vm.container!.name,
+                  style: const TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                actions: [
+                  IconButton(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => ChangeNotifierProvider(
+                            create: (context) => AddItemViewModel(),
+                            child: AddItemScreen(
+                              containerId: vm.container!.id,
+                              containerLocationLabel:
+                                  vm.container!.location.label,
+                              containerName: vm.container!.name,
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.add),
+                    color: Colors.black,
+                  ),
+                  PopupMenuButton<String>(
+                    icon: const Icon(Icons.more_vert, color: Colors.black),
+                    onSelected: (value) async {
+                      if (value == 'share') {
+                        // Implement share functionality
+                      } else if (value == 'edit') {
+                        final result = await Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                ChangeNotifierProvider<ContainerEditViewModel>(
+                                  create: (context) => ContainerEditViewModel(
+                                    vm.container!,
+                                    context.read<ContainerRepository>(),
+                                  ),
+                                  child: EditContainerScreen(
+                                    container: vm.container!,
+                                  ),
+                                ),
+                          ),
+                        );
+
+                        if (result == true && context.mounted) {
+                          context
+                              .read<ContainerDetailsViewModel>()
+                              .loadContainer(
+                                vm.container!.id,
+                                context.read<ContainerRepository>(),
+                              );
+                        }
+                      } else if (value == 'delete') {
+                        final confirm = await showDialog<bool>(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text('Delete Container'),
+                            content: const Text(
+                              'Are you sure you want to delete this container? This action cannot be undone.',
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () =>
+                                    Navigator.of(context).pop(false),
+                                child: const Text('Cancel'),
+                              ),
+                              TextButton(
+                                onPressed: () =>
+                                    Navigator.of(context).pop(true),
+                                style: TextButton.styleFrom(
+                                  foregroundColor: Colors.red,
+                                ),
+                                child: const Text('Delete'),
+                              ),
+                            ],
+                          ),
+                        );
+
+                        if (confirm == true && context.mounted) {
+                          await context
+                              .read<ContainerDetailsViewModel>()
+                              .deleteContainer(
+                                vm.container!.id,
+                                context.read<ContainerRepository>(),
+                              );
+                          if (context.mounted) {
+                            Navigator.of(context).pop();
+                          }
+                        }
+                      }
+                    },
+                    itemBuilder: (BuildContext context) {
+                      return [
+                        const PopupMenuItem<String>(
+                          value: 'share',
+                          child: Row(
+                            children: [
+                              Icon(Icons.share_outlined),
+                              SizedBox(width: 8),
+                              Text('Share'),
+                            ],
+                          ),
+                        ),
+                        const PopupMenuItem<String>(
+                          value: 'edit',
+                          child: Row(
+                            children: [
+                              Icon(Icons.edit_outlined),
+                              SizedBox(width: 8),
+                              Text('Edit'),
+                            ],
+                          ),
+                        ),
+                        const PopupMenuItem<String>(
+                          value: 'delete',
+                          child: Row(
+                            children: [
+                              Icon(Icons.delete_outline, color: Colors.red),
+                              SizedBox(width: 8),
+                              Text(
+                                'Delete',
+                                style: TextStyle(color: Colors.red),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ];
+                    },
+                  ),
+                ],
+                flexibleSpace: FlexibleSpaceBar(
+                  background: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 40, 16, 10),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Container(
+                          width: 120,
+                          height: 120,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(16),
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.surfaceContainerHighest,
+                            image: vm.container!.photoUrl != null
+                                ? DecorationImage(
+                                    image: NetworkImage(
+                                      vm.container!.photoUrl!,
+                                    ),
+                                    fit: BoxFit.cover,
+                                  )
+                                : null,
+                          ),
+                          child: vm.container!.photoUrl == null
+                              ? Icon(
+                                  Icons.inventory_2_outlined,
+                                  size: 48,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
+                                )
+                              : null,
+                        ),
+                        // const SizedBox(height: 16),
+                        _buildInfoSection(context, vm.container!),
+                        // const SizedBox(height: 16),
+                        // FilledButton.icon(
+                        //   onPressed: () {
+                        //     Navigator.of(context).push(
+                        //       MaterialPageRoute(
+                        //         builder: (context) => ChangeNotifierProvider(
+                        //           create: (context) => AddItemViewModel(),
+                        //           child: AddItemScreen(
+                        //             containerId: vm.container!.id,
+                        //             containerLocationLabel:
+                        //                 vm.container!.location.label,
+                        //             containerName: vm.container!.name,
+                        //           ),
+                        //         ),
+                        //       ),
+                        //     );
+                        //   },
+                        //   icon: const Icon(Icons.add),
+                        //   label: const Text('Add Item'),
+                        //   style: FilledButton.styleFrom(
+                        //     backgroundColor: Theme.of(
+                        //       context,
+                        //     ).colorScheme.primary,
+                        //     foregroundColor: Theme.of(
+                        //       context,
+                        //     ).colorScheme.onPrimary,
+                        //   ),
+                        // ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [_buildItemsHeader(context, vm.container!)],
+                  ),
+                ),
+              ),
+              if (vm.container!.items.isEmpty)
+                SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: Center(
+                    child: Text(
+                      'No items in this container',
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    ),
+                  ),
+                )
+              else
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  sliver: SliverGrid(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 12,
+                          mainAxisSpacing: 12,
+                          childAspectRatio: 0.75,
+                        ),
+                    delegate: SliverChildBuilderDelegate((context, index) {
+                      return ItemCard(
+                        item: vm
+                            .container!
+                            .items[index % vm.container!.items.length],
+                        containerId: vm.container!.id,
+                        containerName: vm.container!.name,
+                        containerLocationLabel: vm.container!.location.label,
+                      );
+                    }, childCount: vm.container!.items.length * 5),
+                  ),
+                ),
+              const SliverPadding(padding: EdgeInsets.only(bottom: 24)),
+            ],
           ),
-          body: _buildBody(context, vm.container!),
         );
       },
     );
   }
 
-  Widget _buildAppBarContent(BuildContext context, models.Container container) {
-    final theme = Theme.of(context);
-    final textTheme = theme.textTheme;
-
+  Widget _buildInfoSection(BuildContext context, models.Container container) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            IconButton(
-              onPressed: () => Navigator.of(context).pop(),
-              icon: Container(
-                width: 28,
-                height: 28,
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade200,
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.arrow_back, size: 18),
-              ),
+            Icon(
+              Icons.location_on_outlined,
+              size: 20,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
+            const SizedBox(width: 8),
             Text(
-              'Container Details',
-              style: textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            IconButton(
-              onPressed: () {},
-              icon: Container(
-                width: 28,
-                height: 28,
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade200,
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.more_vert, size: 18),
+              '${container.location.label} • ${container.location.address}',
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
           ],
         ),
-        const SizedBox(height: 20),
-        Center(
-          child: Column(
-            children: [
-              Container(
-                width: 96,
-                height: 96,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: Colors.blue.withAlpha(50),
-                    width: 2,
-                  ),
-                  color: Colors.grey.shade100,
-                  image: container.photoUrl != null
-                      ? DecorationImage(
-                          image: NetworkImage(container.photoUrl!),
-                          fit: BoxFit.cover,
-                        )
-                      : null,
-                ),
-                child: container.photoUrl == null
-                    ? const Icon(Icons.qr_code, size: 48, color: Colors.grey)
-                    : null,
+        const SizedBox(height: 16),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          alignment: WrapAlignment.center,
+          children: container.tags.map((tag) {
+            return Chip(
+              label: Text(tag.toTitleCase()),
+              backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+              labelStyle: TextStyle(
+                color: Theme.of(context).colorScheme.onSecondaryContainer,
               ),
-              const SizedBox(height: 14),
-              Text(container.name, style: textTheme.titleMedium),
-              const SizedBox(height: 4),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(
-                    Icons.location_on_outlined,
-                    size: 14,
-                    color: Color(0xFF6A7282),
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    '${container.location.label} - ${container.location.address}',
-                    style: textTheme.labelSmall?.copyWith(
-                      color: const Color(0xFF6A7282),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    '2.5 Km',
-                    style: textTheme.labelSmall?.copyWith(
-                      color: theme.colorScheme.primary,
-                    ),
-                  ),
-                ],
+              side: BorderSide.none,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
               ),
-              const SizedBox(height: 8),
-              _buildTagSections(container),
-            ],
-          ),
-        ),
-        const SizedBox(height: 15),
-        Row(
-          children: [
-            Expanded(
-              child: _buildActionButton(
-                context,
-                icon: Icons.edit_outlined,
-                label: 'Edit',
-                isPrimary: false,
-                onTap: () async {
-                  final result = await Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          ChangeNotifierProvider<ContainerEditViewModel>(
-                            create: (context) => ContainerEditViewModel(
-                              container,
-                              context.read<ContainerRepository>(),
-                            ),
-                            child: EditContainerScreen(container: container),
-                          ),
-                    ),
-                  );
-
-                  if (result == true && context.mounted) {
-                    context.read<ContainerDetailsViewModel>().loadContainer(
-                      container.id,
-                      context.read<ContainerRepository>(),
-                    );
-                  }
-                },
-              ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: _buildActionButton(
-                context,
-                icon: Icons.add,
-                label: 'Add Item',
-                isPrimary: true,
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => AddItemScreen(
-                        containerId: container.id,
-                        containerName: container.name,
-                        containerLocation: container.location.label,
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: _buildActionButton(
-                context,
-                icon: Icons.share_outlined,
-                label: 'Share',
-                isPrimary: false,
-                onTap: () {},
-              ),
-            ),
-          ],
+            );
+          }).toList(),
         ),
       ],
     );
   }
 
-  Widget _buildTagSections(models.Container container) {
-    final tags = container.tags;
-    return SizedBox(
-      height: 22,
-      child: Center(
-        child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: tags.asMap().entries.map((entry) {
-              final index = entry.key;
-              final tag = entry.value;
-              return Padding(
-                padding: EdgeInsets.only(
-                  right: index != tags.length - 1 ? 10.0 : 0,
-                ),
-                child: Badge(
-                  label: Text(tag.toTitleCase()),
-                  backgroundColor: Colors.blue.withAlpha(50),
-                  textColor: Colors.blue.shade800,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 2,
-                  ),
-                ),
-              );
-            }).toList(),
-          ),
+  Widget _buildItemsHeader(BuildContext context, models.Container container) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          'Items (${container.items.length})',
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
         ),
-      ),
-    );
-  }
-
-  Widget _buildActionButton(
-    BuildContext context, {
-    required IconData icon,
-    required String label,
-    required bool isPrimary,
-    required VoidCallback onTap,
-  }) {
-    final theme = Theme.of(context);
-    final textTheme = theme.textTheme;
-    final color = isPrimary ? theme.colorScheme.primary : Colors.grey.shade200;
-    final textColor = isPrimary ? Colors.white : theme.colorScheme.primary;
-
-    return Material(
-      color: color,
-      borderRadius: BorderRadius.circular(10),
-      elevation: 1,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(10),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 6),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon, size: 24, color: textColor),
-              const SizedBox(height: 4),
-              Text(
-                label,
-                style: textTheme.labelSmall?.copyWith(
-                  color: textColor,
-                  height: 1.2,
-                  letterSpacing: 0.10,
-                ),
-              ),
-            ],
-          ),
+        TextButton.icon(
+          onPressed: () {}, // Implement sort
+          icon: const Icon(Icons.sort),
+          label: const Text('Sort'),
         ),
-      ),
-    );
-  }
-
-  Widget _buildBody(BuildContext context, models.Container container) {
-    final theme = Theme.of(context);
-    final textTheme = theme.textTheme;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                '${container.items.length} Items',
-                style: textTheme.bodySmall?.copyWith(
-                  fontWeight: FontWeight.w500,
-                  color: const Color(0xFF6A7282),
-                ),
-              ),
-              Row(
-                children: [
-                  Text(
-                    'Sort by: ',
-                    style: textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.primary,
-                    ),
-                  ),
-                  Text(
-                    'Name',
-                    style: textTheme.bodySmall?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: theme.colorScheme.primary,
-                    ),
-                  ),
-                  Icon(
-                    Icons.arrow_drop_down,
-                    size: 20,
-                    color: theme.colorScheme.primary,
-                  ),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Expanded(
-            child: container.items.isEmpty
-                ? Center(
-                    child: Text(
-                      'No items in this container',
-                      style: textTheme.bodyMedium?.copyWith(color: Colors.grey),
-                    ),
-                  )
-                : GridView.builder(
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          crossAxisSpacing: 10,
-                          mainAxisSpacing: 10,
-                          childAspectRatio: 0.75,
-                        ),
-                    itemCount: container.items.length,
-                    itemBuilder: (context, index) {
-                      return ItemCard(
-                        item: container.items[index],
-                        containerId: container.id,
-                        containerName: container.name,
-                        containerLocation: container.location.label,
-                      );
-                    },
-                  ),
-          ),
-        ],
-      ),
+      ],
     );
   }
 }

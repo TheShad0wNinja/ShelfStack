@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shelfstack/data/models/item.dart';
 import 'package:shelfstack/features/inventory/screens/container_details_screen.dart';
-import 'package:shelfstack/core/widgets/rounded_appbar.dart';
+import 'package:shelfstack/core/widgets/styled_app_bar.dart';
 
 class EditItemScreen extends StatefulWidget {
   final Item item;
@@ -65,52 +65,20 @@ class _EditItemScreenState extends State<EditItemScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final textTheme = theme.textTheme;
-
     return Scaffold(
-      backgroundColor: const Color(0xFFF1F5F9),
-      appBar: RoundedAppBar(
-        height: 88,
-        padding: const EdgeInsets.fromLTRB(16, 25, 16, 2),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            IconButton(
-              onPressed: () => Navigator.of(context).pop(),
-              icon: Container(
-                width: 28,
-                height: 28,
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade200,
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.arrow_back, size: 18),
-              ),
-            ),
-            Text(
-              'Edit Item',
-              style: textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text(
-                'Save',
-                style: textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: theme.colorScheme.primary,
-                ),
-              ),
-            ),
-          ],
-        ),
+      appBar: StyledAppBar(
+        title: const Text('Edit Item'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text('Save'),
+          ),
+        ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+        padding: const EdgeInsets.all(16),
         child: Column(
           children: [
             _buildPhotoSection(),
@@ -129,30 +97,24 @@ class _EditItemScreenState extends State<EditItemScreen> {
   }
 
   Widget _buildPhotoSection() {
-    final theme = Theme.of(context);
-    final textTheme = theme.textTheme;
-
-    return Material(
-      elevation: 1,
-      borderRadius: BorderRadius.circular(12),
-      color: Colors.white,
-      child: Container(
-        padding: const EdgeInsets.all(14),
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Item Photo', style: textTheme.bodySmall),
-            const SizedBox(height: 10),
+            Text('Item Photo', style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 16),
             Container(
               width: double.infinity,
-              height: 112,
+              height: 120,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                   color: Theme.of(context).colorScheme.primary,
                   width: 1,
                 ),
-                color: Colors.grey.shade200,
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 image: _photoUrl != null
                     ? DecorationImage(
                         image: NetworkImage(_photoUrl!),
@@ -167,67 +129,38 @@ class _EditItemScreenState extends State<EditItemScreen> {
                         Icon(
                           Icons.add_photo_alternate_outlined,
                           size: 32,
-                          color: Colors.grey.shade500,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
-                        const SizedBox(height: 10),
+                        const SizedBox(height: 8),
                         Text(
                           'Add Photo',
-                          style: textTheme.labelSmall?.copyWith(
-                            color: Colors.grey.shade500,
-                          ),
+                          style: Theme.of(context).textTheme.labelSmall
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                              ),
                         ),
                       ],
                     )
                   : null,
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 16),
             Row(
               children: [
                 Expanded(
-                  child: ElevatedButton.icon(
+                  child: FilledButton.icon(
                     onPressed: () {},
-                    icon: const Icon(
-                      Icons.camera_alt,
-                      size: 20,
-                      color: Colors.white,
-                    ),
-                    label: Text(
-                      'Take Photo',
-                      style: textTheme.bodyMedium?.copyWith(
-                        color: Colors.white,
-                      ),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.primary,
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
+                    icon: const Icon(Icons.camera_alt),
+                    label: const Text('Take Photo'),
                   ),
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: 12),
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: () {},
-                    icon: Icon(
-                      Icons.photo_library_outlined,
-                      size: 20,
-                      color: Colors.grey.shade600,
-                    ),
-                    label: Text(
-                      'Choose',
-                      style: textTheme.bodyMedium?.copyWith(
-                        color: Colors.grey.shade600,
-                      ),
-                    ),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      side: BorderSide(color: Colors.grey.shade400, width: 1),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
+                    icon: const Icon(Icons.photo_library_outlined),
+                    label: const Text('Choose'),
                   ),
                 ),
               ],
@@ -239,49 +172,25 @@ class _EditItemScreenState extends State<EditItemScreen> {
   }
 
   Widget _buildNameDescriptionSection() {
-    final theme = Theme.of(context);
-    final textTheme = theme.textTheme;
-
-    return Material(
-      elevation: 1,
-      borderRadius: BorderRadius.circular(12),
-      color: Colors.white,
-      child: Container(
-        padding: const EdgeInsets.all(14),
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Item Name *', style: textTheme.bodySmall),
-            const SizedBox(height: 10),
+            Text('Item Name', style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 16),
             TextField(
               controller: _nameController,
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: Colors.grey.shade200,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide.none,
-                ),
-                contentPadding: const EdgeInsets.all(10),
-              ),
-              style: textTheme.bodySmall,
+              decoration: const InputDecoration(labelText: 'Name'),
             ),
-            const SizedBox(height: 10),
-            Text('Description', style: textTheme.bodySmall),
-            const SizedBox(height: 10),
+            const SizedBox(height: 16),
+            Text('Description', style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 16),
             TextField(
               controller: _descriptionController,
               maxLines: 3,
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: Colors.grey.shade200,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide.none,
-                ),
-                contentPadding: const EdgeInsets.all(10),
-              ),
-              style: textTheme.bodySmall,
+              decoration: const InputDecoration(labelText: 'Description'),
             ),
           ],
         ),
@@ -290,20 +199,14 @@ class _EditItemScreenState extends State<EditItemScreen> {
   }
 
   Widget _buildTagsSection() {
-    final theme = Theme.of(context);
-    final textTheme = theme.textTheme;
-
-    return Material(
-      elevation: 1,
-      borderRadius: BorderRadius.circular(12),
-      color: Colors.white,
-      child: Container(
-        padding: const EdgeInsets.all(14),
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Add Tags', style: textTheme.bodySmall),
-            const SizedBox(height: 10),
+            Text('Tags', style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 16),
             Row(
               children: [
                 Expanded(
@@ -311,54 +214,26 @@ class _EditItemScreenState extends State<EditItemScreen> {
                     controller: _tagController,
                     onSubmitted: (_) => _addTag(),
                     decoration: InputDecoration(
+                      labelText: 'Add Tag',
                       hintText: 'Type a tag...',
-                      hintStyle: textTheme.bodySmall?.copyWith(
-                        color: Colors.grey.shade500,
+                      suffixIcon: IconButton(
+                        onPressed: _addTag,
+                        icon: const Icon(Icons.add),
                       ),
-                      filled: true,
-                      fillColor: Colors.grey.shade200,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide.none,
-                      ),
-                      contentPadding: const EdgeInsets.all(10),
                     ),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: IconButton(
-                    onPressed: _addTag,
-                    icon: const Icon(Icons.add, color: Colors.white, size: 20),
-                    padding: EdgeInsets.zero,
                   ),
                 ),
               ],
             ),
             if (_tags.isNotEmpty) ...[
-              const SizedBox(height: 10),
+              const SizedBox(height: 16),
               Wrap(
                 spacing: 8,
                 runSpacing: 8,
                 children: _tags.map((tag) {
-                  return Chip(
+                  return InputChip(
                     label: Text(tag),
                     onDeleted: () => _removeTag(tag),
-                    deleteIcon: const Icon(Icons.close, size: 16),
-                    backgroundColor: const Color(0xFFE3F2FD),
-                    labelStyle: textTheme.labelSmall?.copyWith(
-                      color: const Color(0xFF1976D2),
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      side: const BorderSide(color: Color(0x00ffffff)),
-                    ),
                   );
                 }).toList(),
               ),
@@ -370,20 +245,14 @@ class _EditItemScreenState extends State<EditItemScreen> {
   }
 
   Widget _buildStoredInSection() {
-    final theme = Theme.of(context);
-    final textTheme = theme.textTheme;
-
-    return Material(
-      elevation: 1,
-      borderRadius: BorderRadius.circular(12),
-      color: Colors.white,
-      child: Container(
-        padding: const EdgeInsets.all(14),
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Stored In', style: textTheme.bodySmall),
-            const SizedBox(height: 10),
+            Text('Stored In', style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 16),
             InkWell(
               onTap: () {
                 Navigator.of(context).push(
@@ -393,12 +262,12 @@ class _EditItemScreenState extends State<EditItemScreen> {
                   ),
                 );
               },
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(12),
               child: Container(
-                padding: const EdgeInsets.all(10),
+                padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade200,
-                  borderRadius: BorderRadius.circular(10),
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
                   children: [
@@ -406,8 +275,8 @@ class _EditItemScreenState extends State<EditItemScreen> {
                       width: 40,
                       height: 40,
                       decoration: BoxDecoration(
-                        color: theme.colorScheme.primary,
-                        borderRadius: BorderRadius.circular(10),
+                        color: Theme.of(context).colorScheme.primary,
+                        borderRadius: BorderRadius.circular(8),
                       ),
                       child: const Icon(
                         Icons.inventory_2_outlined,
@@ -415,20 +284,23 @@ class _EditItemScreenState extends State<EditItemScreen> {
                         size: 20,
                       ),
                     ),
-                    const SizedBox(width: 10),
+                    const SizedBox(width: 12),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             widget.containerName,
-                            style: textTheme.bodySmall,
+                            style: Theme.of(context).textTheme.bodyMedium,
                           ),
                           Text(
                             widget.containerLocation,
-                            style: textTheme.labelSmall?.copyWith(
-                              color: Colors.grey.shade600,
-                            ),
+                            style: Theme.of(context).textTheme.labelSmall
+                                ?.copyWith(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
+                                ),
                           ),
                         ],
                       ),
@@ -437,25 +309,12 @@ class _EditItemScreenState extends State<EditItemScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 10),
-            OutlinedButton(
-              onPressed: () {},
-              style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                side: BorderSide(color: theme.colorScheme.primary, width: 1),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              child: SizedBox(
-                width: double.infinity,
-                child: Text(
-                  'Change Container',
-                  textAlign: TextAlign.center,
-                  style: textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.primary,
-                  ),
-                ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
+                onPressed: () {},
+                child: const Text('Change Container'),
               ),
             ),
           ],
@@ -465,34 +324,23 @@ class _EditItemScreenState extends State<EditItemScreen> {
   }
 
   Widget _buildExternalDocumentsSection() {
-    final theme = Theme.of(context);
-    final textTheme = theme.textTheme;
-
-    return Material(
-      elevation: 1,
-      borderRadius: BorderRadius.circular(12),
-      color: Colors.white,
-      child: Container(
-        padding: const EdgeInsets.all(14),
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('External Documents', style: textTheme.bodySmall),
-            const SizedBox(height: 10),
-            OutlinedButton.icon(
-              onPressed: () {},
-              icon: const Icon(Icons.link, size: 20, color: Colors.black87),
-              label: Text(
-                'Link Attachments',
-                style: textTheme.bodyMedium?.copyWith(color: Colors.black87),
-              ),
-              style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                side: BorderSide(color: Colors.grey.shade500, width: 1),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                minimumSize: const Size(double.infinity, 40),
+            Text(
+              'External Documents',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: () {},
+                icon: const Icon(Icons.link),
+                label: const Text('Link Attachments'),
               ),
             ),
           ],

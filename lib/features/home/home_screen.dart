@@ -5,7 +5,7 @@ import 'package:shelfstack/features/home/widgets/activity_row.dart';
 import 'package:shelfstack/data/models/container.dart' as models;
 import 'package:shelfstack/data/models/location.dart';
 
-import 'package:shelfstack/core/widgets/rounded_appbar.dart';
+import 'package:shelfstack/core/widgets/styled_app_bar.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -13,29 +13,30 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final formattedDate = DateFormat('EEEE, MMMM d').format(DateTime.now());
-
     final theme = Theme.of(context);
-    final textTheme = theme.textTheme;
 
     return Scaffold(
-      appBar: RoundedAppBar(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text("Good Evening, Mohey", style: textTheme.titleMedium),
-            Text(
-              formattedDate,
-              style: textTheme.titleSmall?.copyWith(
-                color: Colors.grey.shade600,
-                fontWeight: FontWeight.w500,
+      appBar: StyledAppBar(
+        // height: 60,
+        title: Center(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text("Good Evening, Mohey", style: theme.textTheme.titleMedium),
+              Text(
+                formattedDate,
+                style: theme.textTheme.titleSmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
       floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 90),
+        padding: const EdgeInsets.only(bottom: 100),
         child: FloatingActionButton.extended(
           onPressed: () {
             Navigator.of(context).push(
@@ -46,8 +47,6 @@ class HomeScreen extends StatelessWidget {
           },
           icon: const Icon(Icons.add),
           label: const Text('Create Container'),
-          backgroundColor: theme.colorScheme.primary,
-          foregroundColor: Colors.white,
         ),
       ),
       body: SingleChildScrollView(
@@ -55,242 +54,175 @@ class HomeScreen extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 15, 16, 100),
           child: Column(
-            spacing: 20,
             children: [
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                spacing: 15,
                 children: [
                   Expanded(
-                    child: Material(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(10),
-                      elevation: 1,
-                      child: Padding(
-                        padding: const EdgeInsets.all(15),
-                        child: Column(
-                          spacing: 4,
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              decoration: BoxDecoration(
-                                color: theme.colorScheme.primary,
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Icon(
-                                  Icons.inventory_2_outlined,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                            Text(
-                              "Total Containers",
-                              style: textTheme.bodySmall?.copyWith(
-                                color: Colors.grey.shade600,
-                              ),
-                            ),
-                            Text(
-                              "12",
-                              style: textTheme.titleMedium?.copyWith(
-                                height: 1.1,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                    child: _buildStatCard(
+                      context,
+                      icon: Icons.inventory_2_outlined,
+                      label: "Total Containers",
+                      value: "12",
+                      color: theme.colorScheme.primary,
                     ),
                   ),
+                  const SizedBox(width: 16),
                   Expanded(
-                    child: Material(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(10),
-                      elevation: 1,
-                      child: Padding(
-                        padding: const EdgeInsets.all(15),
-                        child: Column(
-                          spacing: 4,
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              decoration: BoxDecoration(
-                                color: theme.colorScheme.tertiary,
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Icon(
-                                  Icons.list_alt_outlined,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                            Text(
-                              "Total Items",
-                              style: textTheme.bodySmall?.copyWith(
-                                color: Colors.grey.shade600,
-                              ),
-                            ),
-                            Text(
-                              "45",
-                              style: textTheme.titleMedium?.copyWith(
-                                height: 1.1,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                    child: _buildStatCard(
+                      context,
+                      icon: Icons.list_alt_outlined,
+                      label: "Total Items",
+                      value: "45",
+                      color: theme.colorScheme.tertiary,
                     ),
                   ),
                 ],
               ),
-              Column(
-                spacing: 6,
-                crossAxisAlignment: CrossAxisAlignment.start,
+              const SizedBox(height: 24),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text("Quick Actions", style: theme.textTheme.titleSmall),
+              ),
+              const SizedBox(height: 10),
+              Row(
                 children: [
-                  Text("Quick Actions", style: textTheme.titleSmall),
-                  const SizedBox(height: 10),
-                  Row(
-                    spacing: 10,
+                  Expanded(
+                    child: _buildQuickActionCard(
+                      context,
+                      icon: Icons.qr_code_outlined,
+                      label: "Scan QR",
+                      color: theme.colorScheme.primary,
+                      onTap: () {},
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: _buildQuickActionCard(
+                      context,
+                      icon: Icons.add_circle_outline,
+                      label: "Add Item",
+                      color: theme.colorScheme.tertiary,
+                      onTap: () {},
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: _buildQuickActionCard(
+                      context,
+                      icon: Icons.search,
+                      label: "Search All",
+                      color: theme.colorScheme.secondary,
+                      onTap: () {},
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  "Recent Activities",
+                  style: theme.textTheme.titleSmall,
+                ),
+              ),
+              const SizedBox(height: 10),
+              ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                padding: EdgeInsets.zero,
+                itemCount: 3,
+                itemBuilder: (context, index) {
+                  final container = models.Container(
+                    id: 'static-$index',
+                    name: 'Static Container $index',
+                    tags: ['static', 'demo'],
+                    location: Location(
+                      latitude: 0,
+                      longitude: 0,
+                      label: 'Static Location',
+                      address: '123 Static St',
+                    ),
+                    createdAt: DateTime.now(),
+                    updatedAt: DateTime.now(),
+                    items: [],
+                  );
+                  return Column(
                     children: [
-                      Expanded(
-                        child: Material(
-                          color: theme.colorScheme.primary,
-                          borderRadius: BorderRadius.circular(8),
-                          elevation: 1,
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(8),
-                            onTap: () {},
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Icon(
-                                    Icons.qr_code_outlined,
-                                    size: 22,
-                                    color: Colors.white,
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    "Scan QR",
-                                    style: textTheme.labelMedium?.copyWith(
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: Material(
-                          color: theme.colorScheme.tertiary,
-                          borderRadius: BorderRadius.circular(8),
-                          elevation: 1,
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(8),
-                            onTap: () {},
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Icon(
-                                    Icons.add_circle_outline,
-                                    size: 22,
-                                    color: Colors.white,
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    "Add Item",
-                                    style: textTheme.labelMedium?.copyWith(
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: Material(
-                          color: theme.colorScheme.secondary,
-                          borderRadius: BorderRadius.circular(8),
-                          elevation: 1,
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(8),
-                            onTap: () {},
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Icon(
-                                    Icons.search,
-                                    size: 22,
-                                    color: Colors.white,
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    "Search All",
-                                    style: textTheme.labelMedium?.copyWith(
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
+                      ActivityRow(container: container),
+                      if (index != 2) const SizedBox(height: 10),
                     ],
-                  ),
-                ],
+                  );
+                },
               ),
-              Column(
-                spacing: 6,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text("Recent Activities", style: textTheme.titleSmall),
-                  const SizedBox(height: 10),
-                  ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    padding: EdgeInsets.zero,
-                    itemCount: 3,
-                    itemBuilder: (context, index) {
-                      final container = models.Container(
-                        id: 'static-$index',
-                        name: 'Static Container $index',
-                        tags: ['static', 'demo'],
-                        location: Location(
-                          latitude: 0,
-                          longitude: 0,
-                          label: 'Static Location',
-                          address: '123 Static St',
-                        ),
-                        createdAt: DateTime.now(),
-                        updatedAt: DateTime.now(),
-                        items: [],
-                      );
-                      return Column(
-                        children: [
-                          ActivityRow(container: container),
-                          if (index != 2) const SizedBox(height: 10),
-                        ],
-                      );
-                    },
-                  ),
-                ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatCard(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required String value,
+    required Color color,
+  }) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                color: color,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Icon(icon, color: Colors.white),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              label,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+            Text(value, style: Theme.of(context).textTheme.titleLarge),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildQuickActionCard(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return Card(
+      color: color,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, size: 24, color: Colors.white),
+              const SizedBox(height: 8),
+              Text(
+                label,
+                style: Theme.of(
+                  context,
+                ).textTheme.labelMedium?.copyWith(color: Colors.white),
               ),
             ],
           ),
