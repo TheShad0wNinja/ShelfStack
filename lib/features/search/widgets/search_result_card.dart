@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shelfstack/data/models/container.dart' as models;
 import 'package:shelfstack/data/models/item.dart';
 import 'package:shelfstack/features/inventory/screens/container_details_screen.dart';
-import 'package:shelfstack/features/inventory/screens/edit_item_screen.dart';
+import 'package:shelfstack/features/inventory/screens/item_details_screen.dart';
 
 class SearchResultCard extends StatelessWidget {
   final models.Container? container;
@@ -251,7 +251,7 @@ class SearchResultCard extends StatelessWidget {
         onTap: () {
           Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (context) => EditItemScreen(
+              builder: (context) => ItemDetailsScreen(
                 item: item,
                 containerId: containerId,
                 containerName: containerName,

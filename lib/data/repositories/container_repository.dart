@@ -1,5 +1,4 @@
 import 'package:shelfstack/data/models/container.dart';
-import 'package:shelfstack/data/models/item.dart';
 
 abstract class ContainerRepository {
   Future<List<Container>> fetchContainers();
@@ -12,13 +11,9 @@ abstract class ContainerRepository {
 
   Future deleteContainer(String id);
 
-  Future<List<Item>> searchItems(String query);
-
   Future<List<Container>> searchContainers(String query);
 
-  Future<int> getTotalContainerCount();
-
-  Future<int> getTotalItemCount();
+  Future<int> fetchTotalContainerCount();
 
   Future<List<Container>> fetchRecentContainers(int amount);
 }

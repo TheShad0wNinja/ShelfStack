@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:shelfstack/core/extensions/string_extensions.dart';
 import 'package:shelfstack/data/models/item.dart';
-import 'package:shelfstack/features/inventory/screens/edit_item_screen.dart';
+import 'package:shelfstack/features/inventory/screens/item_details_screen.dart';
 
 class ItemCard extends StatelessWidget {
   final Item item;
@@ -27,7 +28,7 @@ class ItemCard extends StatelessWidget {
         onTap: () {
           Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (context) => EditItemScreen(
+              builder: (context) => ItemDetailsScreen(
                 item: item,
                 containerId: containerId,
                 containerName: containerName,
@@ -90,7 +91,7 @@ class ItemCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
-                        tag,
+                        tag.toTitleCase(),
                         style: textTheme.labelSmall?.copyWith(
                           color: theme.colorScheme.onSecondaryContainer,
                         ),

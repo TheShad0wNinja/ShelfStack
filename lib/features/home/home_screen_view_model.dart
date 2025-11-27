@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:shelfstack/data/repositories/item_repository.dart';
 import 'package:shelfstack/data/repositories/container_repository.dart';
-
-import '../../data/models/container.dart' as models;
+import 'package:shelfstack/data/models/container.dart' as models;
 
 class HomeScreenViewModel extends ChangeNotifier {
-  final ContainerRepository _repository;
+  final ContainerRepository _containerRepository;
+  final ItemRepository _itemRepository;
 
-  bool _isLoadingInfo = false;
+  bool _isLoadingInfo = true;
   bool get isLoadingInfo => _isLoadingInfo;
 
-  bool _isLoadingContainers = false;
+  bool _isLoadingContainers = true;
   bool get isLoadingContainers => _isLoadingContainers;
 
   int _totalContainers = 0;
@@ -21,8 +22,7 @@ class HomeScreenViewModel extends ChangeNotifier {
   List<models.Container> _recentContainers = [];
   List<models.Container> get recentContainers => _recentContainers;
 
-
-  HomeScreenViewModel(this._repository) {
+  HomeScreenViewModel(this._containerRepository, this._itemRepository) {
     loadData();
   }
 
@@ -31,14 +31,12 @@ class HomeScreenViewModel extends ChangeNotifier {
     _isLoadingContainers = true;
     notifyListeners();
 
-    print("PRINTING");
-
-    _totalContainers = await _repository.getTotalContainerCount();
-    _totalItems = await _repository.getTotalItemCount();
+    _totalContainers = await _containerRepository.fetchTotalContainerCount();
+    _totalItems = await _itemRepository.fetchTotalItemCount();
     _isLoadingInfo = false;
     notifyListeners();
 
-    _recentContainers = await _repository.fetchRecentContainers(4);
+    _recentContainers = await _containerRepository.fetchRecentContainers(4);
     _isLoadingContainers = false;
     notifyListeners();
   }

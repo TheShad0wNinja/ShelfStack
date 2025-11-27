@@ -8,7 +8,8 @@ class ContainersScreenViewModel extends ChangeNotifier {
   List<models.Container> _containers = [];
   List<models.Container> _searchResults = [];
   String _query = "";
-  bool _isLoading = false;
+  bool _isLoading = true;
+
   String? _error;
   bool _isSearching = false;
 

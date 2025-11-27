@@ -2,15 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:shelfstack/data/models/container.dart' as models;
 import 'package:shelfstack/data/models/item.dart' as models;
 import 'package:shelfstack/data/repositories/container_repository.dart';
+import 'package:shelfstack/data/repositories/item_repository.dart';
 
 enum SortBy { name, dateAdded }
+
 enum SortOrder { ascending, descending }
 
 class ContainerDetailsViewModel extends ChangeNotifier {
   models.Container? _container;
   models.Container? get container => _container;
 
-  bool _isLoading = false;
+  bool _isLoading = true;
   bool get isLoading => _isLoading;
 
   String? _error;
@@ -21,7 +23,6 @@ class ContainerDetailsViewModel extends ChangeNotifier {
 
   SortOrder _sortOrder = SortOrder.descending;
   SortOrder get sortOrder => _sortOrder;
-
 
   List<models.Item> get sortedItems {
     if (_container == null) return [];
@@ -47,15 +48,20 @@ class ContainerDetailsViewModel extends ChangeNotifier {
   }
 
   Future<void> loadContainer(
-      String containerId,
-      ContainerRepository repository,
-      ) async {
+    String containerId,
+    ContainerRepository containerRepository,
+    ItemRepository itemRepository,
+  ) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
-      _container = await repository.fetchContainerById(containerId);
+      final container = await containerRepository.fetchContainerById(
+        containerId,
+      );
+      final items = await itemRepository.fetchItemsByContainerId(containerId);
+      _container = container.copyWith(items: items);
     } catch (e) {
       _error = e.toString();
     } finally {
@@ -65,9 +71,9 @@ class ContainerDetailsViewModel extends ChangeNotifier {
   }
 
   Future<void> deleteContainer(
-      String containerId,
-      ContainerRepository repository,
-      ) async {
+    String containerId,
+    ContainerRepository repository,
+  ) async {
     _isLoading = true;
     _error = null;
     notifyListeners();

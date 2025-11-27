@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shelfstack/data/models/container.dart' as models;
 import 'package:shelfstack/data/models/item.dart';
 import 'package:shelfstack/data/repositories/container_repository.dart';
+import 'package:shelfstack/data/repositories/item_repository.dart';
 
 enum SearchFilter { all, containersOnly, itemsOnly }
 
@@ -19,17 +20,28 @@ class SearchViewModel extends ChangeNotifier {
   bool get isSearching => _isSearching;
   int get totalResults => _containerResults.length + _itemResults.length;
 
-  void updateQuery(String newQuery, ContainerRepository repository) {
+  void updateQuery(
+    String newQuery,
+    ContainerRepository containerRepository,
+    ItemRepository itemRepository,
+  ) {
     _query = newQuery;
-    _performSearch(repository);
+    _performSearch(containerRepository, itemRepository);
   }
 
-  void updateFilter(SearchFilter newFilter, ContainerRepository repository) {
+  void updateFilter(
+    SearchFilter newFilter,
+    ContainerRepository containerRepository,
+    ItemRepository itemRepository,
+  ) {
     _selectedFilter = newFilter;
-    _performSearch(repository);
+    _performSearch(containerRepository, itemRepository);
   }
 
-  Future<void> _performSearch(ContainerRepository repository) async {
+  Future<void> _performSearch(
+    ContainerRepository containerRepository,
+    ItemRepository itemRepository,
+  ) async {
     if (_query.isEmpty) {
       _containerResults = [];
       _itemResults = [];
@@ -43,14 +55,14 @@ class SearchViewModel extends ChangeNotifier {
 
     if (_selectedFilter == SearchFilter.all ||
         _selectedFilter == SearchFilter.containersOnly) {
-      _containerResults = await repository.searchContainers(_query);
+      _containerResults = await containerRepository.searchContainers(_query);
     } else {
       _containerResults = [];
     }
 
     if (_selectedFilter == SearchFilter.all ||
         _selectedFilter == SearchFilter.itemsOnly) {
-      _itemResults = await repository.searchItems(_query);
+      _itemResults = await itemRepository.searchItems(_query);
     } else {
       _itemResults = [];
     }

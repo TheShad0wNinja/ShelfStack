@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:shelfstack/data/repositories/container_repository.dart';
+import 'package:shelfstack/data/repositories/item_repository.dart';
 import 'package:shelfstack/features/home/home_screen_view_model.dart';
 import 'package:shelfstack/features/inventory/screens/create_container_screen.dart';
 import 'package:shelfstack/features/home/widgets/activity_row.dart';
@@ -17,8 +18,10 @@ class HomeScreen extends StatelessWidget {
     final theme = Theme.of(context);
 
     return ChangeNotifierProvider(
-      create: (BuildContext context) =>
-          HomeScreenViewModel(context.read<ContainerRepository>()),
+      create: (BuildContext context) => HomeScreenViewModel(
+        context.read<ContainerRepository>(),
+        context.read<ItemRepository>(),
+      ),
       child: Scaffold(
         appBar: AppBar(
           title: Center(

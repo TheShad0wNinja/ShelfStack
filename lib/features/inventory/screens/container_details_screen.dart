@@ -7,6 +7,7 @@ import 'package:shelfstack/data/models/container.dart' as models;
 import 'package:shelfstack/features/inventory/screens/add_item_screen.dart';
 import 'package:shelfstack/features/inventory/screens/edit_container_screen.dart';
 import 'package:shelfstack/data/repositories/container_repository.dart';
+import 'package:shelfstack/data/repositories/item_repository.dart';
 import 'package:shelfstack/features/inventory/viewmodels/add_item_viewmodel.dart';
 import 'package:shelfstack/features/inventory/viewmodels/container_details_viewmodel.dart';
 import 'package:shelfstack/features/inventory/viewmodels/container_edit_viewmodel.dart';
@@ -41,9 +42,10 @@ class _ContainerDetailsContentState extends State<_ContainerDetailsContent> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback(
-          (_) => context.read<ContainerDetailsViewModel>().loadContainer(
+      (_) => context.read<ContainerDetailsViewModel>().loadContainer(
         widget.containerId,
         context.read<ContainerRepository>(),
+        context.read<ItemRepository>(),
       ),
     );
   }
@@ -110,7 +112,7 @@ class _ContainerDetailsContentState extends State<_ContainerDetailsContent> {
                             child: AddItemScreen(
                               containerId: vm.container!.id,
                               containerLocationLabel:
-                              vm.container!.location.label,
+                                  vm.container!.location.label,
                               containerName: vm.container!.name,
                             ),
                           ),
@@ -145,9 +147,10 @@ class _ContainerDetailsContentState extends State<_ContainerDetailsContent> {
                           context
                               .read<ContainerDetailsViewModel>()
                               .loadContainer(
-                            vm.container!.id,
-                            context.read<ContainerRepository>(),
-                          );
+                                vm.container!.id,
+                                context.read<ContainerRepository>(),
+                                context.read<ItemRepository>(),
+                              );
                         }
                       } else if (value == 'delete') {
                         final confirm = await showDialog<bool>(
@@ -179,9 +182,9 @@ class _ContainerDetailsContentState extends State<_ContainerDetailsContent> {
                           await context
                               .read<ContainerDetailsViewModel>()
                               .deleteContainer(
-                            vm.container!.id,
-                            context.read<ContainerRepository>(),
-                          );
+                                vm.container!.id,
+                                context.read<ContainerRepository>(),
+                              );
                           if (context.mounted) {
                             Navigator.of(context).pop();
                           }
@@ -243,21 +246,21 @@ class _ContainerDetailsContentState extends State<_ContainerDetailsContent> {
                             ).colorScheme.surfaceContainerHighest,
                             image: vm.container!.photoUrl != null
                                 ? DecorationImage(
-                              image: NetworkImage(
-                                vm.container!.photoUrl!,
-                              ),
-                              fit: BoxFit.cover,
-                            )
+                                    image: NetworkImage(
+                                      vm.container!.photoUrl!,
+                                    ),
+                                    fit: BoxFit.cover,
+                                  )
                                 : null,
                           ),
                           child: vm.container!.photoUrl == null
                               ? Icon(
-                            Icons.inventory_2_outlined,
-                            size: 48,
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.onSurfaceVariant,
-                          )
+                                  Icons.inventory_2_outlined,
+                                  size: 48,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
+                                )
                               : null,
                         ),
                         const SizedBox(height: 10),
@@ -288,15 +291,15 @@ class _ContainerDetailsContentState extends State<_ContainerDetailsContent> {
                 )
               else
                 SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
                   sliver: SliverGrid(
                     gridDelegate:
-                    const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 12,
-                      mainAxisSpacing: 12,
-                      childAspectRatio: 0.75,
-                    ),
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 12,
+                          mainAxisSpacing: 12,
+                          childAspectRatio: 0.75,
+                        ),
                     delegate: SliverChildBuilderDelegate((context, index) {
                       return ItemCard(
                         item: vm.sortedItems[index],
@@ -364,7 +367,7 @@ class _ContainerDetailsContentState extends State<_ContainerDetailsContent> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
-          'Items (${container.items.length})',
+          '${container.items.length} ${container.items.length == 1 ? "item" : "items"}',
           style: Theme.of(
             context,
           ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
@@ -453,21 +456,21 @@ class _SortBottomSheetState extends State<_SortBottomSheet> {
             ),
             RadioGroup<SortBy>(
               groupValue: _selectedSortBy,
-                onChanged: (SortBy? value) => setState(() {
-                  _selectedSortBy = value!;
-                }),
-                child: Column(
-                  children: [
-                    ListTile(
-                      title: Text('Name'),
-                      leading: Radio<SortBy>(value: SortBy.name),
-                    ),
-                    ListTile(
-                      title: Text('Date Added'),
-                      leading: Radio<SortBy>(value: SortBy.dateAdded),
-                    ),
-                  ],
-                )
+              onChanged: (SortBy? value) => setState(() {
+                _selectedSortBy = value!;
+              }),
+              child: Column(
+                children: [
+                  ListTile(
+                    title: Text('Name'),
+                    leading: Radio<SortBy>(value: SortBy.name),
+                  ),
+                  ListTile(
+                    title: Text('Date Added'),
+                    leading: Radio<SortBy>(value: SortBy.dateAdded),
+                  ),
+                ],
+              ),
             ),
 
             const SizedBox(height: 16),
@@ -484,33 +487,37 @@ class _SortBottomSheetState extends State<_SortBottomSheet> {
 
             RadioGroup<SortOrder>(
               groupValue: _selectedSortOrder,
-                onChanged: (SortOrder? value) => setState(() {
-                  _selectedSortOrder = value!;
-                }), child: Column(
-              children: [
-                ListTile(
-                  title: const Text('Ascending'),
-                  subtitle: Text(
-                    _selectedSortBy == SortBy.name ? 'A to Z' : 'Oldest first',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
+              onChanged: (SortOrder? value) => setState(() {
+                _selectedSortOrder = value!;
+              }),
+              child: Column(
+                children: [
+                  ListTile(
+                    title: const Text('Ascending'),
+                    subtitle: Text(
+                      _selectedSortBy == SortBy.name
+                          ? 'A to Z'
+                          : 'Oldest first',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
                     ),
+                    leading: Radio<SortOrder>(value: SortOrder.ascending),
                   ),
-                  leading: Radio<SortOrder>(value: SortOrder.ascending),
-                ),
-                ListTile(
-                  title: const Text('Descending'),
-                  subtitle: Text(
-                    _selectedSortBy == SortBy.name ? 'Z to A' : 'Newest first',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
+                  ListTile(
+                    title: const Text('Descending'),
+                    subtitle: Text(
+                      _selectedSortBy == SortBy.name
+                          ? 'Z to A'
+                          : 'Newest first',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
                     ),
+                    leading: Radio<SortOrder>(value: SortOrder.descending),
                   ),
-                  leading: Radio<SortOrder>(value: SortOrder.descending),
-                )
-
-                ]
-              )
+                ],
+              ),
             ),
 
             Padding(
