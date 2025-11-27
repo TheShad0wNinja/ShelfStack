@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:shelfstack/data/repositories/container_repository.dart';
+import 'package:shelfstack/data/repositories/item_repository.dart';
 import 'package:shelfstack/features/inventory/viewmodels/containers_screen_viewmodel.dart';
 import 'package:shelfstack/features/inventory/widgets/container_row.dart';
 
@@ -12,7 +13,7 @@ class ContainersScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<ContainersScreenViewModel>(
       create: (context) =>
-          ContainersScreenViewModel(context.read<ContainerRepository>()),
+          ContainersScreenViewModel(context.read<ContainerRepository>(), context.read<ItemRepository>()),
       child: _ContainerScreenContent(),
     );
   }

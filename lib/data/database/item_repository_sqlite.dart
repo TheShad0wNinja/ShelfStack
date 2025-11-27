@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:shelfstack/data/database/database_helper.dart';
 import 'package:shelfstack/data/models/item.dart';
 import 'package:shelfstack/data/repositories/item_repository.dart';
@@ -5,6 +7,10 @@ import 'package:sqflite/sqflite.dart';
 
 class ItemRepositorySqlite implements ItemRepository {
   final DatabaseHelper _dbHelper = DatabaseHelper();
+  final _streamController = StreamController<void>.broadcast();
+
+  @override
+  Stream<void> get onDataChanged => _streamController.stream;
 
   @override
   Future<List<Item>> fetchItemsByContainerId(String containerId) async {
@@ -67,6 +73,7 @@ class ItemRepositorySqlite implements ItemRepository {
         await txn.insert('item_tags', {'item_id': item.id, 'tag': tag});
       }
     });
+    _streamController.add(null);
   }
 
   @override
@@ -90,13 +97,14 @@ class ItemRepositorySqlite implements ItemRepository {
         await txn.insert('item_tags', {'item_id': item.id, 'tag': tag});
       }
     });
+    _streamController.add(null);
   }
 
   @override
   Future deleteItem(String id) async {
     final db = await _dbHelper.database;
     await db.delete('items', where: 'id = ?', whereArgs: [id]);
-    // Tags will be cascade deleted due to foreign key constraints
+    _streamController.add(null);
   }
 
   @override
@@ -222,6 +230,8 @@ class ItemRepositorySqlite implements ItemRepository {
       where: 'id = ?',
       whereArgs: [itemId],
     );
+
+    _streamController.add(null);
   }
 
   @override
@@ -264,5 +274,7 @@ class ItemRepositorySqlite implements ItemRepository {
       where: 'id = ?',
       whereArgs: [itemId],
     );
+
+    _streamController.add(null);
   }
 }

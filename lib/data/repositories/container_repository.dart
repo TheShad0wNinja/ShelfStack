@@ -1,6 +1,8 @@
 import 'package:shelfstack/data/models/container.dart';
 
 abstract class ContainerRepository {
+  Stream<void> get onDataChanged;
+
   Future<List<Container>> fetchContainers();
 
   Future<Container> fetchContainerById(String id);

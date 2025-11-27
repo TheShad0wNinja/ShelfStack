@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shelfstack/data/models/container.dart' as models;
 import 'package:shelfstack/data/repositories/container_repository.dart';
+import 'package:shelfstack/data/repositories/item_repository.dart';
 
 class ContainersScreenViewModel extends ChangeNotifier {
   final ContainerRepository _repository;
@@ -25,7 +26,9 @@ class ContainersScreenViewModel extends ChangeNotifier {
   bool get isSearching => _isSearching;
   String get query => _query;
 
-  ContainersScreenViewModel(this._repository) {
+  ContainersScreenViewModel(this._repository, ItemRepository itemRepository) {
+    _repository.onDataChanged.listen((_) => loadContainers());
+    itemRepository.onDataChanged.listen((_) => loadContainers());
     loadContainers();
   }
 

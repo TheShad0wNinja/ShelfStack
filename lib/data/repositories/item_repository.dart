@@ -1,6 +1,8 @@
 import 'package:shelfstack/data/models/item.dart';
 
 abstract class ItemRepository {
+  Stream<void> get onDataChanged;
+
   Future<List<Item>> fetchItemsByContainerId(String containerId);
 
   Future<Item> fetchItemById(String id);

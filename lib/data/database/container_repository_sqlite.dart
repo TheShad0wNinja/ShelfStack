@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:shelfstack/data/database/database_helper.dart';
 import 'package:shelfstack/data/models/container.dart';
 import 'package:shelfstack/data/models/item.dart';
@@ -6,6 +8,10 @@ import 'package:sqflite/sqflite.dart';
 
 class ContainerRepositorySqlite implements ContainerRepository {
   final DatabaseHelper _dbHelper = DatabaseHelper();
+  final _streamController = StreamController<void>.broadcast();
+
+  @override
+  Stream<void> get onDataChanged => _streamController.stream;
 
   @override
   Future<List<Container>> fetchContainers() async {
@@ -85,6 +91,8 @@ class ContainerRepositorySqlite implements ContainerRepository {
         });
       }
     });
+
+    _streamController.add(null);
   }
 
   @override
@@ -115,6 +123,8 @@ class ContainerRepositorySqlite implements ContainerRepository {
         });
       }
     });
+
+    _streamController.add(null);
   }
 
   @override
@@ -122,6 +132,8 @@ class ContainerRepositorySqlite implements ContainerRepository {
     final db = await _dbHelper.database;
     await db.delete('containers', where: 'id = ?', whereArgs: [id]);
     // Tags and items will be cascade deleted due to foreign key constraints
+
+    _streamController.add(null);
   }
 
   @override

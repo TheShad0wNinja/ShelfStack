@@ -23,6 +23,8 @@ class HomeScreenViewModel extends ChangeNotifier {
   List<models.Container> get recentContainers => _recentContainers;
 
   HomeScreenViewModel(this._containerRepository, this._itemRepository) {
+    _containerRepository.onDataChanged.listen((_) => loadData());
+    _itemRepository.onDataChanged.listen((_) => loadData());
     loadData();
   }
 
