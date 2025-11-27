@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 
 import 'package:provider/provider.dart';
 import 'package:shelfstack/core/extensions/string_extensions.dart';
@@ -43,9 +41,25 @@ class _ContainerDetailsContentState extends State<_ContainerDetailsContent> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback(
-      (_) => context.read<ContainerDetailsViewModel>().loadContainer(
+          (_) => context.read<ContainerDetailsViewModel>().loadContainer(
         widget.containerId,
         context.read<ContainerRepository>(),
+      ),
+    );
+  }
+
+  void _showSortModal(BuildContext context) {
+    final vm = context.read<ContainerDetailsViewModel>();
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => _SortBottomSheet(
+        currentSortBy: vm.sortBy,
+        currentSortOrder: vm.sortOrder,
+        onApply: (sortBy, sortOrder) {
+          vm.setSortOptions(sortBy, sortOrder);
+        },
       ),
     );
   }
@@ -75,13 +89,6 @@ class _ContainerDetailsContentState extends State<_ContainerDetailsContent> {
                 expandedHeight: 280,
                 pinned: true,
                 stretch: true,
-                // backgroundColor: Colors.white,
-                // surfaceTintColor: ,
-                // shape: const RoundedRectangleBorder(
-                //   borderRadius: BorderRadius.vertical(
-                //     bottom: Radius.circular(24),
-                //   ),
-                // ),
                 leading: IconButton(
                   icon: const Icon(Icons.arrow_back),
                   onPressed: () => Navigator.of(context).pop(),
@@ -103,7 +110,7 @@ class _ContainerDetailsContentState extends State<_ContainerDetailsContent> {
                             child: AddItemScreen(
                               containerId: vm.container!.id,
                               containerLocationLabel:
-                                  vm.container!.location.label,
+                              vm.container!.location.label,
                               containerName: vm.container!.name,
                             ),
                           ),
@@ -138,9 +145,9 @@ class _ContainerDetailsContentState extends State<_ContainerDetailsContent> {
                           context
                               .read<ContainerDetailsViewModel>()
                               .loadContainer(
-                                vm.container!.id,
-                                context.read<ContainerRepository>(),
-                              );
+                            vm.container!.id,
+                            context.read<ContainerRepository>(),
+                          );
                         }
                       } else if (value == 'delete') {
                         final confirm = await showDialog<bool>(
@@ -172,9 +179,9 @@ class _ContainerDetailsContentState extends State<_ContainerDetailsContent> {
                           await context
                               .read<ContainerDetailsViewModel>()
                               .deleteContainer(
-                                vm.container!.id,
-                                context.read<ContainerRepository>(),
-                              );
+                            vm.container!.id,
+                            context.read<ContainerRepository>(),
+                          );
                           if (context.mounted) {
                             Navigator.of(context).pop();
                           }
@@ -236,53 +243,25 @@ class _ContainerDetailsContentState extends State<_ContainerDetailsContent> {
                             ).colorScheme.surfaceContainerHighest,
                             image: vm.container!.photoUrl != null
                                 ? DecorationImage(
-                                    image: NetworkImage(
-                                      vm.container!.photoUrl!,
-                                    ),
-                                    fit: BoxFit.cover,
-                                  )
+                              image: NetworkImage(
+                                vm.container!.photoUrl!,
+                              ),
+                              fit: BoxFit.cover,
+                            )
                                 : null,
                           ),
                           child: vm.container!.photoUrl == null
                               ? Icon(
-                                  Icons.inventory_2_outlined,
-                                  size: 48,
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.onSurfaceVariant,
-                                )
+                            Icons.inventory_2_outlined,
+                            size: 48,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurfaceVariant,
+                          )
                               : null,
                         ),
-                        // const SizedBox(height: 16),
+                        const SizedBox(height: 10),
                         _buildInfoSection(context, vm.container!),
-                        // const SizedBox(height: 16),
-                        // FilledButton.icon(
-                        //   onPressed: () {
-                        //     Navigator.of(context).push(
-                        //       MaterialPageRoute(
-                        //         builder: (context) => ChangeNotifierProvider(
-                        //           create: (context) => AddItemViewModel(),
-                        //           child: AddItemScreen(
-                        //             containerId: vm.container!.id,
-                        //             containerLocationLabel:
-                        //                 vm.container!.location.label,
-                        //             containerName: vm.container!.name,
-                        //           ),
-                        //         ),
-                        //       ),
-                        //     );
-                        //   },
-                        //   icon: const Icon(Icons.add),
-                        //   label: const Text('Add Item'),
-                        //   style: FilledButton.styleFrom(
-                        //     backgroundColor: Theme.of(
-                        //       context,
-                        //     ).colorScheme.primary,
-                        //     foregroundColor: Theme.of(
-                        //       context,
-                        //     ).colorScheme.onPrimary,
-                        //   ),
-                        // ),
                       ],
                     ),
                   ),
@@ -297,7 +276,7 @@ class _ContainerDetailsContentState extends State<_ContainerDetailsContent> {
                   ),
                 ),
               ),
-              if (vm.container!.items.isEmpty)
+              if (vm.sortedItems.isEmpty)
                 SliverFillRemaining(
                   hasScrollBody: false,
                   child: Center(
@@ -312,22 +291,20 @@ class _ContainerDetailsContentState extends State<_ContainerDetailsContent> {
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   sliver: SliverGrid(
                     gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          crossAxisSpacing: 12,
-                          mainAxisSpacing: 12,
-                          childAspectRatio: 0.75,
-                        ),
+                    const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 12,
+                      mainAxisSpacing: 12,
+                      childAspectRatio: 0.75,
+                    ),
                     delegate: SliverChildBuilderDelegate((context, index) {
                       return ItemCard(
-                        item: vm
-                            .container!
-                            .items[index % vm.container!.items.length],
+                        item: vm.sortedItems[index],
                         containerId: vm.container!.id,
                         containerName: vm.container!.name,
                         containerLocationLabel: vm.container!.location.label,
                       );
-                    }, childCount: vm.container!.items.length * 5),
+                    }, childCount: vm.sortedItems.length),
                   ),
                 ),
               const SliverPadding(padding: EdgeInsets.only(bottom: 24)),
@@ -359,7 +336,7 @@ class _ContainerDetailsContentState extends State<_ContainerDetailsContent> {
             ),
           ],
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 8),
         Wrap(
           spacing: 8,
           runSpacing: 8,
@@ -393,11 +370,168 @@ class _ContainerDetailsContentState extends State<_ContainerDetailsContent> {
           ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
         ),
         TextButton.icon(
-          onPressed: () {}, // Implement sort
+          onPressed: () => _showSortModal(context),
           icon: const Icon(Icons.sort),
           label: const Text('Sort'),
         ),
       ],
+    );
+  }
+}
+
+class _SortBottomSheet extends StatefulWidget {
+  final SortBy currentSortBy;
+  final SortOrder currentSortOrder;
+  final Function(SortBy, SortOrder) onApply;
+
+  const _SortBottomSheet({
+    required this.currentSortBy,
+    required this.currentSortOrder,
+    required this.onApply,
+  });
+
+  @override
+  State<_SortBottomSheet> createState() => _SortBottomSheetState();
+}
+
+class _SortBottomSheetState extends State<_SortBottomSheet> {
+  late SortBy _selectedSortBy;
+  late SortOrder _selectedSortOrder;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedSortBy = widget.currentSortBy;
+    _selectedSortOrder = widget.currentSortOrder;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      child: SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(
+              child: Container(
+                margin: const EdgeInsets.only(top: 12, bottom: 8),
+                width: 32,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.onSurfaceVariant.withOpacity(0.4),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 8, 24, 16),
+              child: Text(
+                'Sort Items',
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Text(
+                'Sort by',
+                style: theme.textTheme.labelLarge?.copyWith(
+                  color: theme.colorScheme.primary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            RadioGroup<SortBy>(
+              groupValue: _selectedSortBy,
+                onChanged: (SortBy? value) => setState(() {
+                  _selectedSortBy = value!;
+                }),
+                child: Column(
+                  children: [
+                    ListTile(
+                      title: Text('Name'),
+                      leading: Radio<SortBy>(value: SortBy.name),
+                    ),
+                    ListTile(
+                      title: Text('Date Added'),
+                      leading: Radio<SortBy>(value: SortBy.dateAdded),
+                    ),
+                  ],
+                )
+            ),
+
+            const SizedBox(height: 16),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Text(
+                'Order',
+                style: theme.textTheme.labelLarge?.copyWith(
+                  color: theme.colorScheme.primary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+
+            RadioGroup<SortOrder>(
+              groupValue: _selectedSortOrder,
+                onChanged: (SortOrder? value) => setState(() {
+                  _selectedSortOrder = value!;
+                }), child: Column(
+              children: [
+                ListTile(
+                  title: const Text('Ascending'),
+                  subtitle: Text(
+                    _selectedSortBy == SortBy.name ? 'A to Z' : 'Oldest first',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  leading: Radio<SortOrder>(value: SortOrder.ascending),
+                ),
+                ListTile(
+                  title: const Text('Descending'),
+                  subtitle: Text(
+                    _selectedSortBy == SortBy.name ? 'Z to A' : 'Newest first',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  leading: Radio<SortOrder>(value: SortOrder.descending),
+                )
+
+                ]
+              )
+            ),
+
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+              child: FilledButton(
+                onPressed: () {
+                  widget.onApply(_selectedSortBy, _selectedSortOrder);
+                  Navigator.pop(context);
+                },
+                style: FilledButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text('Apply'),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
