@@ -65,12 +65,24 @@ class EditItemViewModel extends ChangeNotifier {
     String? photoUrl,
     required List<String> tags,
     required String containerId,
+    required Item originalItem
   }) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
+      if (containerId != originalItem.containerId) {
+        final success = await _moveItem(itemId: itemId,
+            fromContainerId: originalItem.containerId,
+            toContainerId: containerId);
+
+        if (!success) {
+          notifyListeners();
+          return false;
+        }
+      }
+
       final updatedItem = Item(
         id: itemId,
         name: name,
@@ -94,7 +106,7 @@ class EditItemViewModel extends ChangeNotifier {
     }
   }
 
-  Future<bool> moveItem({
+  Future<bool> _moveItem({
     required String itemId,
     required String fromContainerId,
     required String toContainerId,

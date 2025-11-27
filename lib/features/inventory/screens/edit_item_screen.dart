@@ -13,7 +13,7 @@ class EditItemScreen extends StatefulWidget {
   const EditItemScreen({
     super.key,
     required this.item,
-    required this.container
+    required this.container,
   });
 
   @override
@@ -91,6 +91,7 @@ class _EditItemScreenState extends State<EditItemScreen> {
       photoUrl: _photoUrl,
       tags: _tags,
       containerId: _container.id,
+      originalItem: widget.item,
     );
 
     if (success && mounted) {
@@ -112,33 +113,20 @@ class _EditItemScreenState extends State<EditItemScreen> {
 
     if (!mounted) return;
 
-    final selectedContainer = await showDialog<String>(
+    final selectedContainer = await showDialog<models.Container>(
       context: context,
-      builder: (context) => _ContainerSelectionDialog(
-        currentContainerId: _container.id,
-        viewModel: vm,
+      builder: (context) => ChangeNotifierProvider.value(
+        value: vm,
+        child: _ContainerSelectionDialog(currentContainerId: _container.id),
       ),
     );
 
     if (selectedContainer != null &&
-        selectedContainer != _container.id &&
+        selectedContainer.id != _container.id &&
         mounted) {
-      final success = await vm.moveItem(
-        itemId: widget.item.id,
-        fromContainerId: _container.id,
-        toContainerId: selectedContainer,
-      );
-
-      if (success && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Item moved successfully')),
-        );
-        Navigator.of(context).pop(true);
-      } else if (mounted && vm.error != null) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error: ${vm.error}')));
-      }
+      setState(() {
+        _container = selectedContainer;
+      });
     }
   }
 
@@ -454,12 +442,8 @@ class _EditItemScreenState extends State<EditItemScreen> {
 
 class _ContainerSelectionDialog extends StatefulWidget {
   final String currentContainerId;
-  final EditItemViewModel viewModel;
 
-  const _ContainerSelectionDialog({
-    required this.currentContainerId,
-    required this.viewModel,
-  });
+  const _ContainerSelectionDialog({required this.currentContainerId});
 
   @override
   State<_ContainerSelectionDialog> createState() =>
@@ -470,16 +454,27 @@ class _ContainerSelectionDialogState extends State<_ContainerSelectionDialog> {
   final TextEditingController _searchController = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+
+    _searchController.addListener(_onSearchChanged);
+  }
+
+  @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
+  }
+
+  void _onSearchChanged() {
+    final text = _searchController.text;
+    context.read<EditItemViewModel>().searchContainers(text);
   }
 
   @override
   Widget build(BuildContext context) {
     return Dialog(
       child: Container(
-        width: MediaQuery.of(context).size.width * 0.9,
         height: MediaQuery.of(context).size.height * 0.7,
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -501,14 +496,10 @@ class _ContainerSelectionDialogState extends State<_ContainerSelectionDialog> {
                         icon: const Icon(Icons.clear),
                         onPressed: () {
                           _searchController.clear();
-                          widget.viewModel.searchContainers('');
                         },
                       )
                     : null,
               ),
-              onChanged: (query) {
-                widget.viewModel.searchContainers(query);
-              },
             ),
             const SizedBox(height: 16),
             Expanded(
@@ -564,7 +555,7 @@ class _ContainerSelectionDialogState extends State<_ContainerSelectionDialog> {
                           '${container.itemCount} items',
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
-                        onTap: () => Navigator.of(context).pop(container.id),
+                        onTap: () => Navigator.of(context).pop(container),
                       );
                     },
                   );

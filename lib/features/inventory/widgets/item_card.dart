@@ -92,7 +92,7 @@ class ItemCard extends StatelessWidget {
                 Wrap(
                   spacing: 4,
                   runSpacing: 4,
-                  children: item.tags.take(3).map((tag) {
+                  children: item.tags.take(2).map((tag) {
                     return Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 6,
