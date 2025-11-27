@@ -11,12 +11,9 @@ class NavBar extends StatelessWidget {
     return ClipRRect(
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        // filter: ImageFilter.blur(),
         child: Consumer<NavigationViewModel>(
           builder: (context, vm, child) => NavigationBar(
-            backgroundColor: Colors.white.withAlpha(
-              200,
-            ),
-            elevation: 0,
             selectedIndex: vm.currentIndex,
             onDestinationSelected: (int index) => vm.setIndex(index),
             destinations: const [

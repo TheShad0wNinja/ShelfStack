@@ -5,8 +5,6 @@ import 'package:shelfstack/features/home/widgets/activity_row.dart';
 import 'package:shelfstack/data/models/container.dart' as models;
 import 'package:shelfstack/data/models/location.dart';
 
-import 'package:shelfstack/core/widgets/styled_app_bar.dart';
-
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
@@ -16,7 +14,7 @@ class HomeScreen extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: StyledAppBar(
+      appBar: AppBar(
         // height: 60,
         title: Center(
           child: Column(

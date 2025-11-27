@@ -57,6 +57,9 @@ class _ContainerScreenContentState extends State<_ContainerScreenContent> {
               decoration: const InputDecoration(
                 hintText: "Search Containers...",
                 prefixIcon: Icon(Icons.search),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(10)),
+                ),
               ),
             ),
           ),
@@ -69,7 +72,7 @@ class _ContainerScreenContentState extends State<_ContainerScreenContent> {
             itemCount: vm.containers.length,
             itemBuilder: (context, index) =>
                 ContainerRow(container: vm.containers[index]),
-            separatorBuilder: (context, index) => SizedBox(height: 5),
+            separatorBuilder: (context, index) => Divider(),
           ),
         ),
       ),

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:shelfstack/core/widgets/styled_app_bar.dart';
 
 class CreateContainerScreen extends StatefulWidget {
   const CreateContainerScreen({super.key});
@@ -61,7 +60,7 @@ class _CreateContainerScreenState extends State<CreateContainerScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: StyledAppBar(
+      appBar: AppBar(
         title: const Text('Create Container'),
         actions: [
           TextButton(onPressed: _createContainer, child: const Text('Save')),

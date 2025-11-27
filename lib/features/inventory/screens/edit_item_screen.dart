@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shelfstack/data/models/item.dart';
 import 'package:shelfstack/features/inventory/screens/container_details_screen.dart';
-import 'package:shelfstack/core/widgets/styled_app_bar.dart';
 
 class EditItemScreen extends StatefulWidget {
   final Item item;
@@ -66,7 +65,7 @@ class _EditItemScreenState extends State<EditItemScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: StyledAppBar(
+      appBar: AppBar(
         title: const Text('Edit Item'),
         actions: [
           TextButton(

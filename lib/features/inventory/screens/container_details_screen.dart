@@ -72,16 +72,16 @@ class _ContainerDetailsContentState extends State<_ContainerDetailsContent> {
           body: CustomScrollView(
             slivers: [
               SliverAppBar(
-                expandedHeight: 270,
+                expandedHeight: 280,
                 pinned: true,
                 stretch: true,
-                backgroundColor: Colors.white,
-                surfaceTintColor: Colors.white,
-                shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.vertical(
-                    bottom: Radius.circular(24),
-                  ),
-                ),
+                // backgroundColor: Colors.white,
+                // surfaceTintColor: ,
+                // shape: const RoundedRectangleBorder(
+                //   borderRadius: BorderRadius.vertical(
+                //     bottom: Radius.circular(24),
+                //   ),
+                // ),
                 leading: IconButton(
                   icon: const Icon(Icons.arrow_back),
                   onPressed: () => Navigator.of(context).pop(),

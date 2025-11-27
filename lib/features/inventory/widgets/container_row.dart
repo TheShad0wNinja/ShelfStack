@@ -14,7 +14,9 @@ class ContainerRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Card(
+    return Card.filled(
+      margin: const EdgeInsets.symmetric(),
+      color: Colors.transparent,
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () {
@@ -28,37 +30,46 @@ class ContainerRow extends StatelessWidget {
           );
         },
         child: Padding(
-          padding: const EdgeInsets.all(12.0),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Container(
-                width: 56,
-                height: 56,
+                width: 72, height: 72,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
-                  color: theme.colorScheme.surfaceContainerHighest,
+                  color: container.photoUrl == null
+                      ? theme.colorScheme.primaryContainer
+                      : null,
                   image: container.photoUrl != null
                       ? DecorationImage(
-                          image: NetworkImage(container.photoUrl!),
-                          fit: BoxFit.cover,
-                        )
+                    image: NetworkImage(container.photoUrl!),
+                    fit: BoxFit.cover,
+                  )
                       : null,
                 ),
                 child: container.photoUrl == null
                     ? Icon(
-                        Icons.inventory_2_outlined,
-                        size: 32,
-                        color: theme.colorScheme.onSurfaceVariant,
-                      )
+                  Icons.inventory_2_outlined,
+                  size: 28,
+                  color: theme.colorScheme.onPrimaryContainer,
+                )
                     : null,
               ),
               const SizedBox(width: 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(container.name, style: theme.textTheme.titleMedium),
+                    Text(
+                      container.name,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w500,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                     const SizedBox(height: 4),
                     Row(
                       children: [
@@ -70,7 +81,7 @@ class ContainerRow extends StatelessWidget {
                         const SizedBox(width: 4),
                         Text(
                           "${container.items.length} items",
-                          style: theme.textTheme.bodySmall?.copyWith(
+                          style: theme.textTheme.bodyMedium?.copyWith(
                             color: theme.colorScheme.onSurfaceVariant,
                           ),
                         ),
@@ -81,10 +92,14 @@ class ContainerRow extends StatelessWidget {
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
                         const SizedBox(width: 4),
-                        Text(
-                          container.location.label,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
+                        Flexible(
+                          child: Text(
+                            container.location.label,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ],
@@ -96,9 +111,11 @@ class ContainerRow extends StatelessWidget {
                   ],
                 ),
               ),
+              const SizedBox(width: 8),
               Icon(
                 Icons.chevron_right,
                 color: theme.colorScheme.onSurfaceVariant,
+                size: 24,
               ),
             ],
           ),
@@ -108,19 +125,23 @@ class ContainerRow extends StatelessWidget {
   }
 
   Widget _tagSections(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Wrap(
-      spacing: 8,
+      spacing: 6,
+      runSpacing: 6,
       children: container.tags.take(3).map((tag) {
         return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.secondaryContainer,
-            borderRadius: BorderRadius.circular(4),
+            color: theme.colorScheme.secondaryContainer,
+            borderRadius: BorderRadius.circular(8),
           ),
           child: Text(
             tag.toTitleCase(),
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSecondaryContainer,
+            style: theme.textTheme.labelMedium?.copyWith(
+              color: theme.colorScheme.onSecondaryContainer,
+              fontWeight: FontWeight.w500,
             ),
           ),
         );

@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shelfstack/core/theme/theme.dart';
 import 'package:shelfstack/features/inventory/screens/containers_screen.dart';
 import 'package:shelfstack/features/home/home_screen.dart';
 import 'package:shelfstack/features/map/map_screen.dart';
 import 'package:shelfstack/features/search/search_screen.dart';
 import 'package:shelfstack/features/settings/settings_screen.dart';
-import 'package:shelfstack/core/theme/main_theme.dart';
+
 import 'package:shelfstack/core/widgets/navbar.dart';
 import 'package:shelfstack/data/repositories/container_repository.dart';
 import 'package:shelfstack/data/repositories/container_repository_fake.dart';
@@ -43,7 +44,8 @@ class MyApp extends StatelessWidget {
           ),
         ),
         debugShowCheckedModeBanner: false,
-        theme: MainTheme.lightThemeData(),
+        theme: const MaterialTheme(TextTheme()).light(),
+        darkTheme: const MaterialTheme(TextTheme()).dark(),
       ),
     );
   }
