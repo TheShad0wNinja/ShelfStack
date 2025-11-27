@@ -26,6 +26,8 @@ class _ContainerScreenContent extends StatefulWidget {
 class _ContainerScreenContentState extends State<_ContainerScreenContent> {
   final TextEditingController _searchController = TextEditingController();
 
+  bool _isSearching = false;
+
   @override
   void initState() {
     super.initState();
@@ -43,35 +45,51 @@ class _ContainerScreenContentState extends State<_ContainerScreenContent> {
     context.read<ContainersScreenViewModel>().updateQuery(query);
   }
 
+  void _toggleSearch() {
+    setState(() {
+      _isSearching = !_isSearching;
+      if (!_isSearching) {
+        _searchController.clear();
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Containers'),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(60),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-            child: TextField(
-              controller: _searchController,
-              decoration: const InputDecoration(
-                hintText: "Search Containers...",
-                prefixIcon: Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(10)),
+        leading: _isSearching
+            ? IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: _toggleSearch,
+              )
+            : null,
+        title: _isSearching
+            ? TextField(
+                controller: _searchController,
+                autofocus: true,
+                decoration: const InputDecoration(
+                  hintText: "Search Containers...",
+                  border: InputBorder.none,
                 ),
-              ),
+              )
+            : const Text('Containers'),
+        actions: [
+          if (!_isSearching)
+            IconButton(
+              icon: const Icon(Icons.search),
+              onPressed: _toggleSearch,
             ),
-          ),
-        ),
+        ],
       ),
       body: Padding(
         padding: EdgeInsetsGeometry.symmetric(horizontal: 16, vertical: 10),
         child: Consumer<ContainersScreenViewModel>(
           builder: (context, vm, child) => ListView.separated(
             itemCount: vm.containers.length,
-            itemBuilder: (context, index) =>
-                ContainerRow(container: vm.containers[index]),
+            itemBuilder: (context, index) => ContainerRow(
+              container: vm.containers[index],
+            ),
             separatorBuilder: (context, index) => Divider(),
           ),
         ),
