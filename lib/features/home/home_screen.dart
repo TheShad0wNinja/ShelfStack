@@ -15,7 +15,6 @@ class HomeScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        // height: 60,
         title: Center(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
