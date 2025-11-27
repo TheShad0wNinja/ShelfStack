@@ -9,9 +9,9 @@ import 'package:shelfstack/features/settings/settings_screen.dart';
 
 import 'package:shelfstack/core/widgets/navbar.dart';
 import 'package:shelfstack/data/repositories/container_repository.dart';
-import 'package:shelfstack/data/repositories/container_repository_fake.dart';
+import 'package:shelfstack/data/database/container_repository_sqlite.dart';
 import 'package:shelfstack/data/repositories/item_repository.dart';
-import 'package:shelfstack/data/repositories/item_repository_fake.dart';
+import 'package:shelfstack/data/database/item_repository_sqlite.dart';
 import 'package:shelfstack/core/viewmodels/navigation_viewmodel.dart';
 
 class MyApp extends StatelessWidget {
@@ -30,8 +30,10 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => NavigationViewModel()),
-        Provider<ContainerRepository>(create: (_) => ContainerRepositoryFake()),
-        Provider<ItemRepository>(create: (_) => ItemRepositoryFake()),
+        Provider<ContainerRepository>(
+          create: (_) => ContainerRepositorySqlite(),
+        ),
+        Provider<ItemRepository>(create: (_) => ItemRepositorySqlite()),
       ],
       child: MaterialApp(
         title: 'ShelfStack',

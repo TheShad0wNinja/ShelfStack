@@ -249,16 +249,16 @@ class SearchResultCard extends StatelessWidget {
       elevation: 1,
       child: InkWell(
         onTap: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => ItemDetailsScreen(
-                item: item,
-                containerId: containerId,
-                containerName: containerName,
-                containerLocation: containerLocation,
-              ),
-            ),
-          );
+          // Navigator.of(context).push(
+          //   MaterialPageRoute(
+          //     // builder: (context) => ItemDetailsScreen(
+          //     //   item: item,
+          //     //   containerId: containerId,
+          //     //   containerName: containerName,
+          //     //   containerLocation: containerLocation,
+          //     // ),
+          //   ),
+          // );
         },
         borderRadius: BorderRadius.circular(10),
         child: Container(

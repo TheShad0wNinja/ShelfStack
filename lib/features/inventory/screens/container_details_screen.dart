@@ -42,11 +42,15 @@ class _ContainerDetailsContentState extends State<_ContainerDetailsContent> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback(
-      (_) => context.read<ContainerDetailsViewModel>().loadContainer(
-        widget.containerId,
-        context.read<ContainerRepository>(),
-        context.read<ItemRepository>(),
-      ),
+      (_) => _loadContainer(),
+    );
+  }
+
+  void _loadContainer() {
+    context.read<ContainerDetailsViewModel>().loadContainer(
+      widget.containerId,
+      context.read<ContainerRepository>(),
+      context.read<ItemRepository>(),
     );
   }
 
@@ -144,13 +148,14 @@ class _ContainerDetailsContentState extends State<_ContainerDetailsContent> {
                         );
 
                         if (result == true && context.mounted) {
-                          context
-                              .read<ContainerDetailsViewModel>()
-                              .loadContainer(
-                                vm.container!.id,
-                                context.read<ContainerRepository>(),
-                                context.read<ItemRepository>(),
-                              );
+                          _loadContainer();
+                          // context
+                          //     .read<ContainerDetailsViewModel>()
+                          //     .loadContainer(
+                          //       vm.container!.id,
+                          //       context.read<ContainerRepository>(),
+                          //       context.read<ItemRepository>(),
+                          //     );
                         }
                       } else if (value == 'delete') {
                         final confirm = await showDialog<bool>(
@@ -306,6 +311,7 @@ class _ContainerDetailsContentState extends State<_ContainerDetailsContent> {
                         containerId: vm.container!.id,
                         containerName: vm.container!.name,
                         containerLocationLabel: vm.container!.location.label,
+                        onUpdateItem: () => _loadContainer(),
                       );
                     }, childCount: vm.sortedItems.length),
                   ),

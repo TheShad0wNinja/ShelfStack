@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shelfstack/core/extensions/string_extensions.dart';
 import 'package:shelfstack/data/models/item.dart';
+import 'package:shelfstack/data/repositories/container_repository.dart';
+import 'package:shelfstack/data/repositories/item_repository.dart';
 import 'package:shelfstack/features/inventory/screens/item_details_screen.dart';
+import 'package:shelfstack/features/inventory/viewmodels/item_details_viewmodel.dart';
 
 class ItemCard extends StatelessWidget {
   final Item item;
   final String containerId;
   final String containerName;
   final String containerLocationLabel;
+  final void Function() onUpdateItem;
 
   const ItemCard({
     super.key,
@@ -15,6 +20,7 @@ class ItemCard extends StatelessWidget {
     required this.containerId,
     required this.containerName,
     required this.containerLocationLabel,
+    required this.onUpdateItem,
   });
 
   @override
@@ -25,17 +31,23 @@ class ItemCard extends StatelessWidget {
     return Card(
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: () {
-          Navigator.of(context).push(
+        onTap: () async {
+          final result = await Navigator.of(context).push<bool>(
             MaterialPageRoute(
-              builder: (context) => ItemDetailsScreen(
-                item: item,
-                containerId: containerId,
-                containerName: containerName,
-                containerLocation: containerLocationLabel,
+              builder: (context) => ChangeNotifierProvider(
+                create: (BuildContext context) => ItemDetailsViewModel(
+                  item.id,
+                  context.read<ContainerRepository>(),
+                  context.read<ItemRepository>()
+                ),
+                child: ItemDetailsScreen()
               ),
             ),
           );
+
+          if (result == true) {
+            onUpdateItem();
+          }
         },
         child: Padding(
           padding: const EdgeInsets.all(8.0),

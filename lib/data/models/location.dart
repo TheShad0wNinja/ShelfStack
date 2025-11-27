@@ -29,4 +29,22 @@ class Location {
   String toString() {
     return 'Location{latitude: $latitude, longitude: $longitude, label: $label, address: $address}';
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'latitude': latitude,
+      'longitude': longitude,
+      'label': label,
+      'address': address,
+    };
+  }
+
+  factory Location.fromJson(Map<String, dynamic> json) {
+    return Location(
+      latitude: json['latitude'] as double,
+      longitude: json['longitude'] as double,
+      label: json['label'] as String,
+      address: json['address'] as String,
+    );
+  }
 }

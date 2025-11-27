@@ -50,4 +50,40 @@ class Container {
   String toString() {
     return 'Container{id: $id, name: $name, photoUrl: $photoUrl, createdAt: $createdAt, updatedAt: $updatedAt, items: $items, tags: $tags, location: $location}';
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'photo_url': photoUrl,
+      'created_at': createdAt.toIso8601String(),
+      'updated_at': updatedAt.toIso8601String(),
+      'location_latitude': location.latitude,
+      'location_longitude': location.longitude,
+      'location_label': location.label,
+      'location_address': location.address,
+    };
+  }
+
+  factory Container.fromJson(
+    Map<String, dynamic> json,
+    List<String> tags,
+    List<Item> items,
+  ) {
+    return Container(
+      id: json['id'] as String,
+      name: json['name'] as String,
+      photoUrl: json['photo_url'] as String?,
+      createdAt: DateTime.parse(json['created_at'] as String),
+      updatedAt: DateTime.parse(json['updated_at'] as String),
+      items: items,
+      location: Location(
+        latitude: json['location_latitude'] as double,
+        longitude: json['location_longitude'] as double,
+        label: json['location_label'] as String,
+        address: json['location_address'] as String,
+      ),
+      tags: tags,
+    );
+  }
 }

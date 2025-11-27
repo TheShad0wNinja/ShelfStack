@@ -44,4 +44,30 @@ class Item {
       updatedAt: updatedAt ?? this.updatedAt,
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'description': description,
+      'photo_url': photoUrl,
+      'container_id': containerId,
+      'created_at': createdAt.toIso8601String(),
+      'updated_at': updatedAt.toIso8601String(),
+    };
+  }
+
+  factory Item.fromJson(Map<String, dynamic> json, List<String> tags) {
+    return Item(
+      id: json['id'] as String,
+      name: json['name'] as String,
+      description: json['description'] as String?,
+      photoUrl: json['photo_url'] as String?,
+      tags: tags,
+      containerId: json['container_id'] as String,
+      externalDocumentUrl: null, // Will be loaded separately if needed
+      createdAt: DateTime.parse(json['created_at'] as String),
+      updatedAt: DateTime.parse(json['updated_at'] as String),
+    );
+  }
 }
