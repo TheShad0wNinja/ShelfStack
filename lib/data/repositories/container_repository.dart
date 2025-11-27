@@ -15,4 +15,10 @@ abstract class ContainerRepository {
   Future<List<Item>> searchItems(String query);
 
   Future<List<Container>> searchContainers(String query);
+
+  Future<int> getTotalContainerCount();
+
+  Future<int> getTotalItemCount();
+
+  Future<List<Container>> fetchRecentContainers(int amount);
 }

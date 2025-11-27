@@ -250,4 +250,21 @@ class ContainerRepositoryFake implements ContainerRepository {
       _containers[index] = container;
     }
   }
+
+  @override
+  Future<int> getTotalContainerCount() async {
+    return _containers.length;
+  }
+
+  @override
+  Future<int> getTotalItemCount() async {
+    return _containers.fold<int>(0, (acc, container) => acc + container.items.length);
+  }
+
+  @override
+  Future<List<Container>> fetchRecentContainers(int amount) async {
+    final sortContainers = List.of(_containers);
+    sortContainers.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+    return sortContainers.take(amount).toList();
+  }
 }

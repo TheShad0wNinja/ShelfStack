@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import 'package:shelfstack/data/repositories/container_repository.dart';
+import 'package:shelfstack/features/home/home_screen_view_model.dart';
 import 'package:shelfstack/features/inventory/screens/create_container_screen.dart';
 import 'package:shelfstack/features/home/widgets/activity_row.dart';
 import 'package:shelfstack/data/models/container.dart' as models;
@@ -13,145 +16,99 @@ class HomeScreen extends StatelessWidget {
     final formattedDate = DateFormat('EEEE, MMMM d').format(DateTime.now());
     final theme = Theme.of(context);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Center(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text("Good Evening, Mohey", style: theme.textTheme.titleMedium),
-              Text(
-                formattedDate,
-                style: theme.textTheme.titleSmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                  fontWeight: FontWeight.w500,
+    return ChangeNotifierProvider(
+      create: (BuildContext context) =>
+          HomeScreenViewModel(context.read<ContainerRepository>()),
+      child: Scaffold(
+        appBar: AppBar(
+          title: Center(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text("Good Evening, Mohey", style: theme.textTheme.titleMedium),
+                Text(
+                  formattedDate,
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
-      ),
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 100),
-        child: FloatingActionButton.extended(
-          onPressed: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => const CreateContainerScreen(),
-              ),
-            );
-          },
-          icon: const Icon(Icons.add),
-          label: const Text('Create Container'),
-        ),
-      ),
-      body: SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 15, 16, 100),
-          child: Column(
-            children: [
-              Row(
+        // floatingActionButton: Padding(
+        //   padding: const EdgeInsets.only(bottom: 100),
+        //   child: FloatingActionButton.extended(
+        //     onPressed: () {
+        //       Navigator.of(context).push(
+        //         MaterialPageRoute(
+        //           builder: (context) => const CreateContainerScreen(),
+        //         ),
+        //       );
+        //     },
+        //     icon: const Icon(Icons.add),
+        //     label: const Text('Create Container'),
+        //   ),
+        // ),
+        body: Consumer<HomeScreenViewModel>(
+          builder: (context, vm, child) => SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 15, 16, 100),
+              child: Column(
                 children: [
-                  Expanded(
-                    child: _buildStatCard(
-                      context,
-                      icon: Icons.inventory_2_outlined,
-                      label: "Total Containers",
-                      value: "12",
-                      color: theme.colorScheme.primary,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: _buildStatCard(
-                      context,
-                      icon: Icons.list_alt_outlined,
-                      label: "Total Items",
-                      value: "45",
-                      color: theme.colorScheme.tertiary,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text("Quick Actions", style: theme.textTheme.titleSmall),
-              ),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildQuickActionCard(
-                      context,
-                      icon: Icons.qr_code_outlined,
-                      label: "Scan QR",
-                      color: theme.colorScheme.primary,
-                      onTap: () {},
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: _buildQuickActionCard(
-                      context,
-                      icon: Icons.add_circle_outline,
-                      label: "Add Item",
-                      color: theme.colorScheme.tertiary,
-                      onTap: () {},
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: _buildQuickActionCard(
-                      context,
-                      icon: Icons.search,
-                      label: "Search All",
-                      color: theme.colorScheme.secondary,
-                      onTap: () {},
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  "Recent Activities",
-                  style: theme.textTheme.titleSmall,
-                ),
-              ),
-              const SizedBox(height: 10),
-              ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                padding: EdgeInsets.zero,
-                itemCount: 3,
-                itemBuilder: (context, index) {
-                  final container = models.Container(
-                    id: 'static-$index',
-                    name: 'Static Container $index',
-                    tags: ['static', 'demo'],
-                    location: Location(
-                      latitude: 0,
-                      longitude: 0,
-                      label: 'Static Location',
-                      address: '123 Static St',
-                    ),
-                    createdAt: DateTime.now(),
-                    updatedAt: DateTime.now(),
-                    items: [],
-                  );
-                  return Column(
+                  Row(
                     children: [
-                      ActivityRow(container: container),
-                      if (index != 2) const SizedBox(height: 10),
+                      Expanded(
+                        child: _buildStatCard(
+                          context,
+                          icon: Icons.inventory_2_outlined,
+                          label: "Total Containers",
+                          value: vm.totalContainers,
+                          color: theme.colorScheme.primary,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: _buildStatCard(
+                          context,
+                          icon: Icons.list_alt_outlined,
+                          label: "Total Items",
+                          value: vm.totalItems,
+                          color: theme.colorScheme.tertiary,
+                        ),
+                      ),
                     ],
-                  );
-                },
+                  ),
+                  const SizedBox(height: 20),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      "Recent Activities",
+                      style: theme.textTheme.titleMedium,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  vm.isLoadingContainers
+                      ? Padding(
+                          padding: const EdgeInsets.only(top: 20),
+                          child: const CircularProgressIndicator(),
+                        )
+                      : ListView.separated(
+                          itemBuilder: (context, index) => ActivityRow(
+                            container: vm.recentContainers[index],
+                          ),
+                          separatorBuilder: (BuildContext context, int index) =>
+                              const Divider(height: 20),
+                          itemCount: vm.recentContainers.length,
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                        ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),
@@ -162,9 +119,12 @@ class HomeScreen extends StatelessWidget {
     BuildContext context, {
     required IconData icon,
     required String label,
-    required String value,
+    required int value,
     required Color color,
+    bool isLoading = false,
   }) {
+    final textTheme = Theme.of(context).textTheme;
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -182,13 +142,20 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
-            Text(
-              label,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ),
-            Text(value, style: Theme.of(context).textTheme.titleLarge),
+            Text(label, style: textTheme.bodySmall),
+            if (isLoading) const SizedBox(height: 8),
+            isLoading
+                ? SizedBox(
+                    height: textTheme.titleLarge?.fontSize,
+                    width: textTheme.titleLarge?.fontSize,
+                    child: const CircularProgressIndicator(),
+                  )
+                : Text(
+                    value.toString(),
+                    style: textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
           ],
         ),
       ),

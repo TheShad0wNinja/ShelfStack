@@ -12,6 +12,10 @@ class ActivityRow extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Card(
+      margin: const EdgeInsets.symmetric(),
+      elevation: 0,
+      clipBehavior: Clip.antiAlias,
+      color: Colors.transparent,
       child: InkWell(
         onTap: () {
           Navigator.of(context).push(
@@ -21,39 +25,50 @@ class ActivityRow extends StatelessWidget {
             ),
           );
         },
-        borderRadius: BorderRadius.circular(12),
         child: Padding(
-          padding: const EdgeInsets.all(12.0),
+          padding: const EdgeInsets.all(4),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Container(
-                width: 56,
-                height: 56,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  color: theme.colorScheme.surfaceContainerHighest,
-                  image: container.photoUrl != null
-                      ? DecorationImage(
-                          image: NetworkImage(container.photoUrl!),
-                          fit: BoxFit.cover,
-                        )
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    color: container.photoUrl == null
+                        ? theme.colorScheme.primaryContainer
+                        : null,
+                    image: container.photoUrl != null
+                        ? DecorationImage(
+                      image: NetworkImage(container.photoUrl!),
+                      fit: BoxFit.cover,
+                    )
+                        : null,
+                  ),
+                  child: container.photoUrl == null
+                      ? Icon(
+                    Icons.inventory_2_outlined,
+                    size: 28,
+                    color: theme.colorScheme.onPrimaryContainer,
+                  )
                       : null,
                 ),
-                child: container.photoUrl == null
-                    ? Icon(
-                        Icons.inventory_2_outlined,
-                        size: 32,
-                        color: theme.colorScheme.onSurfaceVariant,
-                      )
-                    : null,
               ),
               const SizedBox(width: 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(container.name, style: theme.textTheme.titleMedium),
+                    Text(
+                      container.name,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w500,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                     const SizedBox(height: 4),
                     Row(
                       children: [
@@ -65,21 +80,25 @@ class ActivityRow extends StatelessWidget {
                         const SizedBox(width: 4),
                         Text(
                           "${container.items.length} items",
-                          style: theme.textTheme.bodySmall?.copyWith(
+                          style: theme.textTheme.bodyMedium?.copyWith(
                             color: theme.colorScheme.onSurfaceVariant,
                           ),
                         ),
-                        const SizedBox(width: 16),
+                        const SizedBox(width: 12),
                         Icon(
                           Icons.location_on_outlined,
                           color: theme.colorScheme.onSurfaceVariant,
                           size: 16,
                         ),
                         const SizedBox(width: 4),
-                        Text(
-                          container.location.label,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
+                        Flexible(
+                          child: Text(
+                            container.location.label,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ],
@@ -87,11 +106,8 @@ class ActivityRow extends StatelessWidget {
                   ],
                 ),
               ),
-              IconButton(
-                onPressed: () {},
-                icon: const Icon(Icons.qr_code_scanner_outlined),
-                color: theme.colorScheme.primary,
-              ),
+              const SizedBox(width: 8),
+              const Icon(Icons.chevron_right),
             ],
           ),
         ),
