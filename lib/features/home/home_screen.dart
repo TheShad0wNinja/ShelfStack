@@ -18,7 +18,6 @@ class HomeScreen extends StatelessWidget {
     final formattedDate = DateFormat('EEEE, MMMM d').format(DateTime.now());
     final theme = Theme.of(context);
 
-    // Determine greeting based on time of day
     final hour = DateTime.now().hour;
     final greeting = hour < 12
         ? 'Good Morning'
@@ -132,9 +131,6 @@ class HomeScreen extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Card(
-      elevation: 0,
-      color: theme.colorScheme.surfaceContainerLow,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(

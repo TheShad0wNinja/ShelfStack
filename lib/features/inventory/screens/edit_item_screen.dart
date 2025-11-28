@@ -289,7 +289,13 @@ class _EditItemScreenState extends State<EditItemScreen> {
               children: [
                 Expanded(
                   child: FilledButton.icon(
-                    onPressed: () {},
+                    onPressed: () {
+                      setState(() {
+                        _photoUrl =
+                            'https://picsum.photos/seed/${DateTime.now().millisecondsSinceEpoch}/400/400';
+                        _hasUnsavedChanges = true;
+                      });
+                    },
                     icon: const Icon(Icons.camera_alt),
                     label: const Text('Take Photo'),
                   ),
@@ -297,13 +303,38 @@ class _EditItemScreenState extends State<EditItemScreen> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: OutlinedButton.icon(
-                    onPressed: () {},
+                    onPressed: () {
+                      setState(() {
+                        _photoUrl =
+                            'https://picsum.photos/seed/${DateTime.now().millisecondsSinceEpoch + 1}/400/400';
+                        _hasUnsavedChanges = true;
+                      });
+                    },
                     icon: const Icon(Icons.photo_library_outlined),
                     label: const Text('Choose'),
                   ),
                 ),
               ],
             ),
+            if (_photoUrl != null) ...[
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: TextButton.icon(
+                  onPressed: () {
+                    setState(() {
+                      _photoUrl = null;
+                      _hasUnsavedChanges = true;
+                    });
+                  },
+                  icon: const Icon(Icons.delete_outline),
+                  label: const Text('Remove Photo'),
+                  style: TextButton.styleFrom(
+                    foregroundColor: Theme.of(context).colorScheme.error,
+                  ),
+                ),
+              ),
+            ],
           ],
         ),
       ),

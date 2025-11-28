@@ -12,6 +12,7 @@ import 'package:shelfstack/features/inventory/viewmodels/add_item_viewmodel.dart
 import 'package:shelfstack/features/inventory/viewmodels/container_details_viewmodel.dart';
 import 'package:shelfstack/features/inventory/viewmodels/container_edit_viewmodel.dart';
 import 'package:shelfstack/features/inventory/widgets/item_card.dart';
+import 'package:shelfstack/features/inventory/widgets/qr_code_dialog.dart';
 
 class ContainerDetailsScreen extends StatelessWidget {
   final String containerId;
@@ -41,9 +42,7 @@ class _ContainerDetailsContentState extends State<_ContainerDetailsContent> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback(
-      (_) => _loadContainer(),
-    );
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadContainer());
   }
 
   void _loadContainer() {
@@ -132,7 +131,15 @@ class _ContainerDetailsContentState extends State<_ContainerDetailsContent> {
                   PopupMenuButton<String>(
                     icon: const Icon(Icons.more_vert, color: Colors.black),
                     onSelected: (value) async {
-                      if (value == 'share') {
+                      if (value == 'qr_code') {
+                        showDialog(
+                          context: context,
+                          builder: (context) => QrCodeDialog(
+                            containerId: vm.container!.id,
+                            containerName: vm.container!.name,
+                          ),
+                        );
+                      } else if (value == 'share') {
                         // Implement share functionality
                       } else if (value == 'edit') {
                         final result = await Navigator.of(context).push(
@@ -194,6 +201,16 @@ class _ContainerDetailsContentState extends State<_ContainerDetailsContent> {
                     },
                     itemBuilder: (BuildContext context) {
                       return [
+                        const PopupMenuItem<String>(
+                          value: 'qr_code',
+                          child: Row(
+                            children: [
+                              Icon(Icons.qr_code_2),
+                              SizedBox(width: 8),
+                              Text('QR Code'),
+                            ],
+                          ),
+                        ),
                         const PopupMenuItem<String>(
                           value: 'share',
                           child: Row(
