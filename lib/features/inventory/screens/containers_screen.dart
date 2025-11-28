@@ -76,7 +76,7 @@ class _ContainerScreenContentState extends State<_ContainerScreenContent> {
                   border: InputBorder.none,
                 ),
               )
-            : const Text('Containers'),
+            : Text('Containers', style: Theme.of(context).textTheme.headlineSmall),
         actions: [
           if (!_isSearching)
             IconButton(
