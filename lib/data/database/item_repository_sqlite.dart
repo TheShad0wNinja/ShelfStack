@@ -60,6 +60,18 @@ class ItemRepositorySqlite implements ItemRepository {
     return Item.fromJson(itemMap, tags);
   }
 
+  Future<void> _updateContainerTimestamp(
+    Transaction txn,
+    String containerId,
+  ) async {
+    await txn.update(
+      'containers',
+      {'updated_at': DateTime.now().toIso8601String()},
+      where: 'id = ?',
+      whereArgs: [containerId],
+    );
+  }
+
   @override
   Future createItem(Item item) async {
     final db = await _dbHelper.database;
@@ -72,6 +84,9 @@ class ItemRepositorySqlite implements ItemRepository {
       for (final tag in item.tags) {
         await txn.insert('item_tags', {'item_id': item.id, 'tag': tag});
       }
+
+      // Update container timestamp
+      await _updateContainerTimestamp(txn, item.containerId);
     });
     _streamController.add(null);
   }
@@ -96,6 +111,9 @@ class ItemRepositorySqlite implements ItemRepository {
       for (final tag in item.tags) {
         await txn.insert('item_tags', {'item_id': item.id, 'tag': tag});
       }
+
+      // Update container timestamp
+      await _updateContainerTimestamp(txn, item.containerId);
     });
     _streamController.add(null);
   }
@@ -103,7 +121,26 @@ class ItemRepositorySqlite implements ItemRepository {
   @override
   Future deleteItem(String id) async {
     final db = await _dbHelper.database;
-    await db.delete('items', where: 'id = ?', whereArgs: [id]);
+
+    await db.transaction((txn) async {
+      // Get item to find container_id before deleting
+      final itemMaps = await txn.query(
+        'items',
+        columns: ['container_id'],
+        where: 'id = ?',
+        whereArgs: [id],
+      );
+
+      if (itemMaps.isNotEmpty) {
+        final containerId = itemMaps.first['container_id'] as String;
+
+        // Delete item
+        await txn.delete('items', where: 'id = ?', whereArgs: [id]);
+
+        // Update container timestamp
+        await _updateContainerTimestamp(txn, containerId);
+      }
+    });
     _streamController.add(null);
   }
 
@@ -209,27 +246,32 @@ class ItemRepositorySqlite implements ItemRepository {
   Future assignItemToContainer(String itemId, String containerId) async {
     final db = await _dbHelper.database;
 
-    // Verify container exists
-    final containerMaps = await db.query(
-      'containers',
-      where: 'id = ?',
-      whereArgs: [containerId],
-    );
+    await db.transaction((txn) async {
+      // Verify container exists
+      final containerMaps = await txn.query(
+        'containers',
+        where: 'id = ?',
+        whereArgs: [containerId],
+      );
 
-    if (containerMaps.isEmpty) {
-      throw Exception('Container not found');
-    }
+      if (containerMaps.isEmpty) {
+        throw Exception('Container not found');
+      }
 
-    // Update item's container_id
-    await db.update(
-      'items',
-      {
-        'container_id': containerId,
-        'updated_at': DateTime.now().toIso8601String(),
-      },
-      where: 'id = ?',
-      whereArgs: [itemId],
-    );
+      // Update item's container_id
+      await txn.update(
+        'items',
+        {
+          'container_id': containerId,
+          'updated_at': DateTime.now().toIso8601String(),
+        },
+        where: 'id = ?',
+        whereArgs: [itemId],
+      );
+
+      // Update container timestamp
+      await _updateContainerTimestamp(txn, containerId);
+    });
 
     _streamController.add(null);
   }
@@ -242,38 +284,46 @@ class ItemRepositorySqlite implements ItemRepository {
   ) async {
     final db = await _dbHelper.database;
 
-    // Verify item exists and is in the source container
-    final itemMaps = await db.query(
-      'items',
-      where: 'id = ? AND container_id = ?',
-      whereArgs: [itemId, fromContainerId],
-    );
+    await db.transaction((txn) async {
+      // Verify item exists and is in the source container
+      final itemMaps = await txn.query(
+        'items',
+        where: 'id = ? AND container_id = ?',
+        whereArgs: [itemId, fromContainerId],
+      );
 
-    if (itemMaps.isEmpty) {
-      throw Exception('Item not found in source container');
-    }
+      if (itemMaps.isEmpty) {
+        throw Exception('Item not found in source container');
+      }
 
-    // Verify destination container exists
-    final containerMaps = await db.query(
-      'containers',
-      where: 'id = ?',
-      whereArgs: [toContainerId],
-    );
+      // Verify destination container exists
+      final containerMaps = await txn.query(
+        'containers',
+        where: 'id = ?',
+        whereArgs: [toContainerId],
+      );
 
-    if (containerMaps.isEmpty) {
-      throw Exception('Destination container not found');
-    }
+      if (containerMaps.isEmpty) {
+        throw Exception('Destination container not found');
+      }
 
-    // Move item
-    await db.update(
-      'items',
-      {
-        'container_id': toContainerId,
-        'updated_at': DateTime.now().toIso8601String(),
-      },
-      where: 'id = ?',
-      whereArgs: [itemId],
-    );
+      // Move item
+      await txn.update(
+        'items',
+        {
+          'container_id': toContainerId,
+          'updated_at': DateTime.now().toIso8601String(),
+        },
+        where: 'id = ?',
+        whereArgs: [itemId],
+      );
+
+      // Update source container timestamp
+      await _updateContainerTimestamp(txn, fromContainerId);
+
+      // Update destination container timestamp
+      await _updateContainerTimestamp(txn, toContainerId);
+    });
 
     _streamController.add(null);
   }

@@ -108,8 +108,8 @@ class _ContainerDetailsContentState extends State<_ContainerDetailsContent> {
                 ),
                 actions: [
                   IconButton(
-                    onPressed: () {
-                      Navigator.of(context).push(
+                    onPressed: () async {
+                      final updated = await Navigator.of(context).push<bool>(
                         MaterialPageRoute(
                           builder: (context) => ChangeNotifierProvider(
                             create: (context) => AddItemViewModel(),
@@ -122,6 +122,9 @@ class _ContainerDetailsContentState extends State<_ContainerDetailsContent> {
                           ),
                         ),
                       );
+                      if (updated == true) {
+                        _loadContainer();
+                      }
                     },
                     icon: const Icon(Icons.add),
                     color: Colors.black,
@@ -149,13 +152,6 @@ class _ContainerDetailsContentState extends State<_ContainerDetailsContent> {
 
                         if (result == true && context.mounted) {
                           _loadContainer();
-                          // context
-                          //     .read<ContainerDetailsViewModel>()
-                          //     .loadContainer(
-                          //       vm.container!.id,
-                          //       context.read<ContainerRepository>(),
-                          //       context.read<ItemRepository>(),
-                          //     );
                         }
                       } else if (value == 'delete') {
                         final confirm = await showDialog<bool>(

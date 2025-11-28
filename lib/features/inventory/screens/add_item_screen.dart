@@ -1,94 +1,160 @@
 import 'package:flutter/material.dart';
-
 import 'package:provider/provider.dart';
+import 'package:shelfstack/data/models/container.dart' as models;
 import 'package:shelfstack/data/repositories/container_repository.dart';
+import 'package:shelfstack/data/repositories/item_repository.dart';
 import 'package:shelfstack/features/inventory/viewmodels/add_item_viewmodel.dart';
+import 'package:shelfstack/features/inventory/widgets/container_selection_dialog.dart';
 
-class AddItemScreen extends StatefulWidget {
-  final String containerId;
-  final String containerLocationLabel;
-  final String containerName;
+class AddItemScreen extends StatelessWidget {
+  final String? containerId;
+  final String? containerLocationLabel;
+  final String? containerName;
 
   const AddItemScreen({
     super.key,
-    required this.containerId,
-    required this.containerLocationLabel,
-    required this.containerName,
+    this.containerId,
+    this.containerLocationLabel,
+    this.containerName,
   });
 
   @override
-  State createState() => _AddItemScreenState();
+  Widget build(BuildContext context) {
+    return ChangeNotifierProvider(
+      create: (_) {
+        final vm = AddItemViewModel();
+        if (containerId != null) {
+          vm.loadContainer(containerId!, context.read<ContainerRepository>());
+        }
+        return vm;
+      },
+      child: const _AddItemScreenContent(),
+    );
+  }
 }
 
-class _AddItemScreenState extends State<AddItemScreen> {
-  ThemeData get theme => Theme.of(context);
+class _AddItemScreenContent extends StatefulWidget {
+  const _AddItemScreenContent();
+
+  @override
+  State<_AddItemScreenContent> createState() => _AddItemScreenContentState();
+}
+
+class _AddItemScreenContentState extends State<_AddItemScreenContent> {
+  final _tagController = TextEditingController();
+
+  @override
+  void dispose() {
+    _tagController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _showContainerSelectionDialog() async {
+    final vm = context.read<AddItemViewModel>();
+    final selectedContainer = await showDialog<models.Container>(
+      context: context,
+      builder: (context) => ContainerSelectionDialog(
+        currentContainerId: vm.selectedContainer?.id,
+      ),
+    );
+
+    if (selectedContainer != null && mounted) {
+      vm.setContainer(selectedContainer);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Add Item'),
-        actions: [
-          TextButton(
-            onPressed: () async {
-              final success = await context.read<AddItemViewModel>().saveItem(
-                widget.containerId,
-                context.read<ContainerRepository>(),
-              );
-              if (success && mounted) {
-                Navigator.of(context).pop();
-              }
-            },
-            child: const Text('Save'),
-          ),
-        ],
-      ),
-      body: Consumer<AddItemViewModel>(
-        builder: (context, vm, child) {
-          if (vm.isLoading) {
-            return const Center(child: CircularProgressIndicator());
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        print("didPop: $didPop");
+        print("result: $result");
+        if (!didPop) {
+          final shouldPop = await _confirmDiscard();
+          if (shouldPop && mounted) {
+            Navigator.of(context).pop(false);
           }
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                if (vm.error != null)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: Text(
-                      vm.error!,
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.error,
-                      ),
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Add Item'),
+          actions: [
+            IconButton(
+              onPressed: () async {
+                final vm = context.read<AddItemViewModel>();
+                final success = await vm.save(context.read<ItemRepository>());
+                if (success && mounted) {
+                  Navigator.of(context).pop(true);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Item added successfully')),
+                  );
+                } else if (mounted && vm.error != null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(vm.error!),
+                      backgroundColor: Theme.of(context).colorScheme.error,
                     ),
-                  ),
-                _buildNameSection(vm),
-                const SizedBox(height: 24),
-                _buildDescriptionSection(vm),
-                const SizedBox(height: 24),
-                _buildTagsSection(vm),
-              ],
+                  );
+                }
+              },
+              icon: const Icon(Icons.save),
+              tooltip: 'Save',
             ),
-          );
-        },
+          ],
+        ),
+        body: Consumer<AddItemViewModel>(
+          builder: (context, vm, child) {
+            if (vm.isLoading) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _buildNameDescriptionSection(vm),
+                  const SizedBox(height: 24),
+                  _buildPhotoSection(context),
+                  const SizedBox(height: 24),
+                  _buildTagsSection(vm),
+                  const SizedBox(height: 24),
+                  _buildStoredInSection(context, vm),
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }
 
-  Widget _buildNameSection(AddItemViewModel vm) {
+  Widget _buildNameDescriptionSection(AddItemViewModel vm) {
     return Card(
+      elevation: 0,
+      color: Theme.of(context).colorScheme.surfaceContainer,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Item Name', style: Theme.of(context).textTheme.titleMedium),
+            Text('Details', style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 16),
             TextField(
               onChanged: vm.updateName,
               decoration: const InputDecoration(
                 labelText: 'Name',
-                hintText: 'Enter item name',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              onChanged: vm.updateDescription,
+              maxLines: 3,
+              decoration: const InputDecoration(
+                labelText: 'Description',
+                border: OutlineInputBorder(),
               ),
             ),
           ],
@@ -97,22 +163,66 @@ class _AddItemScreenState extends State<AddItemScreen> {
     );
   }
 
-  Widget _buildDescriptionSection(AddItemViewModel vm) {
+  Widget _buildPhotoSection(BuildContext context) {
     return Card(
+      elevation: 0,
+      color: Theme.of(context).colorScheme.surfaceContainer,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Description', style: Theme.of(context).textTheme.titleMedium),
+            Text('Item Photo', style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 16),
-            TextField(
-              onChanged: vm.updateDescription,
-              maxLines: 3,
-              decoration: const InputDecoration(
-                labelText: 'Description',
-                hintText: 'Enter item description',
+            Container(
+              width: double.infinity,
+              height: 200,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.outlineVariant,
+                ),
+                color: Theme.of(context).colorScheme.surface,
               ),
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.add_photo_alternate_outlined,
+                      size: 48,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'No Photo',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: FilledButton.icon(
+                    onPressed: () {},
+                    icon: const Icon(Icons.camera_alt),
+                    label: const Text('Take Photo'),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () {},
+                    icon: const Icon(Icons.photo_library_outlined),
+                    label: const Text('Choose'),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -121,8 +231,9 @@ class _AddItemScreenState extends State<AddItemScreen> {
   }
 
   Widget _buildTagsSection(AddItemViewModel vm) {
-    final tagController = TextEditingController();
     return Card(
+      elevation: 0,
+      color: Theme.of(context).colorScheme.surfaceContainer,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -134,18 +245,19 @@ class _AddItemScreenState extends State<AddItemScreen> {
               children: [
                 Expanded(
                   child: TextField(
-                    controller: tagController,
+                    controller: _tagController,
                     onSubmitted: (value) {
                       vm.addTag(value);
-                      tagController.clear();
+                      _tagController.clear();
                     },
                     decoration: InputDecoration(
                       labelText: 'Add Tag',
                       hintText: 'Type a tag...',
+                      border: const OutlineInputBorder(),
                       suffixIcon: IconButton(
                         onPressed: () {
-                          vm.addTag(tagController.text);
-                          tagController.clear();
+                          vm.addTag(_tagController.text);
+                          _tagController.clear();
                         },
                         icon: const Icon(Icons.add),
                       ),
@@ -171,5 +283,128 @@ class _AddItemScreenState extends State<AddItemScreen> {
         ),
       ),
     );
+  }
+
+  Widget _buildStoredInSection(BuildContext context, AddItemViewModel vm) {
+    return Card(
+      elevation: 0,
+      color: Theme.of(context).colorScheme.surfaceContainer,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Stored In', style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 16),
+            if (vm.selectedContainer != null)
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surface,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: Theme.of(context).colorScheme.outlineVariant,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.primaryContainer,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        Icons.inventory_2_outlined,
+                        color: Theme.of(context).colorScheme.onPrimaryContainer,
+                        size: 24,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            vm.selectedContainer!.name,
+                            style: Theme.of(context).textTheme.titleSmall,
+                          ),
+                          Text(
+                            vm.selectedContainer!.location.label,
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
+                                ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            else
+              Container(
+                padding: const EdgeInsets.all(16),
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surface,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: Theme.of(context).colorScheme.outlineVariant,
+                    style: BorderStyle.solid,
+                  ),
+                ),
+                child: Center(
+                  child: Text(
+                    'No container selected',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+              ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
+                onPressed: _showContainerSelectionDialog,
+                child: Text(
+                  vm.selectedContainer == null
+                      ? 'Select Container'
+                      : 'Change Container',
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<bool> _confirmDiscard() async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Discard Changes?'),
+        content: const Text(
+          'You have unsaved changes. Are you sure you want to discard them?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Discard'),
+          ),
+        ],
+      ),
+    );
+
+    return result ?? false;
   }
 }

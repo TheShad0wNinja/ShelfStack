@@ -12,8 +12,10 @@ class ContainersScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<ContainersScreenViewModel>(
-      create: (context) =>
-          ContainersScreenViewModel(context.read<ContainerRepository>(), context.read<ItemRepository>()),
+      create: (context) => ContainersScreenViewModel(
+        context.read<ContainerRepository>(),
+        context.read<ItemRepository>(),
+      ),
       child: _ContainerScreenContent(),
     );
   }
@@ -84,14 +86,13 @@ class _ContainerScreenContentState extends State<_ContainerScreenContent> {
         ],
       ),
       body: Padding(
-        padding: EdgeInsetsGeometry.symmetric(horizontal: 16, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         child: Consumer<ContainersScreenViewModel>(
           builder: (context, vm, child) => ListView.separated(
             itemCount: vm.containers.length,
-            itemBuilder: (context, index) => ContainerRow(
-              container: vm.containers[index],
-            ),
-            separatorBuilder: (context, index) => Divider(),
+            itemBuilder: (context, index) =>
+                ContainerRow(container: vm.containers[index]),
+            separatorBuilder: (context, index) => const Divider(),
           ),
         ),
       ),

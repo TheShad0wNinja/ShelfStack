@@ -5,6 +5,7 @@ import 'package:shelfstack/data/models/item.dart';
 import 'package:shelfstack/data/repositories/container_repository.dart';
 import 'package:shelfstack/data/repositories/item_repository.dart';
 import 'package:shelfstack/features/inventory/viewmodels/edit_item_viewmodel.dart';
+import 'package:shelfstack/features/inventory/widgets/container_selection_dialog.dart';
 
 class EditItemScreen extends StatefulWidget {
   final Item item;
@@ -115,10 +116,8 @@ class _EditItemScreenState extends State<EditItemScreen> {
 
     final selectedContainer = await showDialog<models.Container>(
       context: context,
-      builder: (context) => ChangeNotifierProvider.value(
-        value: vm,
-        child: _ContainerSelectionDialog(currentContainerId: _container.id),
-      ),
+      builder: (context) =>
+          ContainerSelectionDialog(currentContainerId: _container.id),
     );
 
     if (selectedContainer != null &&
@@ -432,145 +431,6 @@ class _EditItemScreenState extends State<EditItemScreen> {
                 onPressed: _showMoveItemDialog,
                 child: const Text('Move Item'),
               ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ContainerSelectionDialog extends StatefulWidget {
-  final String currentContainerId;
-
-  const _ContainerSelectionDialog({required this.currentContainerId});
-
-  @override
-  State<_ContainerSelectionDialog> createState() =>
-      _ContainerSelectionDialogState();
-}
-
-class _ContainerSelectionDialogState extends State<_ContainerSelectionDialog> {
-  final TextEditingController _searchController = TextEditingController();
-
-  @override
-  void initState() {
-    super.initState();
-
-    _searchController.addListener(_onSearchChanged);
-  }
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
-  }
-
-  void _onSearchChanged() {
-    final text = _searchController.text;
-    context.read<EditItemViewModel>().searchContainers(text);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Dialog(
-      child: Container(
-        height: MediaQuery.of(context).size.height * 0.7,
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Move Item To',
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Search containers...',
-                prefixIcon: const Icon(Icons.search),
-                border: const OutlineInputBorder(),
-                suffixIcon: _searchController.text.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.clear),
-                        onPressed: () {
-                          _searchController.clear();
-                        },
-                      )
-                    : null,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Expanded(
-              child: Consumer<EditItemViewModel>(
-                builder: (context, vm, child) {
-                  if (vm.isLoading) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-
-                  if (vm.error != null) {
-                    return Center(child: Text('Error: ${vm.error}'));
-                  }
-
-                  final containers = vm.filteredContainers
-                      .where((c) => c.id != widget.currentContainerId)
-                      .toList();
-
-                  if (containers.isEmpty) {
-                    return Center(
-                      child: Text(
-                        'No other containers found',
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    );
-                  }
-
-                  return ListView.builder(
-                    itemCount: containers.length,
-                    itemBuilder: (context, index) {
-                      final container = containers[index];
-                      return ListTile(
-                        leading: Container(
-                          width: 48,
-                          height: 48,
-                          decoration: BoxDecoration(
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.primaryContainer,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Icon(
-                            Icons.inventory_2_outlined,
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.onPrimaryContainer,
-                          ),
-                        ),
-                        title: Text(container.name),
-                        subtitle: Text(container.location.label),
-                        trailing: Text(
-                          '${container.itemCount} items',
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                        onTap: () => Navigator.of(context).pop(container),
-                      );
-                    },
-                  );
-                },
-              ),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Cancel'),
-                ),
-              ],
             ),
           ],
         ),

@@ -80,12 +80,23 @@ class _EditContainerScreenState extends State<EditContainerScreen> {
         title: const Text('Edit Container'),
         actions: [
           TextButton(
-            onPressed: () =>
-                context.read<ContainerEditViewModel>().save(context).then((_) {
-                  if (mounted) {
-                    Navigator.of(context).pop(true);
-                  }
-                }),
+            onPressed: () async {
+              try {
+                await context.read<ContainerEditViewModel>().save(context);
+                if (mounted) {
+                  Navigator.of(context).pop(true);
+                }
+              } catch (e) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Error saving container: $e'),
+                      backgroundColor: Theme.of(context).colorScheme.error,
+                    ),
+                  );
+                }
+              }
+            },
             child: const Text('Save'),
           ),
         ],

@@ -34,6 +34,9 @@ class ContainerEditViewModel extends ChangeNotifier {
   }
 
   Future<void> save(BuildContext context) async {
+    if (_name.trim().isEmpty) {
+      throw Exception("Container name cannot be empty");
+    }
     models.Container newContainer = _container.copyWith(
       location: _location,
       name: _name,
