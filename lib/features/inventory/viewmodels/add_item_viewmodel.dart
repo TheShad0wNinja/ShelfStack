@@ -63,7 +63,6 @@ class AddItemViewModel extends ChangeNotifier {
       notifyListeners();
     } catch (e) {
       // Handle error silently or log it, as this is just initial loading
-      print('Error loading container: $e');
     }
   }
 

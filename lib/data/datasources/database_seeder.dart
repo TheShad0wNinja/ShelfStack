@@ -2,7 +2,6 @@ import 'package:sqflite/sqflite.dart';
 
 class DatabaseSeeder {
   static Future<void> seed(Database db) async {
-    print('seeding');
     final now = DateTime.now();
 
     // Seed containers
@@ -241,7 +240,5 @@ class DatabaseSeeder {
     for (final tag in itemTags) {
       await db.insert('item_tags', tag);
     }
-
-    print('DatabaseSeeder: Database seeded successfully.');
   }
 }

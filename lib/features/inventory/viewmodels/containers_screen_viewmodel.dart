@@ -63,7 +63,6 @@ class ContainersScreenViewModel extends ChangeNotifier {
     try {
       _searchResults = await _repository.searchContainers(_query);
     } catch (e) {
-      print(e);
       _searchResults = [];
     } finally {
       _isSearching = false;

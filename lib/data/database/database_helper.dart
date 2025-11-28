@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:shelfstack/data/datasources/database_seeder.dart';
@@ -19,8 +20,6 @@ class DatabaseHelper {
   Future<Database> _initDatabase() async {
     final databasePath = await getDatabasesPath();
     final path = join(databasePath, 'shelfstack.db');
-
-    print('DatabaseHelper: Database path: $path');
 
     return await openDatabase(
       path,
@@ -100,7 +99,10 @@ class DatabaseHelper {
     await db.execute('PRAGMA foreign_keys = ON');
 
     // Seed initial data
-    await DatabaseSeeder.seed(db);
+    // if (kDebugMode) {
+    if (true) {
+      await DatabaseSeeder.seed(db);
+    }
   }
 
   Future<void> close() async {

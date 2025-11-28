@@ -100,10 +100,7 @@ class _ContainerDetailsContentState extends State<_ContainerDetailsContent> {
                 ),
                 title: Text(
                   vm.container!.name,
-                  style: const TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: TextStyle(fontWeight: FontWeight.w600)
                 ),
                 actions: [
                   IconButton(
@@ -126,10 +123,9 @@ class _ContainerDetailsContentState extends State<_ContainerDetailsContent> {
                       }
                     },
                     icon: const Icon(Icons.add),
-                    color: Colors.black,
                   ),
                   PopupMenuButton<String>(
-                    icon: const Icon(Icons.more_vert, color: Colors.black),
+                    icon: const Icon(Icons.more_vert),
                     onSelected: (value) async {
                       if (value == 'qr_code') {
                         showDialog(
