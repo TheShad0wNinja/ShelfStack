@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shelfstack/data/models/container.dart' as models;
 import 'package:shelfstack/data/models/item.dart';
+import 'package:shelfstack/data/repositories/container_repository.dart';
+import 'package:shelfstack/data/repositories/item_repository.dart';
 import 'package:shelfstack/features/inventory/screens/container_details_screen.dart';
 import 'package:shelfstack/features/inventory/screens/item_details_screen.dart';
+import 'package:shelfstack/features/inventory/viewmodels/item_details_viewmodel.dart';
 
 class SearchResultCard extends StatelessWidget {
   final models.Container? container;
   final Item? item;
-  final String?
-  containerName; // For items, the name of the container they belong to
-  final String?
-  containerId; // For items, the ID of the container they belong to
-  final String?
-  containerLocation; // For items, the location of the container they belong to
+  final String? containerName;
+  final String? containerId;
+  final String? containerLocation;
 
   const SearchResultCard.container({super.key, required this.container})
     : item = null,
@@ -30,204 +31,127 @@ class SearchResultCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     if (container != null) {
-      return _buildContainerCard(context, theme, container!);
-    } else {
-      return _buildItemCard(
+      return _buildCard(
         context,
-        theme,
-        item!,
-        containerName ?? 'Unknown',
-        containerId ?? item!.containerId,
-        containerLocation ?? 'Unknown',
-      );
-    }
-  }
-
-  Widget _buildContainerCard(
-    BuildContext context,
-    ThemeData theme,
-    models.Container container,
-  ) {
-    return Material(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(10),
-      elevation: 1,
-      child: InkWell(
+        type: 'Container',
+        title: container!.name,
         onTap: () {
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) =>
-                  ContainerDetailsScreen(containerId: container.id),
+                  ContainerDetailsScreen(containerId: container!.id),
             ),
           );
         },
-        borderRadius: BorderRadius.circular(10),
-        child: Padding(
-          padding: const EdgeInsets.all(10),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            spacing: 10,
-            children: [
-              Container(
-                width: 50,
-                height: 50,
-                decoration: ShapeDecoration(
-                  image: container.photoUrl != null
-                      ? DecorationImage(
-                          image: NetworkImage(container.photoUrl!),
-                          fit: BoxFit.cover,
-                        )
-                      : null,
-                  color: container.photoUrl == null
-                      ? Colors.grey.shade300
-                      : null,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
+        leadingPhotoUrl: container!.photoUrl,
+        leadingIcon: Icons.inventory_2_outlined,
+        leadingIconColor: Theme.of(context).colorScheme.onPrimaryContainer,
+        details: _buildContainerDetails(context, container!),
+      );
+    } else if (item != null) {
+      return _buildCard(
+        context,
+        type: 'Item',
+        title: item!.name,
+        onTap: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => ChangeNotifierProvider(
+                create: (BuildContext context) => ItemDetailsViewModel(
+                  item!.id,
+                  context.read<ContainerRepository>(),
+                  context.read<ItemRepository>(),
                 ),
-                child: container.photoUrl == null
-                    ? const Icon(Icons.inventory_2_outlined, color: Colors.grey)
-                    : null,
+                child: ItemDetailsScreen(),
               ),
+            ),
+          );
+        },
+        leadingPhotoUrl: item!.photoUrl,
+        leadingIcon: Icons.hide_image_outlined,
+        leadingIconColor: Theme.of(context).colorScheme.onPrimaryContainer,
+        details: _buildItemDetails(context),
+      );
+    }
+    return const SizedBox.shrink();
+  }
+
+  Widget _buildCard(
+    BuildContext context, {
+    required String type,
+    required String title,
+    required VoidCallback onTap,
+    String? leadingPhotoUrl,
+    required IconData leadingIcon,
+    required Color leadingIconColor,
+    required Widget details,
+  }) {
+    final theme = Theme.of(context);
+    final isContainer = type == 'Container';
+
+    return Card(
+      margin: const EdgeInsets.symmetric(),
+      clipBehavior: Clip.antiAlias,
+      elevation: 0,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(8),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    color: leadingPhotoUrl == null
+                        ? theme.colorScheme.secondary
+                        : null,
+                    image: leadingPhotoUrl != null
+                        ? DecorationImage(
+                            image: NetworkImage(leadingPhotoUrl),
+                            fit: BoxFit.cover,
+                          )
+                        : null,
+                  ),
+                  child: leadingPhotoUrl == null
+                      ? Icon(leadingIcon, size: 28, color: leadingIconColor)
+                      : null,
+                ),
+              ),
+              const SizedBox(width: 16),
+
               Expanded(
-                child: Row(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  spacing: 10,
                   children: [
-                    Expanded(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        spacing: 5,
-                        children: [
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            spacing: 4,
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 1,
-                                ),
-                                clipBehavior: Clip.antiAlias,
-                                decoration: ShapeDecoration(
-                                  color: Colors.blue.withAlpha(50),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(2),
-                                  ),
-                                ),
-                                child: Text(
-                                  'Container',
-                                  style: theme.textTheme.labelSmall?.copyWith(
-                                    color: Colors.blue.shade800,
-                                    fontWeight: FontWeight.w400,
-                                    fontSize: 10,
-                                    height: 1.50,
-                                    letterSpacing: 0.10,
-                                  ),
-                                ),
-                              ),
-                              Flexible(
-                                child: Text(
-                                  container.name,
-                                  textAlign: TextAlign.left,
-                                  style: theme.textTheme.labelMedium?.copyWith(
-                                    fontWeight: FontWeight.w400,
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ],
+                    Row(
+                      children: [
+                        _buildTypeTag(context, type, isContainer),
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Text(
+                            title,
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w500,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            spacing: 10,
-                            children: [
-                              Row(
-                                mainAxisSize: MainAxisSize.min,
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                spacing: 2,
-                                children: [
-                                  const Icon(
-                                    Icons.inventory_2_outlined,
-                                    size: 13,
-                                    color: Colors.grey,
-                                  ),
-                                  Text(
-                                    '${container.itemCount} items',
-                                    textAlign: TextAlign.center,
-                                    style: theme.textTheme.labelSmall?.copyWith(
-                                      color: Colors.grey.shade600,
-                                      fontWeight: FontWeight.w400,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Flexible(
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  spacing: 2,
-                                  children: [
-                                    const Icon(
-                                      Icons.location_on_outlined,
-                                      size: 12,
-                                      color: Color(0xFF6A7282),
-                                    ),
-                                    Flexible(
-                                      child: Text(
-                                        container.location.label,
-                                        style: theme.textTheme.labelSmall
-                                            ?.copyWith(
-                                              color: Colors.grey.shade600,
-                                              fontWeight: FontWeight.w400,
-                                            ),
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.all(2),
-                      clipBehavior: Clip.antiAlias,
-                      decoration: ShapeDecoration(
-                        color: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
                         ),
-                      ),
-                      child: IconButton(
-                        onPressed: () {},
-                        icon: const Icon(
-                          Icons.qr_code_scanner_outlined,
-                          color: Colors.blueAccent,
-                        ),
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
-                      ),
+                      ],
                     ),
+                    const SizedBox(height: 4),
+                    details,
                   ],
                 ),
               ),
+              const SizedBox(width: 8),
+              const Icon(Icons.chevron_right),
             ],
           ),
         ),
@@ -235,144 +159,52 @@ class SearchResultCard extends StatelessWidget {
     );
   }
 
-  Widget _buildItemCard(
+  Widget _buildTypeTag(BuildContext context, String type, bool isContainer) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final color = isContainer ? colorScheme.secondary : colorScheme.tertiary;
+
+    return Badge(
+      label: Text(type),
+      backgroundColor: color,
+      padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+    );
+  }
+
+  Widget _buildContainerDetails(
     BuildContext context,
-    ThemeData theme,
-    Item item,
-    String containerName,
-    String containerId,
-    String containerLocation,
+    models.Container container,
   ) {
-    return Material(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(10),
-      elevation: 1,
-      child: InkWell(
-        onTap: () {
-          // Navigator.of(context).push(
-          //   MaterialPageRoute(
-          //     // builder: (context) => ItemDetailsScreen(
-          //     //   item: item,
-          //     //   containerId: containerId,
-          //     //   containerName: containerName,
-          //     //   containerLocation: containerLocation,
-          //     // ),
-          //   ),
-          // );
-        },
-        borderRadius: BorderRadius.circular(10),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            spacing: 10,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                clipBehavior: Clip.antiAlias,
-                decoration: ShapeDecoration(
-                  color: theme.primaryColor,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                child: const Icon(
-                  Icons.inventory_2_outlined,
-                  color: Colors.white,
-                  size: 20,
-                ),
-              ),
-              Expanded(
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  spacing: 10,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        spacing: 5,
-                        children: [
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            spacing: 4,
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 1,
-                                ),
-                                clipBehavior: Clip.antiAlias,
-                                decoration: ShapeDecoration(
-                                  color: Colors.orangeAccent.withAlpha(50),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(2),
-                                  ),
-                                ),
-                                child: Text(
-                                  'Item',
-                                  style: theme.textTheme.labelSmall?.copyWith(
-                                    color: Colors.orange,
-                                    fontWeight: FontWeight.w400,
-                                    fontSize: 10,
-                                    height: 1.50,
-                                    letterSpacing: 0.10,
-                                  ),
-                                ),
-                              ),
-                              Flexible(
-                                child: Text(
-                                  item.name,
-                                  textAlign: TextAlign.left,
-                                  style: theme.textTheme.labelMedium?.copyWith(
-                                    fontWeight: FontWeight.w400,
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ],
-                          ),
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            spacing: 2,
-                            children: [
-                              const Icon(
-                                Icons.inventory_2_outlined,
-                                size: 13,
-                                color: Colors.grey,
-                              ),
-                              Expanded(
-                                child: Text(
-                                  containerName,
-                                  textAlign: TextAlign.left,
-                                  style: theme.textTheme.labelSmall?.copyWith(
-                                    color: Colors.grey.shade600,
-                                    fontWeight: FontWeight.w400,
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+    final theme = Theme.of(context);
+    final color = theme.colorScheme.onSurfaceVariant;
+
+    return Row(
+      children: [
+        Icon(Icons.inventory_2_outlined, color: color, size: 16),
+        const SizedBox(width: 4),
+        Text(
+          "${container.itemCount} items",
+          style: theme.textTheme.bodySmall?.copyWith(color: color),
+        ),
+        const SizedBox(width: 12),
+        Icon(Icons.location_on_outlined, color: color, size: 16),
+        const SizedBox(width: 4),
+        Flexible(
+          child: Text(
+            container.location.label,
+            style: theme.textTheme.bodySmall?.copyWith(color: color),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
-      ),
+      ],
     );
+  }
+
+  Widget _buildItemDetails(BuildContext context) {
+    final theme = Theme.of(context);
+    final color = theme.colorScheme.onSurfaceVariant;
+
+    return const SizedBox();
   }
 }

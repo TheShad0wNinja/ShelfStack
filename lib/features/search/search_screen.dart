@@ -85,9 +85,9 @@ class _SearchScreenContentState extends State<_SearchScreenContent> {
                             hintText: 'Search items or containers...',
                             filled: true,
                             fillColor:
-                                theme.colorScheme.surfaceContainerHighest,
+                                theme.colorScheme.surfaceContainer,
                             border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(14),
                               borderSide: BorderSide.none,
                             ),
                             suffixIcon: _searchController.text.isNotEmpty
@@ -146,7 +146,6 @@ class _SearchScreenContentState extends State<_SearchScreenContent> {
                                 color: theme.colorScheme.onSurfaceVariant,
                               ),
                             ),
-                            // Sort functionality can be added here later
                           ],
                         ),
                       ],
@@ -170,22 +169,14 @@ class _SearchScreenContentState extends State<_SearchScreenContent> {
                           final item = vm.itemResults[itemIndex];
                           return Padding(
                             padding: const EdgeInsets.only(bottom: 12),
-                            child: SearchResultCard.item(
-                              item: item,
-                              containerName: 'Container ${item.containerId}',
-                              containerId: item.containerId,
-                              containerLocation: 'Unknown Location',
-                            ),
+                            child: SearchResultCard.item(item: item),
                           );
                         }
                       },
-                      childCount:
-                          vm.containerResults.length + vm.itemResults.length,
+                      childCount: vm.containerResults.length + vm.itemResults.length,
                     ),
                   ),
                 ),
-                // Add some bottom padding for the FAB
-                const SliverToBoxAdapter(child: SizedBox(height: 80)),
               ],
             ),
           ),
@@ -200,26 +191,25 @@ class _SearchScreenContentState extends State<_SearchScreenContent> {
     required bool isSelected,
     required VoidCallback onSelected,
   }) {
-    final theme = Theme.of(context);
     return FilterChip(
       label: Text(label),
       selected: isSelected,
       onSelected: (_) => onSelected(),
-      backgroundColor: theme.colorScheme.surfaceContainerHighest,
-      selectedColor: theme.colorScheme.primaryContainer,
-      labelStyle: TextStyle(
-        color: isSelected
-            ? theme.colorScheme.onPrimaryContainer
-            : theme.colorScheme.onSurfaceVariant,
-        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-      ),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-        side: BorderSide(
-          color: isSelected ? Colors.transparent : Colors.transparent,
-        ),
-      ),
-      showCheckmark: false,
+      // backgroundColor: theme.colorScheme.surfaceContainerHighest,
+      // selectedColor: theme.colorScheme.primaryContainer,
+      // labelStyle: TextStyle(
+      //   color: isSelected
+      //       ? theme.colorScheme.onPrimaryContainer
+      //       : theme.colorScheme.onSurfaceVariant,
+      //   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+      // ),
+      // shape: RoundedRectangleBorder(
+      //   borderRadius: BorderRadius.circular(20),
+      //   side: BorderSide(
+      //     color: isSelected ? Colors.transparent : Colors.transparent,
+      //   ),
+      // ),
+      // showCheckmark: false,
     );
   }
 }
