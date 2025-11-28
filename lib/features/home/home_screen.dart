@@ -8,6 +8,7 @@ import 'package:shelfstack/features/inventory/screens/create_container_screen.da
 import 'package:shelfstack/features/home/widgets/activity_row.dart';
 import 'package:shelfstack/data/models/container.dart' as models;
 import 'package:shelfstack/data/models/location.dart';
+import 'package:shelfstack/features/settings/settings_viewmodel.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -17,6 +18,14 @@ class HomeScreen extends StatelessWidget {
     final formattedDate = DateFormat('EEEE, MMMM d').format(DateTime.now());
     final theme = Theme.of(context);
 
+    // Determine greeting based on time of day
+    final hour = DateTime.now().hour;
+    final greeting = hour < 12
+        ? 'Good Morning'
+        : hour < 17
+        ? 'Good Afternoon'
+        : 'Good Evening';
+
     return ChangeNotifierProvider(
       create: (BuildContext context) => HomeScreenViewModel(
         context.read<ContainerRepository>(),
@@ -25,36 +34,29 @@ class HomeScreen extends StatelessWidget {
       child: Scaffold(
         appBar: AppBar(
           title: Center(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text("Good Evening, Mohey", style: theme.textTheme.titleMedium),
-                Text(
-                  formattedDate,
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
+            child: Consumer<SettingsViewModel>(
+              builder: (context, settingsVm, child) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "$greeting, ${settingsVm.username}",
+                      style: theme.textTheme.titleMedium,
+                    ),
+                    Text(
+                      formattedDate,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                );
+              },
             ),
           ),
         ),
-        // floatingActionButton: Padding(
-        //   padding: const EdgeInsets.only(bottom: 100),
-        //   child: FloatingActionButton.extended(
-        //     onPressed: () {
-        //       Navigator.of(context).push(
-        //         MaterialPageRoute(
-        //           builder: (context) => const CreateContainerScreen(),
-        //         ),
-        //       );
-        //     },
-        //     icon: const Icon(Icons.add),
-        //     label: const Text('Create Container'),
-        //   ),
-        // ),
         body: Consumer<HomeScreenViewModel>(
           builder: (context, vm, child) => SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
@@ -127,25 +129,32 @@ class HomeScreen extends StatelessWidget {
     bool isLoading = false,
   }) {
     final textTheme = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
 
     return Card(
+      elevation: 0,
+      color: theme.colorScheme.surfaceContainerLow,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
+              padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
                 color: color,
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(8),
               ),
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Icon(icon, color: Colors.white),
+              child: Icon(icon, color: Colors.white, size: 24),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              label,
+              style: textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
-            const SizedBox(height: 8),
-            Text(label, style: textTheme.bodySmall),
             if (isLoading) const SizedBox(height: 8),
             isLoading
                 ? SizedBox(
@@ -156,7 +165,7 @@ class HomeScreen extends StatelessWidget {
                 : Text(
                     value.toString(),
                     style: textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w500,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
           ],

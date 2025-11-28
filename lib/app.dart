@@ -16,6 +16,7 @@ import 'package:shelfstack/core/viewmodels/navigation_viewmodel.dart';
 import 'package:shelfstack/features/inventory/widgets/expandable_fab.dart';
 import 'package:shelfstack/features/inventory/screens/create_container_screen.dart';
 import 'package:shelfstack/features/inventory/screens/add_item_screen.dart';
+import 'package:shelfstack/features/settings/settings_viewmodel.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -29,6 +30,7 @@ class MyApp extends StatelessWidget {
           create: (_) => ContainerRepositorySqlite(),
         ),
         Provider<ItemRepository>(create: (_) => ItemRepositorySqlite()),
+        ChangeNotifierProvider(create: (_) => SettingsViewModel()),
       ],
       child: MaterialApp(
         title: 'ShelfStack',
