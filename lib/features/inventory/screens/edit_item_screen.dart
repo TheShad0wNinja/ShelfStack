@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shelfstack/core/utils/dialog_helper.dart';
 import 'package:shelfstack/data/models/container.dart' as models;
 import 'package:shelfstack/data/models/item.dart';
 import 'package:shelfstack/data/repositories/container_repository.dart';
@@ -129,39 +130,13 @@ class _EditItemScreenState extends State<EditItemScreen> {
     }
   }
 
-  Future<bool> _confirmDiscard() async {
-    if (!_hasUnsavedChanges) return true;
-
-    final result = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Discard Changes?'),
-        content: const Text(
-          'You have unsaved changes. Are you sure you want to discard them?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Discard'),
-          ),
-        ],
-      ),
-    );
-
-    return result ?? false;
-  }
-
   @override
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) async {
         if (!didPop) {
-          final shouldPop = await _confirmDiscard();
+          final shouldPop = await DialogHelper.confirmDiscard(context);
           if (shouldPop && mounted) {
             Navigator.of(context).pop(_didUpdate);
           }

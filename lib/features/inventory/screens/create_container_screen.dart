@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shelfstack/core/utils/dialog_helper.dart';
 import 'package:shelfstack/data/repositories/container_repository.dart';
 import 'package:shelfstack/features/inventory/viewmodels/create_container_viewmodel.dart';
 
@@ -35,102 +36,175 @@ class _CreateContainerScreenContentState
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Create Container'),
-        actions: [
-          IconButton(
-            onPressed: () async {
-              final vm = context.read<CreateContainerViewModel>();
-              final success = await vm.createContainer(
-                context.read<ContainerRepository>(),
-              );
-              if (success && mounted) {
-                Navigator.of(context).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Container created successfully'),
-                    backgroundColor: Colors.green,
-                  ),
-                );
-              } else if (mounted && vm.error != null) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(vm.error!),
-                    backgroundColor: Theme.of(context).colorScheme.error,
-                  ),
-                );
-              }
-            },
-            icon: const Icon(Icons.save),
-            tooltip: 'Save',
-          ),
-        ],
-      ),
-      body: Consumer<CreateContainerViewModel>(
-        builder: (context, vm, child) {
-          if (vm.isLoading) {
-            return const Center(child: CircularProgressIndicator());
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (!didPop) {
+          final success = await DialogHelper.confirmDiscard(context);
+
+          if (success == true && mounted) {
+            Navigator.of(context).pop(false);
           }
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                _buildQRCodePreview(),
-                const SizedBox(height: 24),
-                _buildNameSection(vm),
-                const SizedBox(height: 24),
-                _buildTagsSection(vm),
-                const SizedBox(height: 24),
-                _buildLocationSection(vm),
-              ],
+        } else {
+          Navigator.of(context).pop(result);
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Create Container'),
+          actions: [
+            IconButton(
+              onPressed: () async {
+                final vm = context.read<CreateContainerViewModel>();
+                final success = await vm.createContainer(
+                  context.read<ContainerRepository>(),
+                );
+                if (success && mounted) {
+                  Navigator.of(context).pop();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Container created successfully'),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                } else if (mounted && vm.error != null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(vm.error!),
+                      backgroundColor: Theme.of(context).colorScheme.error,
+                    ),
+                  );
+                }
+              },
+              icon: const Icon(Icons.save),
+              tooltip: 'Save',
             ),
-          );
-        },
+          ],
+        ),
+        body: Consumer<CreateContainerViewModel>(
+          builder: (context, vm, child) {
+            if (vm.isLoading) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  _buildPhotoSection(vm),
+                  const SizedBox(height: 24),
+                  _buildNameSection(vm),
+                  const SizedBox(height: 24),
+                  _buildTagsSection(vm),
+                  const SizedBox(height: 24),
+                  _buildLocationSection(vm),
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }
 
-  Widget _buildQRCodePreview() {
+  Widget _buildPhotoSection(CreateContainerViewModel vm) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'QR Code Preview',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+              'Container Photo',
+              style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 16),
             Container(
-              width: 120,
-              height: 120,
+              width: double.infinity,
+              height: 200,
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: Theme.of(context).colorScheme.primary,
-                  width: 2,
+                  color: Theme.of(context).colorScheme.outlineVariant,
+                ),
+                color: Theme.of(context).colorScheme.surface,
+                image: vm.photoUrl != null
+                    ? DecorationImage(
+                        image: NetworkImage(vm.photoUrl!),
+                        fit: BoxFit.cover,
+                      )
+                    : null,
+              ),
+              child: vm.photoUrl == null
+                  ? Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.add_photo_alternate_outlined,
+                            size: 48,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurfaceVariant,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'No Photo',
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
+                                ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : null,
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: FilledButton.icon(
+                    onPressed: () {
+                      vm.updatePhotoUrl(
+                        'https://picsum.photos/seed/${DateTime.now().millisecondsSinceEpoch}/400/400',
+                      );
+                    },
+                    icon: const Icon(Icons.camera_alt),
+                    label: const Text('Take Photo'),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      vm.updatePhotoUrl(
+                        'https://picsum.photos/seed/${DateTime.now().millisecondsSinceEpoch + 1}/400/400',
+                      );
+                    },
+                    icon: const Icon(Icons.photo_library_outlined),
+                    label: const Text('Choose'),
+                  ),
+                ),
+              ],
+            ),
+            if (vm.photoUrl != null) ...[
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: TextButton.icon(
+                  onPressed: () {
+                    vm.updatePhotoUrl(null);
+                  },
+                  icon: const Icon(Icons.delete_outline),
+                  label: const Text('Remove Photo'),
+                  style: TextButton.styleFrom(
+                    foregroundColor: Theme.of(context).colorScheme.error,
+                  ),
                 ),
               ),
-              child: Center(
-                child: Icon(
-                  Icons.qr_code,
-                  size: 64,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'QR code will be\ngenerated upon saving',
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ),
+            ],
           ],
         ),
       ),

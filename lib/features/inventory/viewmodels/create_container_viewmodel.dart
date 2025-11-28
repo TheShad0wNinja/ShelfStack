@@ -7,6 +7,7 @@ class CreateContainerViewModel extends ChangeNotifier {
   String _name = '';
   String _locationLabel = '';
   String? _locationAddress;
+  String? _photoUrl;
   List<String> _tags = [];
   bool _isLoading = false;
   String? _error;
@@ -14,6 +15,7 @@ class CreateContainerViewModel extends ChangeNotifier {
   String get name => _name;
   String get locationLabel => _locationLabel;
   String? get locationAddress => _locationAddress;
+  String? get photoUrl => _photoUrl;
   List<String> get tags => _tags;
   bool get isLoading => _isLoading;
   String? get error => _error;
@@ -25,6 +27,11 @@ class CreateContainerViewModel extends ChangeNotifier {
 
   void updateLocationLabel(String value) {
     _locationLabel = value;
+    notifyListeners();
+  }
+
+  void updatePhotoUrl(String? value) {
+    _photoUrl = value;
     notifyListeners();
   }
 
@@ -61,6 +68,7 @@ class CreateContainerViewModel extends ChangeNotifier {
       final newContainer = models.Container(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
         name: _name,
+        photoUrl: _photoUrl,
         location: Location(
           label: _locationLabel.isEmpty ? 'Unassigned' : _locationLabel,
           address: _locationAddress ?? '',

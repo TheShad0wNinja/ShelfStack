@@ -10,11 +10,13 @@ class ContainerEditViewModel extends ChangeNotifier {
   String _name = "";
   Location? _location;
   List<String> _tags = [];
+  String? _photoUrl;
 
   ContainerEditViewModel(this._container, this._repository) {
     _name = _container.name;
     _location = _container.location;
     _tags = List.from(_container.tags);
+    _photoUrl = _container.photoUrl;
   }
 
   void updateName(String s) {
@@ -33,6 +35,11 @@ class ContainerEditViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  void updatePhotoUrl(String? url) {
+    _photoUrl = url;
+    notifyListeners();
+  }
+
   Future<void> save(BuildContext context) async {
     if (_name.trim().isEmpty) {
       throw Exception("Container name cannot be empty");
@@ -41,6 +48,7 @@ class ContainerEditViewModel extends ChangeNotifier {
       location: _location,
       name: _name,
       tags: _tags,
+      photoUrl: _photoUrl,
     );
     await _repository.updateContainer(newContainer);
   }

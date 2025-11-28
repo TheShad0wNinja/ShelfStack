@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shelfstack/core/utils/dialog_helper.dart';
 import 'package:shelfstack/data/models/container.dart' as models;
 
 import 'package:shelfstack/features/inventory/viewmodels/container_edit_viewmodel.dart';
@@ -19,6 +20,9 @@ class _EditContainerScreenState extends State<EditContainerScreen> {
   final _tagController = TextEditingController();
   late List<String> _tags;
   String? _locationAddress;
+  String? _photoUrl;
+
+  bool _didUpdate = false;
 
   @override
   void initState() {
@@ -29,16 +33,28 @@ class _EditContainerScreenState extends State<EditContainerScreen> {
     );
     _tags = List.from(widget.container.tags);
     _locationAddress = widget.container.location.address;
+    _photoUrl = widget.container.photoUrl;
 
     _nameController.addListener(
       () => context.read<ContainerEditViewModel>().updateName(
         _nameController.text,
       ),
     );
+    _nameController.addListener(
+      () => setState(() {
+        _didUpdate = true;
+      }),
+    );
+
     _locationLabelController.addListener(
       () => context.read<ContainerEditViewModel>().updateLocationLabel(
         _locationLabelController.text,
       ),
+    );
+    _locationLabelController.addListener(
+      () => setState(() {
+        _didUpdate = true;
+      }),
     );
   }
 
@@ -56,6 +72,7 @@ class _EditContainerScreenState extends State<EditContainerScreen> {
       setState(() {
         _tags.add(tag);
         _tagController.clear();
+        _didUpdate = true;
       });
       context.read<ContainerEditViewModel>().updateTags(_tags);
     }
@@ -64,52 +81,189 @@ class _EditContainerScreenState extends State<EditContainerScreen> {
   void _removeTag(String tag) {
     setState(() {
       _tags.remove(tag);
+      _didUpdate = true;
     });
   }
 
   void _useCurrentLocation() {
     setState(() {
       _locationAddress = '123 Street, Storage room';
+      _didUpdate = true;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Edit Container'),
-        actions: [
-          TextButton(
-            onPressed: () async {
-              try {
-                await context.read<ContainerEditViewModel>().save(context);
-                if (mounted) {
-                  Navigator.of(context).pop(true);
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (!didPop && _didUpdate) {
+          final shouldPop = await DialogHelper.confirmDiscard(context);
+          if (shouldPop == true && mounted) {
+            Navigator.of(context).pop(false);
+          }
+        } else {
+          Navigator.of(context).pop(result);
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Edit Container'),
+          actions: [
+            IconButton(
+              tooltip: 'Save',
+              icon: const Icon(Icons.save),
+              onPressed: () async {
+                try {
+                  await context.read<ContainerEditViewModel>().save(context);
+                  if (mounted) {
+                    Navigator.of(context).pop(true);
+                  }
+                } catch (e) {
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Error saving container: $e'),
+                        backgroundColor: Theme.of(context).colorScheme.error,
+                      ),
+                    );
+                  }
                 }
-              } catch (e) {
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Error saving container: $e'),
-                      backgroundColor: Theme.of(context).colorScheme.error,
-                    ),
-                  );
-                }
-              }
-            },
-            child: const Text('Save'),
+              },
+            ),
+          ],
+        ),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              _buildPhotoSection(),
+              const SizedBox(height: 24),
+              _buildNameSection(),
+              const SizedBox(height: 24),
+              _buildTagsSection(),
+              const SizedBox(height: 24),
+              _buildLocationSection(),
+            ],
           ),
-        ],
+        ),
       ),
-      body: SingleChildScrollView(
+    );
+  }
+
+  Widget _buildPhotoSection() {
+    return Card(
+      child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildNameSection(),
-            const SizedBox(height: 24),
-            _buildTagsSection(),
-            const SizedBox(height: 24),
-            _buildLocationSection(),
+            Text(
+              'Container Photo',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 16),
+            Container(
+              width: double.infinity,
+              height: 200,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.outlineVariant,
+                ),
+                color: Theme.of(context).colorScheme.surface,
+                image: _photoUrl != null
+                    ? DecorationImage(
+                        image: NetworkImage(_photoUrl!),
+                        fit: BoxFit.cover,
+                      )
+                    : null,
+              ),
+              child: _photoUrl == null
+                  ? Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.add_photo_alternate_outlined,
+                            size: 48,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurfaceVariant,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'No Photo',
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
+                                ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : null,
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: FilledButton.icon(
+                    onPressed: () {
+                      setState(() {
+                        _photoUrl =
+                            'https://picsum.photos/seed/${DateTime.now().millisecondsSinceEpoch}/400/400';
+                        _didUpdate = true;
+                      });
+                      context.read<ContainerEditViewModel>().updatePhotoUrl(
+                        _photoUrl,
+                      );
+                    },
+                    icon: const Icon(Icons.camera_alt),
+                    label: const Text('Take Photo'),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      setState(() {
+                        _photoUrl =
+                            'https://picsum.photos/seed/${DateTime.now().millisecondsSinceEpoch + 1}/400/400';
+                        _didUpdate = true;
+                      });
+                      context.read<ContainerEditViewModel>().updatePhotoUrl(
+                        _photoUrl,
+                      );
+                    },
+                    icon: const Icon(Icons.photo_library_outlined),
+                    label: const Text('Choose'),
+                  ),
+                ),
+              ],
+            ),
+            if (_photoUrl != null) ...[
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: TextButton.icon(
+                  onPressed: () {
+                    setState(() {
+                      _photoUrl = null;
+                      _didUpdate = true;
+                    });
+                    context.read<ContainerEditViewModel>().updatePhotoUrl(null);
+                  },
+                  icon: const Icon(Icons.delete_outline),
+                  label: const Text('Remove Photo'),
+                  style: TextButton.styleFrom(
+                    foregroundColor: Theme.of(context).colorScheme.error,
+                  ),
+                ),
+              ),
+            ],
           ],
         ),
       ),
