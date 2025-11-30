@@ -14,7 +14,7 @@ class DynamicImage extends StatelessWidget {
   const DynamicImage({
     super.key,
     required this.imageUrl,
-    this.placeholderIcon = Icons.photo_library,
+    this.placeholderIcon = Icons.hide_image,
     this.iconSize = 50,
     this.iconColor = Colors.black,
     this.imageFit = BoxFit.cover

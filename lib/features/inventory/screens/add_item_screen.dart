@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shelfstack/core/utils/dialog_helper.dart';
+import 'package:shelfstack/core/widgets/expandable_dynamic_image.dart';
 import 'package:shelfstack/data/models/container.dart' as models;
 import 'package:shelfstack/data/repositories/container_repository.dart';
 import 'package:shelfstack/data/repositories/item_repository.dart';
@@ -69,11 +70,10 @@ class _AddItemScreenContentState extends State<_AddItemScreenContent> {
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) async {
-        if (!didPop) {
-          final shouldPop = await DialogHelper.confirmDiscard(context);
-          if (shouldPop && mounted) {
-            Navigator.of(context).pop(false);
-          }
+        if (didPop) return;
+        final shouldPop = await DialogHelper.confirmDiscard(context);
+        if (shouldPop && context.mounted) {
+          Navigator.of(context).pop(false);
         }
       },
       child: Scaffold(
@@ -178,48 +178,22 @@ class _AddItemScreenContentState extends State<_AddItemScreenContent> {
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 const SizedBox(height: 16),
-                Container(
-                  width: double.infinity,
-                  height: 200,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: Theme.of(context).colorScheme.outlineVariant,
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    width: double.infinity,
+                    height: 200,
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.outlineVariant,
+                      ),
+                      color: Theme.of(context).colorScheme.surface,
                     ),
-                    color: Theme.of(context).colorScheme.surface,
-                    image: vm.photoUrl != null
-                        ? DecorationImage(
-                            image: NetworkImage(vm.photoUrl!),
-                            fit: BoxFit.cover,
-                          )
-                        : null,
+                    child: ExpandableDynamicImage(
+                      imageUrl: vm.photoUrl,
+                      heroTag: 'add_item_image',
+                    ),
                   ),
-                  child: vm.photoUrl == null
-                      ? Center(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.add_photo_alternate_outlined,
-                                size: 48,
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onSurfaceVariant,
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                'No Photo',
-                                style: Theme.of(context).textTheme.bodyMedium
-                                    ?.copyWith(
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.onSurfaceVariant,
-                                    ),
-                              ),
-                            ],
-                          ),
-                        )
-                      : null,
                 ),
                 const SizedBox(height: 16),
                 Row(
@@ -227,9 +201,7 @@ class _AddItemScreenContentState extends State<_AddItemScreenContent> {
                     Expanded(
                       child: FilledButton.icon(
                         onPressed: () {
-                          vm.updatePhotoUrl(
-                            'https://picsum.photos/seed/${DateTime.now().millisecondsSinceEpoch}/400/400',
-                          );
+                          vm.takePhoto();
                         },
                         icon: const Icon(Icons.camera_alt),
                         label: const Text('Take Photo'),
@@ -239,9 +211,7 @@ class _AddItemScreenContentState extends State<_AddItemScreenContent> {
                     Expanded(
                       child: OutlinedButton.icon(
                         onPressed: () {
-                          vm.updatePhotoUrl(
-                            'https://picsum.photos/seed/${DateTime.now().millisecondsSinceEpoch + 1}/400/400',
-                          );
+                          vm.choosePhoto();
                         },
                         icon: const Icon(Icons.photo_library_outlined),
                         label: const Text('Choose'),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shelfstack/core/utils/files_helper.dart';
 import 'package:shelfstack/data/models/container.dart' as models;
 import 'package:shelfstack/data/models/item.dart';
 import 'package:shelfstack/data/repositories/container_repository.dart';
@@ -7,38 +8,91 @@ import 'package:shelfstack/data/repositories/item_repository.dart';
 class EditItemViewModel extends ChangeNotifier {
   final ItemRepository _itemRepository;
   final ContainerRepository _containerRepository;
+  final Item _originalItem;
+  final models.Container _originalContainer;
 
-  EditItemViewModel(this._itemRepository, this._containerRepository);
+  EditItemViewModel(
+    this._itemRepository,
+    this._containerRepository,
+    this._originalItem,
+    this._originalContainer,
+  ) {
+    _name = _originalItem.name;
+    _description = _originalItem.description;
+    _tags = List.from(_originalItem.tags);
+    _photoUrl = _originalItem.photoUrl;
+    _selectedContainer = _originalContainer;
+    _loadAvailableContainers();
+  }
 
   bool _isLoading = false;
+
   bool get isLoading => _isLoading;
 
   String? _error;
+
   String? get error => _error;
 
+  late String _name;
+
+  String get name => _name;
+
+  String? _description;
+
+  String? get description => _description;
+
+  late List<String> _tags;
+
+  List<String> get tags => _tags;
+
+  String? _photoUrl;
+
+  String? get photoUrl => _photoUrl;
+
+  late models.Container _selectedContainer;
+
+  models.Container get selectedContainer => _selectedContainer;
+
   List<models.Container> _availableContainers = [];
+
   List<models.Container> get availableContainers => _availableContainers;
 
   List<models.Container> _filteredContainers = [];
+
   List<models.Container> get filteredContainers => _filteredContainers;
 
   String _containerSearchQuery = '';
+
   String get containerSearchQuery => _containerSearchQuery;
 
-  Future<void> loadAvailableContainers() async {
-    _isLoading = true;
-    _error = null;
-    notifyListeners();
-
+  Future<void> _loadAvailableContainers() async {
     try {
       _availableContainers = await _containerRepository.fetchContainers();
       _filteredContainers = _availableContainers;
-    } catch (e) {
-      _error = e.toString();
-    } finally {
-      _isLoading = false;
       notifyListeners();
+    } catch (e) {
+      print('Error loading containers: $e');
     }
+  }
+
+  void updateName(String name) {
+    _name = name;
+    notifyListeners();
+  }
+
+  void updateDescription(String? description) {
+    _description = description;
+    notifyListeners();
+  }
+
+  void updateTags(List<String> tags) {
+    _tags = tags;
+    notifyListeners();
+  }
+
+  void updateContainer(models.Container container) {
+    _selectedContainer = container;
+    notifyListeners();
   }
 
   void searchContainers(String query) {
@@ -58,24 +112,18 @@ class EditItemViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<bool> updateItem({
-    required String itemId,
-    required String name,
-    String? description,
-    String? photoUrl,
-    required List<String> tags,
-    required String containerId,
-    required Item originalItem
-  }) async {
+  Future<bool> save() async {
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
-      if (containerId != originalItem.containerId) {
-        final success = await _moveItem(itemId: itemId,
-            fromContainerId: originalItem.containerId,
-            toContainerId: containerId);
+      if (_selectedContainer.id != _originalItem.containerId) {
+        final success = await _moveItem(
+          itemId: _originalItem.id,
+          fromContainerId: _originalItem.containerId,
+          toContainerId: _selectedContainer.id,
+        );
 
         if (!success) {
           notifyListeners();
@@ -84,14 +132,14 @@ class EditItemViewModel extends ChangeNotifier {
       }
 
       final updatedItem = Item(
-        id: itemId,
-        name: name,
-        description: description,
-        photoUrl: photoUrl,
-        tags: tags,
-        containerId: containerId,
+        id: _originalItem.id,
+        name: _name,
+        description: _description?.isEmpty == true ? null : _description,
+        photoUrl: _photoUrl,
+        tags: _tags,
+        containerId: _selectedContainer.id,
         externalDocumentUrl: null,
-        createdAt: DateTime.now(),
+        createdAt: _originalItem.createdAt,
         updatedAt: DateTime.now(),
       );
 
@@ -111,10 +159,6 @@ class EditItemViewModel extends ChangeNotifier {
     required String fromContainerId,
     required String toContainerId,
   }) async {
-    _isLoading = true;
-    _error = null;
-    notifyListeners();
-
     try {
       await _itemRepository.moveItemToContainer(
         itemId,
@@ -125,9 +169,35 @@ class EditItemViewModel extends ChangeNotifier {
     } catch (e) {
       _error = e.toString();
       return false;
-    } finally {
-      _isLoading = false;
-      notifyListeners();
     }
+  }
+
+  void updatePhotoUrl(String? url) {
+    _photoUrl = url;
+    notifyListeners();
+  }
+
+  void choosePhoto() async {
+    final imagePath = await pickImage();
+    if (imagePath == null) {
+      _error = "Error taking photo";
+      notifyListeners();
+      return;
+    }
+    final filePath = await saveImageFile(imagePath);
+    _photoUrl = filePath;
+    notifyListeners();
+  }
+
+  void takePhoto() async {
+    final imagePath = await takeImagePhoto();
+    if (imagePath == null) {
+      _error = "Error picking image";
+      notifyListeners();
+      return;
+    }
+    final filePath = await saveImageFile(imagePath);
+    _photoUrl = filePath;
+    notifyListeners();
   }
 }

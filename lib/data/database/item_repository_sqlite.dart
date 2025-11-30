@@ -54,6 +54,7 @@ class ItemRepositorySqlite implements ItemRepository {
       'item_tags',
       where: 'item_id = ?',
       whereArgs: [id],
+      orderBy: 'tag ASC'
     );
     final tags = tagMaps.map((t) => t['tag'] as String).toList();
 

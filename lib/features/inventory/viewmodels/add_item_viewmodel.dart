@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shelfstack/core/utils/files_helper.dart';
 import 'package:shelfstack/data/models/container.dart' as models;
 import 'package:shelfstack/data/models/item.dart';
 import 'package:shelfstack/data/repositories/container_repository.dart';
@@ -106,5 +107,29 @@ class AddItemViewModel extends ChangeNotifier {
       notifyListeners();
       return false;
     }
+  }
+
+  void choosePhoto() async {
+    final imagePath = await pickImage();
+    if (imagePath == null) {
+      _error = "Error picking image";
+      notifyListeners();
+      return;
+    }
+    final filePath = await saveImageFile(imagePath);
+    _photoUrl = filePath;
+    notifyListeners();
+  }
+
+  void takePhoto() async {
+    final imagePath = await takeImagePhoto();
+    if (imagePath == null) {
+      _error = "Error picking image";
+      notifyListeners();
+      return;
+    }
+    final filePath = await saveImageFile(imagePath);
+    _photoUrl = filePath;
+    notifyListeners();
   }
 }

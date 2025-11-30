@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shelfstack/core/utils/dialog_helper.dart';
-import 'package:shelfstack/core/widgets/file_image.dart';
+import 'package:shelfstack/core/widgets/dynamic_image.dart';
+import 'package:shelfstack/core/widgets/expandable_dynamic_image.dart';
 import 'package:shelfstack/data/models/container.dart' as models;
 
 import 'package:shelfstack/features/inventory/viewmodels/edit_container_viewmodel.dart';
@@ -96,15 +97,13 @@ class _EditContainerScreenState extends State<EditContainerScreen> {
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: false,
+      canPop: !_didUpdate,
       onPopInvokedWithResult: (didPop, result) async {
-        if (!didPop && _didUpdate) {
-          final shouldPop = await DialogHelper.confirmDiscard(context);
-          if (shouldPop == true && mounted) {
-            Navigator.of(context).pop(false);
-          }
-        } else {
-          Navigator.of(context).pop(result);
+        if (didPop) return;
+        final shouldPop = await DialogHelper.confirmDiscard(context);
+
+        if (shouldPop == true && context.mounted) {
+          Navigator.of(context).pop(false);
         }
       },
       child: Scaffold(
@@ -178,10 +177,7 @@ class _EditContainerScreenState extends State<EditContainerScreen> {
                 selector: (context, vm) => vm.photoUrl,
                 builder:
                     (BuildContext context, String? photoUrl, Widget? child) =>
-                        DynamicImage(
-                          imageUrl: photoUrl,
-                          imageFit: BoxFit.contain,
-                        ),
+                        ExpandableDynamicImage(imageUrl: photoUrl),
               ),
             ),
             const SizedBox(height: 16),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shelfstack/core/extensions/string_extensions.dart';
+import 'package:shelfstack/core/widgets/dynamic_image.dart';
 import 'package:shelfstack/data/models/item.dart';
 import 'package:shelfstack/data/repositories/container_repository.dart';
 import 'package:shelfstack/data/repositories/item_repository.dart';
@@ -57,27 +58,15 @@ class ItemCard extends StatelessWidget {
             children: [
               AspectRatio(
                 aspectRatio: 1.0,
-                child: Container(
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    color: theme.colorScheme.surfaceContainerHighest,
-                    image: item.photoUrl != null
-                        ? DecorationImage(
-                            image: NetworkImage(item.photoUrl!),
-                            fit: BoxFit.cover,
-                          )
-                        : null,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surfaceContainerHighest,
+                    ),
+                    child: DynamicImage(imageUrl: item.photoUrl, iconColor: theme.colorScheme.onSurfaceVariant,)
                   ),
-                  child: item.photoUrl == null
-                      ? Center(
-                          child: Icon(
-                            Icons.inventory_2_outlined,
-                            size: 48,
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                        )
-                      : null,
                 ),
               ),
               const SizedBox(height: 12),

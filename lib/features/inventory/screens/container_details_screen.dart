@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'package:provider/provider.dart';
 import 'package:shelfstack/core/extensions/string_extensions.dart';
-import 'package:shelfstack/core/widgets/file_image.dart';
+import 'package:shelfstack/core/widgets/dynamic_image.dart';
+import 'package:shelfstack/core/widgets/expandable_dynamic_image.dart';
 import 'package:shelfstack/data/models/container.dart' as models;
 
 import 'package:shelfstack/features/inventory/screens/add_item_screen.dart';
@@ -260,10 +261,11 @@ class _ContainerDetailsContentState extends State<_ContainerDetailsContent> {
                             decoration: BoxDecoration(
                               color: theme.colorScheme.surfaceContainerHighest,
                             ),
-                            child: DynamicImage(
+                            child: ExpandableDynamicImage(
                               imageUrl: vm.container!.photoUrl,
                               iconColor: theme.colorScheme.onSurfaceVariant,
                               iconSize: 48,
+                              heroTag: 'container_${vm.container!.id}_image',
                             ),
                           ),
                         ),

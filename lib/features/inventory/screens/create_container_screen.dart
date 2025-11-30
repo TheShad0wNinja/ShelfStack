@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart' hide FileImage;
 import 'package:provider/provider.dart';
 import 'package:shelfstack/core/utils/dialog_helper.dart';
-import 'package:shelfstack/core/widgets/file_image.dart';
+import 'package:shelfstack/core/widgets/dynamic_image.dart';
+import 'package:shelfstack/core/widgets/expandable_dynamic_image.dart';
 import 'package:shelfstack/data/repositories/container_repository.dart';
 import 'package:shelfstack/features/inventory/viewmodels/create_container_viewmodel.dart';
 
@@ -40,16 +41,10 @@ class _CreateContainerScreenContentState
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) async {
-        if (!didPop) {
-          final success = await DialogHelper.confirmDiscard(context);
-
-          if (success == true) {
-            if (mounted) {
-              Navigator.of(context).pop(false);
-            }
-          }
-        } else {
-          Navigator.of(context).pop(result);
+        if (didPop) return;
+        final shouldPop = await DialogHelper.confirmDiscard(context);
+        if (shouldPop && context.mounted) {
+          Navigator.of(context).pop(false);
         }
       },
       child: Scaffold(
@@ -131,7 +126,7 @@ class _CreateContainerScreenContentState
                 ),
                 color: Theme.of(context).colorScheme.surface,
               ),
-              child: DynamicImage(imageUrl: vm.photoUrl),
+              child: ExpandableDynamicImage(imageUrl: vm.photoUrl, heroTag: 'create_container_image'),
             ),
             const SizedBox(height: 16),
             Row(

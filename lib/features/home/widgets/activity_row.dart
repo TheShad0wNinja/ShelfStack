@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:shelfstack/core/widgets/file_image.dart';
+import 'package:shelfstack/core/widgets/dynamic_image.dart';
 import 'package:shelfstack/data/models/container.dart' as models;
 import 'package:shelfstack/features/inventory/screens/container_details_screen.dart';
 

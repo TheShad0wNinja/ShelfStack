@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shelfstack/core/widgets/dynamic_image.dart';
+import 'package:shelfstack/core/widgets/expandable_dynamic_image.dart';
 import 'package:shelfstack/data/models/item.dart';
 import 'package:shelfstack/data/models/container.dart' as models;
 import 'package:shelfstack/data/repositories/container_repository.dart';
@@ -40,6 +42,8 @@ class _ItemDetailsState extends State<ItemDetailsScreen> {
           create: (context) => EditItemViewModel(
             context.read<ItemRepository>(),
             context.read<ContainerRepository>(),
+            item,
+            container,
           ),
           child: EditItemScreen(item: item, container: container),
         ),
@@ -213,15 +217,17 @@ class _ItemDetailsState extends State<ItemDetailsScreen> {
           ),
         );
       },
-      child: Container(
-        width: double.infinity,
-        height: 250,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          color: Theme.of(context).colorScheme.surfaceContainerHighest,
-          image: DecorationImage(
-            image: NetworkImage(item.photoUrl!),
-            fit: BoxFit.cover,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          width: double.infinity,
+          height: 250,
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+          ),
+          child: ExpandableDynamicImage(
+            imageUrl: item.photoUrl!,
+            heroTag: 'item_${item.id}_image',
           ),
         ),
       ),
