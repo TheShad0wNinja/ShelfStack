@@ -1,6 +1,7 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide FileImage;
 import 'package:provider/provider.dart';
 import 'package:shelfstack/core/utils/dialog_helper.dart';
+import 'package:shelfstack/core/widgets/file_image.dart';
 import 'package:shelfstack/data/repositories/container_repository.dart';
 import 'package:shelfstack/features/inventory/viewmodels/create_container_viewmodel.dart';
 
@@ -42,8 +43,10 @@ class _CreateContainerScreenContentState
         if (!didPop) {
           final success = await DialogHelper.confirmDiscard(context);
 
-          if (success == true && mounted) {
-            Navigator.of(context).pop(false);
+          if (success == true) {
+            if (mounted) {
+              Navigator.of(context).pop(false);
+            }
           }
         } else {
           Navigator.of(context).pop(result);
@@ -127,39 +130,8 @@ class _CreateContainerScreenContentState
                   color: Theme.of(context).colorScheme.outlineVariant,
                 ),
                 color: Theme.of(context).colorScheme.surface,
-                image: vm.photoUrl != null
-                    ? DecorationImage(
-                        image: NetworkImage(vm.photoUrl!),
-                        fit: BoxFit.cover,
-                      )
-                    : null,
               ),
-              child: vm.photoUrl == null
-                  ? Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.add_photo_alternate_outlined,
-                            size: 48,
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.onSurfaceVariant,
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'No Photo',
-                            style: Theme.of(context).textTheme.bodyMedium
-                                ?.copyWith(
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.onSurfaceVariant,
-                                ),
-                          ),
-                        ],
-                      ),
-                    )
-                  : null,
+              child: DynamicImage(imageUrl: vm.photoUrl),
             ),
             const SizedBox(height: 16),
             Row(
@@ -167,9 +139,7 @@ class _CreateContainerScreenContentState
                 Expanded(
                   child: FilledButton.icon(
                     onPressed: () {
-                      vm.updatePhotoUrl(
-                        'https://picsum.photos/seed/${DateTime.now().millisecondsSinceEpoch}/400/400',
-                      );
+                      vm.takePhoto();
                     },
                     icon: const Icon(Icons.camera_alt),
                     label: const Text('Take Photo'),
@@ -179,9 +149,7 @@ class _CreateContainerScreenContentState
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: () {
-                      vm.updatePhotoUrl(
-                        'https://picsum.photos/seed/${DateTime.now().millisecondsSinceEpoch + 1}/400/400',
-                      );
+                      vm.choosePhoto();
                     },
                     icon: const Icon(Icons.photo_library_outlined),
                     label: const Text('Choose'),

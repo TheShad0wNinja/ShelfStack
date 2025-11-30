@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:provider/provider.dart';
 import 'package:shelfstack/core/extensions/string_extensions.dart';
+import 'package:shelfstack/core/widgets/file_image.dart';
 import 'package:shelfstack/data/models/container.dart' as models;
 
 import 'package:shelfstack/features/inventory/screens/add_item_screen.dart';
@@ -10,7 +11,7 @@ import 'package:shelfstack/data/repositories/container_repository.dart';
 import 'package:shelfstack/data/repositories/item_repository.dart';
 import 'package:shelfstack/features/inventory/viewmodels/add_item_viewmodel.dart';
 import 'package:shelfstack/features/inventory/viewmodels/container_details_viewmodel.dart';
-import 'package:shelfstack/features/inventory/viewmodels/container_edit_viewmodel.dart';
+import 'package:shelfstack/features/inventory/viewmodels/edit_container_viewmodel.dart';
 import 'package:shelfstack/features/inventory/widgets/item_card.dart';
 import 'package:shelfstack/features/inventory/widgets/qr_code_dialog.dart';
 
@@ -71,6 +72,7 @@ class _ContainerDetailsContentState extends State<_ContainerDetailsContent> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Consumer<ContainerDetailsViewModel>(
       builder: (context, vm, child) {
         if (vm.isLoading) {
@@ -100,7 +102,7 @@ class _ContainerDetailsContentState extends State<_ContainerDetailsContent> {
                 ),
                 title: Text(
                   vm.container!.name,
-                  style: TextStyle(fontWeight: FontWeight.w600)
+                  style: TextStyle(fontWeight: FontWeight.w600),
                 ),
                 actions: [
                   IconButton(
@@ -141,8 +143,8 @@ class _ContainerDetailsContentState extends State<_ContainerDetailsContent> {
                         final result = await Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (context) =>
-                                ChangeNotifierProvider<ContainerEditViewModel>(
-                                  create: (context) => ContainerEditViewModel(
+                                ChangeNotifierProvider<EditContainerViewModel>(
+                                  create: (context) => EditContainerViewModel(
                                     vm.container!,
                                     context.read<ContainerRepository>(),
                                   ),
@@ -250,32 +252,20 @@ class _ContainerDetailsContentState extends State<_ContainerDetailsContent> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        Container(
-                          width: 120,
-                          height: 120,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(16),
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.surfaceContainerHighest,
-                            image: vm.container!.photoUrl != null
-                                ? DecorationImage(
-                                    image: NetworkImage(
-                                      vm.container!.photoUrl!,
-                                    ),
-                                    fit: BoxFit.cover,
-                                  )
-                                : null,
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Container(
+                            width: 120,
+                            height: 120,
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.surfaceContainerHighest,
+                            ),
+                            child: DynamicImage(
+                              imageUrl: vm.container!.photoUrl,
+                              iconColor: theme.colorScheme.onSurfaceVariant,
+                              iconSize: 48,
+                            ),
                           ),
-                          child: vm.container!.photoUrl == null
-                              ? Icon(
-                                  Icons.inventory_2_outlined,
-                                  size: 48,
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.onSurfaceVariant,
-                                )
-                              : null,
                         ),
                         const SizedBox(height: 10),
                         _buildInfoSection(context, vm.container!),

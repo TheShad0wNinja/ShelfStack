@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shelfstack/core/widgets/file_image.dart';
 import 'package:shelfstack/data/models/container.dart' as models;
 import 'package:shelfstack/features/inventory/screens/container_details_screen.dart';
 
@@ -36,23 +37,13 @@ class ActivityRow extends StatelessWidget {
                   width: 56,
                   height: 56,
                   decoration: BoxDecoration(
-                    color: container.photoUrl == null
-                        ? theme.colorScheme.primaryContainer
-                        : null,
-                    image: container.photoUrl != null
-                        ? DecorationImage(
-                      image: NetworkImage(container.photoUrl!),
-                      fit: BoxFit.cover,
-                    )
-                        : null,
+                    color: theme.colorScheme.surfaceContainer,
                   ),
-                  child: container.photoUrl == null
-                      ? Icon(
-                    Icons.inventory_2_outlined,
-                    size: 28,
-                    color: theme.colorScheme.onPrimaryContainer,
-                  )
-                      : null,
+                  child: DynamicImage(
+                    imageUrl: container.photoUrl,
+                    iconSize: 28,
+                    iconColor: theme.colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ),
               const SizedBox(width: 16),

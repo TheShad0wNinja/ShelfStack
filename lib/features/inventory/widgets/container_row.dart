@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shelfstack/core/extensions/string_extensions.dart';
+import 'package:shelfstack/core/widgets/file_image.dart';
 import 'package:shelfstack/data/models/container.dart' as models;
 import 'package:shelfstack/features/inventory/screens/container_details_screen.dart';
 import 'package:shelfstack/features/inventory/viewmodels/container_details_viewmodel.dart';
@@ -34,27 +35,19 @@ class ContainerRow extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Container(
-                width: 72, height: 72,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  color: container.photoUrl == null
-                      ? theme.colorScheme.primaryContainer
-                      : null,
-                  image: container.photoUrl != null
-                      ? DecorationImage(
-                    image: NetworkImage(container.photoUrl!),
-                    fit: BoxFit.cover,
-                  )
-                      : null,
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  width: 72,
+                  height: 72,
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primaryContainer,
+                  ),
+                  child: DynamicImage(
+                    imageUrl: container.photoUrl,
+                    iconColor: theme.colorScheme.onPrimaryContainer,
+                  ),
                 ),
-                child: container.photoUrl == null
-                    ? Icon(
-                  Icons.inventory_2_outlined,
-                  size: 28,
-                  color: theme.colorScheme.onPrimaryContainer,
-                )
-                    : null,
               ),
               const SizedBox(width: 16),
               Expanded(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shelfstack/core/widgets/file_image.dart';
 import 'package:shelfstack/data/models/container.dart' as models;
 import 'package:shelfstack/data/models/item.dart';
 import 'package:shelfstack/data/repositories/container_repository.dart';
@@ -31,6 +32,7 @@ class SearchResultCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     if (container != null) {
       return _buildCard(
         context,
@@ -46,7 +48,8 @@ class SearchResultCard extends StatelessWidget {
         },
         leadingPhotoUrl: container!.photoUrl,
         leadingIcon: Icons.inventory_2_outlined,
-        leadingIconColor: Theme.of(context).colorScheme.onPrimaryContainer,
+        leadingIconColor: theme.colorScheme.onPrimaryContainer,
+        leadingColor: theme.colorScheme.primaryContainer,
         details: _buildContainerDetails(context, container!),
       );
     } else if (item != null) {
@@ -70,7 +73,8 @@ class SearchResultCard extends StatelessWidget {
         },
         leadingPhotoUrl: item!.photoUrl,
         leadingIcon: Icons.hide_image_outlined,
-        leadingIconColor: Theme.of(context).colorScheme.onPrimaryContainer,
+        leadingIconColor: theme.colorScheme.onTertiaryContainer,
+        leadingColor: theme.colorScheme.tertiaryContainer,
         details: _buildItemDetails(context),
       );
     }
@@ -85,6 +89,7 @@ class SearchResultCard extends StatelessWidget {
     String? leadingPhotoUrl,
     required IconData leadingIcon,
     required Color leadingIconColor,
+    Color leadingColor = Colors.white,
     required Widget details,
   }) {
     final theme = Theme.of(context);
@@ -106,20 +111,12 @@ class SearchResultCard extends StatelessWidget {
                 child: Container(
                   width: 56,
                   height: 56,
-                  decoration: BoxDecoration(
-                    color: leadingPhotoUrl == null
-                        ? theme.colorScheme.secondary
-                        : null,
-                    image: leadingPhotoUrl != null
-                        ? DecorationImage(
-                            image: NetworkImage(leadingPhotoUrl),
-                            fit: BoxFit.cover,
-                          )
-                        : null,
+                  decoration: BoxDecoration(color: leadingColor),
+                  child: DynamicImage(
+                    imageUrl: leadingPhotoUrl,
+                    iconSize: 28,
+                    iconColor: leadingIconColor,
                   ),
-                  child: leadingPhotoUrl == null
-                      ? Icon(leadingIcon, size: 28, color: leadingIconColor)
-                      : null,
                 ),
               ),
               const SizedBox(width: 16),

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shelfstack/core/utils/dialog_helper.dart';
+import 'package:shelfstack/core/widgets/file_image.dart';
 import 'package:shelfstack/data/models/container.dart' as models;
 
-import 'package:shelfstack/features/inventory/viewmodels/container_edit_viewmodel.dart';
+import 'package:shelfstack/features/inventory/viewmodels/edit_container_viewmodel.dart';
 
 class EditContainerScreen extends StatefulWidget {
   final models.Container container;
@@ -36,7 +37,7 @@ class _EditContainerScreenState extends State<EditContainerScreen> {
     _photoUrl = widget.container.photoUrl;
 
     _nameController.addListener(
-      () => context.read<ContainerEditViewModel>().updateName(
+      () => context.read<EditContainerViewModel>().updateName(
         _nameController.text,
       ),
     );
@@ -47,7 +48,7 @@ class _EditContainerScreenState extends State<EditContainerScreen> {
     );
 
     _locationLabelController.addListener(
-      () => context.read<ContainerEditViewModel>().updateLocationLabel(
+      () => context.read<EditContainerViewModel>().updateLocationLabel(
         _locationLabelController.text,
       ),
     );
@@ -74,7 +75,7 @@ class _EditContainerScreenState extends State<EditContainerScreen> {
         _tagController.clear();
         _didUpdate = true;
       });
-      context.read<ContainerEditViewModel>().updateTags(_tags);
+      context.read<EditContainerViewModel>().updateTags(_tags);
     }
   }
 
@@ -115,7 +116,7 @@ class _EditContainerScreenState extends State<EditContainerScreen> {
               icon: const Icon(Icons.save),
               onPressed: () async {
                 try {
-                  await context.read<ContainerEditViewModel>().save(context);
+                  await context.read<EditContainerViewModel>().save(context);
                   if (mounted) {
                     Navigator.of(context).pop(true);
                   }
@@ -172,39 +173,16 @@ class _EditContainerScreenState extends State<EditContainerScreen> {
                   color: Theme.of(context).colorScheme.outlineVariant,
                 ),
                 color: Theme.of(context).colorScheme.surface,
-                image: _photoUrl != null
-                    ? DecorationImage(
-                        image: NetworkImage(_photoUrl!),
-                        fit: BoxFit.cover,
-                      )
-                    : null,
               ),
-              child: _photoUrl == null
-                  ? Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.add_photo_alternate_outlined,
-                            size: 48,
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.onSurfaceVariant,
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'No Photo',
-                            style: Theme.of(context).textTheme.bodyMedium
-                                ?.copyWith(
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.onSurfaceVariant,
-                                ),
-                          ),
-                        ],
-                      ),
-                    )
-                  : null,
+              child: Selector<EditContainerViewModel, String?>(
+                selector: (context, vm) => vm.photoUrl,
+                builder:
+                    (BuildContext context, String? photoUrl, Widget? child) =>
+                        DynamicImage(
+                          imageUrl: photoUrl,
+                          imageFit: BoxFit.contain,
+                        ),
+              ),
             ),
             const SizedBox(height: 16),
             Row(
@@ -213,13 +191,9 @@ class _EditContainerScreenState extends State<EditContainerScreen> {
                   child: FilledButton.icon(
                     onPressed: () {
                       setState(() {
-                        _photoUrl =
-                            'https://picsum.photos/seed/${DateTime.now().millisecondsSinceEpoch}/400/400';
                         _didUpdate = true;
                       });
-                      context.read<ContainerEditViewModel>().updatePhotoUrl(
-                        _photoUrl,
-                      );
+                      context.read<EditContainerViewModel>().takePhoto();
                     },
                     icon: const Icon(Icons.camera_alt),
                     label: const Text('Take Photo'),
@@ -230,13 +204,9 @@ class _EditContainerScreenState extends State<EditContainerScreen> {
                   child: OutlinedButton.icon(
                     onPressed: () {
                       setState(() {
-                        _photoUrl =
-                            'https://picsum.photos/seed/${DateTime.now().millisecondsSinceEpoch + 1}/400/400';
                         _didUpdate = true;
                       });
-                      context.read<ContainerEditViewModel>().updatePhotoUrl(
-                        _photoUrl,
-                      );
+                      context.read<EditContainerViewModel>().choosePhoto();
                     },
                     icon: const Icon(Icons.photo_library_outlined),
                     label: const Text('Choose'),
@@ -254,7 +224,7 @@ class _EditContainerScreenState extends State<EditContainerScreen> {
                       _photoUrl = null;
                       _didUpdate = true;
                     });
-                    context.read<ContainerEditViewModel>().updatePhotoUrl(null);
+                    context.read<EditContainerViewModel>().updatePhotoUrl(null);
                   },
                   icon: const Icon(Icons.delete_outline),
                   label: const Text('Remove Photo'),

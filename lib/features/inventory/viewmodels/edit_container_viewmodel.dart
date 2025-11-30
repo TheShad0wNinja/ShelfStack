@@ -1,18 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:shelfstack/core/utils/files_helper.dart';
 import 'package:shelfstack/data/models/container.dart' as models;
 import 'package:shelfstack/data/models/location.dart';
 import 'package:shelfstack/data/repositories/container_repository.dart';
 
-class ContainerEditViewModel extends ChangeNotifier {
+class EditContainerViewModel extends ChangeNotifier {
   final ContainerRepository _repository;
-  models.Container _container;
+  final models.Container _container;
 
   String _name = "";
   Location? _location;
   List<String> _tags = [];
   String? _photoUrl;
 
-  ContainerEditViewModel(this._container, this._repository) {
+  String? get photoUrl => _photoUrl;
+
+  EditContainerViewModel(this._container, this._repository) {
     _name = _container.name;
     _location = _container.location;
     _tags = List.from(_container.tags);
@@ -51,5 +54,30 @@ class ContainerEditViewModel extends ChangeNotifier {
       photoUrl: _photoUrl,
     );
     await _repository.updateContainer(newContainer);
+  }
+
+
+  void choosePhoto() async {
+    final imagePath = await pickImage();
+    if (imagePath == null) {
+      // _error = "Error picking image";
+      notifyListeners();
+      return;
+    }
+    final filePath = await saveImageFile(imagePath);
+    _photoUrl = filePath;
+    notifyListeners();
+  }
+
+  void takePhoto() async {
+    final imagePath = await takeImagePhoto();
+    if (imagePath == null) {
+      // _error = "Error picking image";
+      notifyListeners();
+      return;
+    }
+    final filePath = await saveImageFile(imagePath);
+    _photoUrl = filePath;
+    notifyListeners();
   }
 }
