@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shelfstack/core/theme/theme.dart';
+import 'package:shelfstack/core/viewmodels/theme_viewmodel.dart';
 import 'package:shelfstack/features/inventory/screens/containers_screen.dart';
 import 'package:shelfstack/features/home/home_screen.dart';
 import 'package:shelfstack/features/map/map_screen.dart';
@@ -31,13 +32,19 @@ class MyApp extends StatelessWidget {
         ),
         Provider<ItemRepository>(create: (_) => ItemRepositorySqlite()),
         ChangeNotifierProvider(create: (_) => SettingsViewModel()),
+        ChangeNotifierProvider(create: (_) => ThemeViewModel())
       ],
-      child: MaterialApp(
-        title: 'ShelfStack',
-        home: const MainScreen(),
-        debugShowCheckedModeBanner: false,
-        theme: const MaterialTheme(TextTheme()).light(),
-        darkTheme: const MaterialTheme(TextTheme()).dark(),
+      child: Consumer<ThemeViewModel>(
+        builder: (context, vm, child) {
+          return MaterialApp(
+            title: 'ShelfStack',
+            home: const MainScreen(),
+            theme: const MaterialTheme(TextTheme()).light(),
+            darkTheme: const MaterialTheme(TextTheme()).dark(),
+            themeMode: vm.themeMode,
+            debugShowCheckedModeBanner: false,
+          );
+        },
       ),
     );
   }
