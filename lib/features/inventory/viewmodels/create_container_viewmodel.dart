@@ -4,6 +4,7 @@ import 'package:shelfstack/core/utils/files_helper.dart';
 import 'package:shelfstack/data/models/container.dart' as models;
 import 'package:shelfstack/data/models/location.dart';
 import 'package:shelfstack/data/repositories/container_repository.dart';
+import 'package:shelfstack/features/map/util/address_helper.dart';
 
 class CreateContainerViewModel extends ChangeNotifier {
   String _name = '';
@@ -23,6 +24,9 @@ class CreateContainerViewModel extends ChangeNotifier {
   List<String> get tags => _tags;
   bool get isLoading => _isLoading;
   String? get error => _error;
+
+  bool _addressLoading = false;
+  bool get addressLoading => _addressLoading;
 
   void updateName(String value) {
     _name = value;
@@ -56,10 +60,13 @@ class CreateContainerViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void updateLocation(LatLng location) {
+  void updateLocation(LatLng location) async {
+    _addressLoading = true;
+    notifyListeners();
+    final address = await fetchAddressFromLatLng(location);
     _selectedLocation = location;
-    _locationAddress =
-        '${location.latitude.toStringAsFixed(4)}, ${location.longitude.toStringAsFixed(4)}';
+    _locationAddress = address;
+    _addressLoading = false;
     notifyListeners();
   }
 

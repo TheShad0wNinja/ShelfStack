@@ -266,25 +266,24 @@ class _CreateContainerScreenContentState
             Text('Location', style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 16),
             InkWell(
-              onTap: () async {
-                final result = await Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const LocationPickerScreen(),
-                  ),
-                );
-                if (result is LatLng) {
-                  vm.updateLocation(result);
-                }
-              },
+              onTap: vm.addressLoading
+                  ? null
+                  : () async {
+                      final result = await Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const LocationPickerScreen(),
+                        ),
+                      );
+                      if (result is LatLng) {
+                        vm.updateLocation(result);
+                      }
+                    },
               child: Container(
                 height: 120,
                 width: double.infinity,
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(12),
-                  image: vm.selectedLocation != null
-                      ? null // TODO: Add static map preview if possible, for now just color/icon
-                      : null,
                 ),
                 child: Center(
                   child: vm.selectedLocation != null
@@ -314,17 +313,28 @@ class _CreateContainerScreenContentState
             SizedBox(
               width: double.infinity,
               child: FilledButton.tonalIcon(
-                onPressed: () async {
-                  final result = await Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => const LocationPickerScreen(),
-                    ),
-                  );
-                  if (result is LatLng) {
-                    vm.updateLocation(result);
-                  }
-                },
-                icon: const Icon(Icons.map),
+                onPressed: vm.addressLoading
+                    ? null
+                    : () async {
+                        final result = await Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => const LocationPickerScreen(),
+                          ),
+                        );
+                        if (result is LatLng) {
+                          vm.updateLocation(result);
+                        }
+                      },
+                icon: vm.addressLoading
+                    ? SizedBox(
+                        width: 14,
+                        height: 14,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 1,
+                          color: Theme.of(context).colorScheme.primaryFixedDim,
+                        ),
+                      )
+                    : const Icon(Icons.map),
                 label: const Text('Select on Map'),
               ),
             ),
@@ -336,10 +346,10 @@ class _CreateContainerScreenContentState
                 hintText: 'e.g. Storage Room',
               ),
             ),
-            if (vm.locationAddress != null) ...[
+            if (vm.selectedLocation != null) ...[
               const SizedBox(height: 8),
               Text(
-                'Coordinates: ${vm.locationAddress}',
+                'Address: ${vm.locationAddress ?? "Unknown Address"}',
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ],

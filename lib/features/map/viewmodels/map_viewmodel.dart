@@ -62,14 +62,14 @@ class MapViewModel extends ChangeNotifier {
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
         if (permission == LocationPermission.denied) {
-          _error = 'Location permissions were denied';
+          _error = 'Location permissions are denied';
           notifyListeners();
           return;
         }
       }
 
       if (permission == LocationPermission.deniedForever) {
-        _error = 'Location permissions are permanently denied';
+        _error = 'Location permissions are permanently denied, we cannot request permissions.';
         notifyListeners();
         return;
       }
