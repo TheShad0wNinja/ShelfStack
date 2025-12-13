@@ -71,7 +71,6 @@ class _MainScreenState extends State<MainScreen> {
   ];
   final DeepLinkService _deepLinkService = DeepLinkService();
 
-
   @override
   void initState() {
     super.initState();
@@ -102,13 +101,13 @@ class _MainScreenState extends State<MainScreen> {
       );
     };
 
-    _deepLinkService.initialize();
+    _deepLinkService.init();
   }
 
   void _navigateToScanQR() {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (context) => const QRScannerScreen()),
-    );
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (context) => const QRScannerScreen()));
   }
 
   @override
@@ -122,11 +121,13 @@ class _MainScreenState extends State<MainScreen> {
           child: IndexedStack(index: vm.currentIndex, children: screens),
         ),
         bottomNavigationBar: const NavBar(),
-        floatingActionButton: ExpandableFab(
-          onCreateContainer: _navigateToCreateContainer,
-          onCreateItem: _navigateToCreateItem,
-          onScanQR: _navigateToScanQR,
-        ),
+        floatingActionButton: vm.currentIndex < 3
+            ? ExpandableFab(
+                onCreateContainer: _navigateToCreateContainer,
+                onCreateItem: _navigateToCreateItem,
+                onScanQR: _navigateToScanQR,
+              )
+            : null,
       ),
     );
   }

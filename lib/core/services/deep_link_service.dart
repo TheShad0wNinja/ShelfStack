@@ -13,7 +13,7 @@ class DeepLinkService {
 
   Function(String containerId)? onContainerLink;
 
-  Future<void> initialize() async {
+  Future<void> init() async {
     // Handle cold start
     try  {
       final initialUri = await _appLinks.getInitialLink();
