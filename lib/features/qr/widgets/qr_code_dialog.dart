@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
 import 'package:flutter/rendering.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:shelfstack/core/services/deep_link_service.dart';
 import 'package:shelfstack/core/utils/files_helper.dart';
 
 class QrCodeDialog extends StatefulWidget {
@@ -82,7 +83,7 @@ class _QrCodeDialogState extends State<QrCodeDialog> {
     final containerId = widget.containerId;
     final containerName = widget.containerName;
 
-    final qrCodeContent = 'shelfstack://container/$containerId';
+    final qrCodeContent = DeepLinkService.generateContainerLink(containerId);
 
     return Dialog(
       child: Padding(

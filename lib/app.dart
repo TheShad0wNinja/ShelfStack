@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shelfstack/core/services/deep_link_service.dart';
 import 'package:shelfstack/core/theme/theme.dart';
 import 'package:shelfstack/core/viewmodels/theme_viewmodel.dart';
+import 'package:shelfstack/features/inventory/screens/container_details_screen.dart';
 import 'package:shelfstack/features/inventory/screens/containers_screen.dart';
 import 'package:shelfstack/features/home/home_screen.dart';
+import 'package:shelfstack/features/inventory/viewmodels/container_details_viewmodel.dart';
 import 'package:shelfstack/features/map/map_screen.dart';
+import 'package:shelfstack/features/qr/qr_scanner_screen.dart';
 import 'package:shelfstack/features/search/search_screen.dart';
 import 'package:shelfstack/features/settings/settings_screen.dart';
 
@@ -32,7 +36,7 @@ class MyApp extends StatelessWidget {
         ),
         Provider<ItemRepository>(create: (_) => ItemRepositorySqlite()),
         ChangeNotifierProvider(create: (_) => SettingsViewModel()),
-        ChangeNotifierProvider(create: (_) => ThemeViewModel())
+        ChangeNotifierProvider(create: (_) => ThemeViewModel()),
       ],
       child: Consumer<ThemeViewModel>(
         builder: (context, vm, child) {
@@ -65,6 +69,14 @@ class _MainScreenState extends State<MainScreen> {
     MapScreen(),
     SettingsScreen(),
   ];
+  final DeepLinkService _deepLinkService = DeepLinkService();
+
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeDeepLinks();
+  }
 
   void _navigateToCreateContainer() {
     Navigator.of(context).push(
@@ -76,6 +88,27 @@ class _MainScreenState extends State<MainScreen> {
     Navigator.of(
       context,
     ).push(MaterialPageRoute(builder: (context) => const AddItemScreen()));
+  }
+
+  void _initializeDeepLinks() {
+    _deepLinkService.onContainerLink = (containerId) {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => ChangeNotifierProvider(
+            create: (_) => ContainerDetailsViewModel(),
+            child: ContainerDetailsScreen(containerId: containerId),
+          ),
+        ),
+      );
+    };
+
+    _deepLinkService.initialize();
+  }
+
+  void _navigateToScanQR() {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (context) => const QRScannerScreen()),
+    );
   }
 
   @override
@@ -92,6 +125,7 @@ class _MainScreenState extends State<MainScreen> {
         floatingActionButton: ExpandableFab(
           onCreateContainer: _navigateToCreateContainer,
           onCreateItem: _navigateToCreateItem,
+          onScanQR: _navigateToScanQR,
         ),
       ),
     );

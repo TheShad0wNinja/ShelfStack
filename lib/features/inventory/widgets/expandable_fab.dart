@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 class ExpandableFab extends StatefulWidget {
   final VoidCallback onCreateContainer;
   final VoidCallback onCreateItem;
+  final VoidCallback onScanQR;
 
   const ExpandableFab({
     super.key,
     required this.onCreateContainer,
     required this.onCreateItem,
+    required this.onScanQR,
   });
 
   @override
@@ -65,6 +67,12 @@ class _ExpandableFabState extends State<ExpandableFab>
         icon: Icons.inventory_2_outlined,
         label: 'Create Container',
         onPressed: widget.onCreateContainer,
+        animation: _expandAnimation,
+      ),
+      _buildFabOption(
+        icon: Icons.qr_code_scanner_rounded,
+        label: "Scan Container QR",
+        onPressed: widget.onScanQR,
         animation: _expandAnimation,
       ),
     ];
