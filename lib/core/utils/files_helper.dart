@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:gal/gal.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 import 'package:image_picker/image_picker.dart';
@@ -47,6 +48,7 @@ Future<String> saveImageFile(XFile pickedFile) async {
 }
 
 enum ImageUrlType { network, localFile, unknown }
+
 ImageUrlType getImageUrlType(String url) {
   final uri = Uri.tryParse(url);
   if (uri == null || uri.scheme.isEmpty) {
@@ -61,4 +63,31 @@ ImageUrlType getImageUrlType(String url) {
   }
 
   return ImageUrlType.unknown;
+}
+
+Future<bool> saveImageBytesToGallery(
+  List<int> bytes,
+  String fileName, {
+  String? albumName,
+}) async {
+  try {
+    final hasAccess = await Gal.hasAccess();
+    if (!hasAccess) {
+      final granted = await Gal.requestAccess();
+      if (!granted) {
+        return false;
+      }
+    }
+
+    final tempDir = await getTemporaryDirectory();
+    final tempFile = File('${tempDir.path}/$fileName');
+    await tempFile.writeAsBytes(bytes);
+    await Gal.putImage(tempFile.path, album: albumName);
+    await tempFile.delete();
+
+    return true;
+  } catch (e) {
+    print(e);
+    return false;
+  }
 }

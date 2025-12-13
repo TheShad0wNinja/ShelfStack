@@ -14,7 +14,7 @@ import 'package:shelfstack/features/inventory/viewmodels/add_item_viewmodel.dart
 import 'package:shelfstack/features/inventory/viewmodels/container_details_viewmodel.dart';
 import 'package:shelfstack/features/inventory/viewmodels/edit_container_viewmodel.dart';
 import 'package:shelfstack/features/inventory/widgets/item_card.dart';
-import 'package:shelfstack/features/inventory/widgets/qr_code_dialog.dart';
+import 'package:shelfstack/features/qr/widgets/qr_code_dialog.dart';
 
 class ContainerDetailsScreen extends StatelessWidget {
   final String containerId;

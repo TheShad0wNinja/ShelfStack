@@ -5,10 +5,12 @@ import 'package:shelfstack/data/models/container.dart';
 import 'package:shelfstack/data/models/item.dart';
 import 'package:shelfstack/data/repositories/container_repository.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:uuid/uuid.dart';
 
 class ContainerRepositorySqlite implements ContainerRepository {
   final DatabaseHelper _dbHelper = DatabaseHelper();
   final _streamController = StreamController<void>.broadcast();
+  static final _uuid = Uuid();
 
   @override
   Stream<void> get onDataChanged => _streamController.stream;
@@ -79,20 +81,23 @@ class ContainerRepositorySqlite implements ContainerRepository {
   Future createContainer(Container container) async {
     final db = await _dbHelper.database;
 
+    // Assign the container a UUIDv4 id
+    final containerWithId = container.copyWith(id:_uuid.v4());
+
     await db.transaction((txn) async {
       // Insert container
-      await txn.insert('containers', container.toJson());
+      await txn.insert('containers', containerWithId.toJson());
 
       // Insert tags
-      for (final tag in container.tags) {
+      for (final tag in containerWithId.tags) {
         await txn.insert('container_tags', {
-          'container_id': container.id,
+          'container_id': containerWithId.id,
           'tag': tag,
         });
       }
     });
 
-    _streamController.add(null);
+    _streamController.add(null); // Notify listeners
   }
 
   @override

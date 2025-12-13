@@ -66,7 +66,7 @@ class CreateContainerViewModel extends ChangeNotifier {
 
     try {
       final newContainer = models.Container(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        id: "",
         name: _name,
         photoUrl: _photoUrl,
         location: Location(
@@ -101,7 +101,7 @@ class CreateContainerViewModel extends ChangeNotifier {
       notifyListeners();
       return;
     }
-    final filePath = await saveImageFile(imagePath!);
+    final filePath = await saveImageFile(imagePath);
     _photoUrl = filePath;
     notifyListeners();
   }

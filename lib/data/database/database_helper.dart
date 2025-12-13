@@ -23,17 +23,15 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 2, // Incremented to force recreation with seed data
+      version: 2,
       onCreate: _onCreate,
       onUpgrade: (db, oldVersion, newVersion) async {
-        // Drop all tables and recreate
         await db.execute('DROP TABLE IF EXISTS item_documents');
         await db.execute('DROP TABLE IF EXISTS item_tags');
         await db.execute('DROP TABLE IF EXISTS items');
         await db.execute('DROP TABLE IF EXISTS container_tags');
         await db.execute('DROP TABLE IF EXISTS containers');
 
-        // Recreate with seed data
         await _onCreate(db, newVersion);
       },
     );
@@ -99,8 +97,7 @@ class DatabaseHelper {
     await db.execute('PRAGMA foreign_keys = ON');
 
     // Seed initial data
-    // if (kDebugMode) {
-    if (true) {
+    if (kDebugMode) {
       await DatabaseSeeder.seed(db);
     }
   }
