@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:shelfstack/core/utils/files_helper.dart';
 import 'package:shelfstack/data/models/container.dart' as models;
 import 'package:shelfstack/data/models/location.dart';
@@ -8,6 +9,7 @@ class CreateContainerViewModel extends ChangeNotifier {
   String _name = '';
   String _locationLabel = '';
   String? _locationAddress;
+  LatLng? _selectedLocation;
   String? _photoUrl;
   List<String> _tags = [];
   bool _isLoading = false;
@@ -16,6 +18,7 @@ class CreateContainerViewModel extends ChangeNotifier {
   String get name => _name;
   String get locationLabel => _locationLabel;
   String? get locationAddress => _locationAddress;
+  LatLng? get selectedLocation => _selectedLocation;
   String? get photoUrl => _photoUrl;
   List<String> get tags => _tags;
   bool get isLoading => _isLoading;
@@ -53,6 +56,13 @@ class CreateContainerViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  void updateLocation(LatLng location) {
+    _selectedLocation = location;
+    _locationAddress =
+        '${location.latitude.toStringAsFixed(4)}, ${location.longitude.toStringAsFixed(4)}';
+    notifyListeners();
+  }
+
   Future<bool> createContainer(ContainerRepository repository) async {
     if (_name.trim().isEmpty) {
       _error = 'Container name cannot be empty';
@@ -72,8 +82,8 @@ class CreateContainerViewModel extends ChangeNotifier {
         location: Location(
           label: _locationLabel.isEmpty ? 'Unassigned' : _locationLabel,
           address: _locationAddress ?? '',
-          latitude: 0,
-          longitude: 0,
+          latitude: _selectedLocation?.latitude ?? 0.0,
+          longitude: _selectedLocation?.longitude ?? 0.0,
         ),
         tags: _tags,
         items: [],

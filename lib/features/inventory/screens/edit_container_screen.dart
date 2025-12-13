@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:latlong2/latlong.dart';
+import 'package:shelfstack/features/map/screens/location_picker_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:shelfstack/core/utils/dialog_helper.dart';
-import 'package:shelfstack/core/widgets/dynamic_image.dart';
 import 'package:shelfstack/core/widgets/expandable_dynamic_image.dart';
 import 'package:shelfstack/data/models/container.dart' as models;
 
@@ -21,7 +22,6 @@ class _EditContainerScreenState extends State<EditContainerScreen> {
   late final TextEditingController _locationLabelController;
   final _tagController = TextEditingController();
   late List<String> _tags;
-  String? _locationAddress;
   String? _photoUrl;
 
   bool _didUpdate = false;
@@ -34,7 +34,6 @@ class _EditContainerScreenState extends State<EditContainerScreen> {
       text: widget.container.location.label,
     );
     _tags = List.from(widget.container.tags);
-    _locationAddress = widget.container.location.address;
     _photoUrl = widget.container.photoUrl;
 
     _nameController.addListener(
@@ -83,13 +82,6 @@ class _EditContainerScreenState extends State<EditContainerScreen> {
   void _removeTag(String tag) {
     setState(() {
       _tags.remove(tag);
-      _didUpdate = true;
-    });
-  }
-
-  void _useCurrentLocation() {
-    setState(() {
-      _locationAddress = '123 Street, Storage room';
       _didUpdate = true;
     });
   }
@@ -307,6 +299,18 @@ class _EditContainerScreenState extends State<EditContainerScreen> {
     );
   }
 
+  Future<dynamic> _openLocationPicker(EditContainerViewModel vm) {
+    return Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => LocationPickerScreen(
+          initialLocation: vm.location != null && vm.location!.latitude != 0
+              ? LatLng(vm.location!.latitude, vm.location!.longitude)
+              : null,
+        ),
+      ),
+    );
+  }
+
   Widget _buildLocationSection() {
     return Card(
       child: Padding(
@@ -316,45 +320,108 @@ class _EditContainerScreenState extends State<EditContainerScreen> {
           children: [
             Text('Location', style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 16),
-            Container(
-              height: 120,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Center(
-                child: Icon(
-                  Icons.map,
-                  size: 48,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
+            Consumer<EditContainerViewModel>(
+              builder: (context, vm, child) {
+                return InkWell(
+                  onTap: vm.addressLoading
+                      ? null
+                      : () async {
+                          final result = await _openLocationPicker(vm);
+                          if (result is LatLng) {
+                            vm.updateLocation(result);
+                          }
+                        },
+                  child: Container(
+                    height: 120,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Center(
+                      child: vm.location != null && vm.location!.latitude != 0
+                          ? Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(
+                                  Icons.location_on,
+                                  size: 48,
+                                  color: Colors.red,
+                                ),
+                                Text(
+                                  '${vm.location!.latitude.toStringAsFixed(4)}, ${vm.location!.longitude.toStringAsFixed(4)}',
+                                  style: Theme.of(context).textTheme.bodyMedium,
+                                ),
+                              ],
+                            )
+                          : Icon(
+                              Icons.map,
+                              size: 48,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurfaceVariant,
+                            ),
+                    ),
+                  ),
+                );
+              },
             ),
             const SizedBox(height: 16),
             SizedBox(
               width: double.infinity,
-              child: FilledButton.tonalIcon(
-                onPressed: _useCurrentLocation,
-                icon: const Icon(Icons.my_location),
-                label: const Text('Use Current Location'),
+              child: Consumer<EditContainerViewModel>(
+                builder: (context, vm, child) {
+                  return FilledButton.tonalIcon(
+                    onPressed: vm.addressLoading
+                        ? null
+                        : () async {
+                            final result = await _openLocationPicker(vm);
+                            if (result is LatLng) {
+                              vm.updateLocation(result);
+                            }
+                          },
+                    icon: vm.addressLoading
+                        ? SizedBox(
+                            width: 14,
+                            height: 14,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 1,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.primaryFixedDim,
+                            ),
+                          )
+                        : const Icon(Icons.map),
+                    label: const Text('Select on Map'),
+                  );
+                },
               ),
             ),
             const SizedBox(height: 16),
-            TextField(
-              controller: _locationLabelController,
-              decoration: const InputDecoration(
-                labelText: 'Location Label',
-                hintText: 'e.g. Storage Room',
-              ),
+            Consumer<EditContainerViewModel>(
+              builder: (context, vm, child) {
+                return Column(
+                  children: [
+                    TextField(
+                      controller: _locationLabelController,
+                      decoration: const InputDecoration(
+                        labelText: 'Location Label',
+                        hintText: 'e.g. Storage Room',
+                      ),
+                    ),
+                    if (vm.location != null) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        'Address: ${vm.location?.address ?? "Unknown Address"}',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ],
+                  ],
+                );
+              },
             ),
-            if (_locationAddress != null) ...[
-              const SizedBox(height: 8),
-              Text(
-                'Address: $_locationAddress',
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            ],
           ],
         ),
       ),

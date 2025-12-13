@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:shelfstack/features/map/util/external_map_helper.dart';
 
 import 'package:provider/provider.dart';
 import 'package:shelfstack/core/extensions/string_extensions.dart';
-import 'package:shelfstack/core/widgets/dynamic_image.dart';
 import 'package:shelfstack/core/widgets/expandable_dynamic_image.dart';
 import 'package:shelfstack/data/models/container.dart' as models;
 
@@ -94,7 +94,7 @@ class _ContainerDetailsContentState extends State<_ContainerDetailsContent> {
           body: CustomScrollView(
             slivers: [
               SliverAppBar(
-                expandedHeight: 280,
+                expandedHeight: 318,
                 pinned: true,
                 stretch: true,
                 leading: IconButton(
@@ -249,7 +249,7 @@ class _ContainerDetailsContentState extends State<_ContainerDetailsContent> {
                 ],
                 flexibleSpace: FlexibleSpaceBar(
                   background: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 40, 16, 10),
+                    padding: const EdgeInsets.fromLTRB(16, 80, 16, 10),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
@@ -329,22 +329,37 @@ class _ContainerDetailsContentState extends State<_ContainerDetailsContent> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.location_on_outlined,
-              size: 20,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+        InkWell(
+          onTap: () async {
+            await openMap(container.location.toLatLng());
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(width: 8),
+                Text(
+                  container.location.label,
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    color: Theme.of(context).colorScheme.tertiary,
+                  ),
+                ),
+                if (container.location.address.isNotEmpty) ...[
+                  Text(
+                    container.location.address,
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                    maxLines: 1,
+                    textAlign: TextAlign.center,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ],
             ),
-            const SizedBox(width: 8),
-            Text(
-              '${container.location.label} • ${container.location.address}',
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ],
+          ),
         ),
         const SizedBox(height: 8),
         Wrap(
@@ -435,12 +450,11 @@ class _SortBottomSheetState extends State<_SortBottomSheet> {
                 width: 32,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.onSurfaceVariant.withOpacity(0.4),
+                  color: theme.colorScheme.onSurfaceVariant.withAlpha(100),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
             ),
-
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 8, 24, 16),
               child: Text(

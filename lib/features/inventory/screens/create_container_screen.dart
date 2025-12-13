@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart' hide FileImage;
+import 'package:latlong2/latlong.dart';
+import 'package:shelfstack/core/widgets/expandable_dynamic_image.dart';
+import 'package:shelfstack/features/map/screens/location_picker_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:shelfstack/core/utils/dialog_helper.dart';
-import 'package:shelfstack/core/widgets/dynamic_image.dart';
-import 'package:shelfstack/core/widgets/expandable_dynamic_image.dart';
+
 import 'package:shelfstack/data/repositories/container_repository.dart';
 import 'package:shelfstack/features/inventory/viewmodels/create_container_viewmodel.dart';
 
@@ -126,7 +128,10 @@ class _CreateContainerScreenContentState
                 ),
                 color: Theme.of(context).colorScheme.surface,
               ),
-              child: ExpandableDynamicImage(imageUrl: vm.photoUrl, heroTag: 'create_container_image'),
+              child: ExpandableDynamicImage(
+                imageUrl: vm.photoUrl,
+                heroTag: 'create_container_image',
+              ),
             ),
             const SizedBox(height: 16),
             Row(
@@ -260,18 +265,48 @@ class _CreateContainerScreenContentState
           children: [
             Text('Location', style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 16),
-            Container(
-              height: 120,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Center(
-                child: Icon(
-                  Icons.map,
-                  size: 48,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+            InkWell(
+              onTap: () async {
+                final result = await Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const LocationPickerScreen(),
+                  ),
+                );
+                if (result is LatLng) {
+                  vm.updateLocation(result);
+                }
+              },
+              child: Container(
+                height: 120,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(12),
+                  image: vm.selectedLocation != null
+                      ? null // TODO: Add static map preview if possible, for now just color/icon
+                      : null,
+                ),
+                child: Center(
+                  child: vm.selectedLocation != null
+                      ? Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(
+                              Icons.location_on,
+                              size: 48,
+                              color: Colors.red,
+                            ),
+                            Text(
+                              '${vm.selectedLocation!.latitude.toStringAsFixed(4)}, ${vm.selectedLocation!.longitude.toStringAsFixed(4)}',
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                          ],
+                        )
+                      : Icon(
+                          Icons.map,
+                          size: 48,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
                 ),
               ),
             ),
@@ -279,9 +314,18 @@ class _CreateContainerScreenContentState
             SizedBox(
               width: double.infinity,
               child: FilledButton.tonalIcon(
-                onPressed: vm.useCurrentLocation,
-                icon: const Icon(Icons.my_location),
-                label: const Text('Use Current Location'),
+                onPressed: () async {
+                  final result = await Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const LocationPickerScreen(),
+                    ),
+                  );
+                  if (result is LatLng) {
+                    vm.updateLocation(result);
+                  }
+                },
+                icon: const Icon(Icons.map),
+                label: const Text('Select on Map'),
               ),
             ),
             const SizedBox(height: 16),
@@ -295,7 +339,7 @@ class _CreateContainerScreenContentState
             if (vm.locationAddress != null) ...[
               const SizedBox(height: 8),
               Text(
-                'Address: ${vm.locationAddress}',
+                'Coordinates: ${vm.locationAddress}',
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ],

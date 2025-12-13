@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:shelfstack/core/utils/files_helper.dart';
 import 'package:shelfstack/data/models/container.dart' as models;
 import 'package:shelfstack/data/models/location.dart';
 import 'package:shelfstack/data/repositories/container_repository.dart';
+import 'package:shelfstack/features/map/util/address_helper.dart';
 
 class EditContainerViewModel extends ChangeNotifier {
   final ContainerRepository _repository;
@@ -14,6 +16,11 @@ class EditContainerViewModel extends ChangeNotifier {
   String? _photoUrl;
 
   String? get photoUrl => _photoUrl;
+  Location? get location => _location;
+
+  bool _addressLoading = false;
+  bool get addressLoading => _addressLoading;
+
 
   EditContainerViewModel(this._container, this._repository) {
     _name = _container.name;
@@ -24,6 +31,20 @@ class EditContainerViewModel extends ChangeNotifier {
 
   void updateName(String s) {
     _name = s;
+    notifyListeners();
+  }
+
+  void updateLocation(LatLng location) async {
+    _addressLoading = true;
+    notifyListeners();
+    final address = await fetchAddressFromLatLng(location);
+    _location = Location(
+      label: _location?.label ?? 'Unassigned',
+      latitude: location.latitude,
+      longitude: location.longitude,
+      address: address,
+    );
+    _addressLoading = false;
     notifyListeners();
   }
 
@@ -55,7 +76,6 @@ class EditContainerViewModel extends ChangeNotifier {
     );
     await _repository.updateContainer(newContainer);
   }
-
 
   void choosePhoto() async {
     final imagePath = await pickImage();

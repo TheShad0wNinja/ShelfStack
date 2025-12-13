@@ -9,7 +9,7 @@ import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
 import 'package:shelfstack/data/models/container.dart' as models;
 import 'package:shelfstack/features/inventory/widgets/container_row.dart';
 
-import 'map_viewmodel.dart';
+import '../viewmodels/map_viewmodel.dart';
 
 class MapScreen extends StatelessWidget {
   const MapScreen({super.key});
@@ -84,11 +84,7 @@ class _MapScreenContentState extends State<_MapScreenContent> {
             point: c.location.toLatLng(),
             width: 48,
             height: 48,
-            child: Icon(
-              Icons.location_on_rounded,
-              size: 48,
-              color: Theme.of(context).colorScheme.tertiary,
-            ),
+            child: Icon(Icons.location_on_rounded, size: 48, color: Colors.red),
           );
           markerMap[marker] = c;
           return marker;
@@ -155,13 +151,13 @@ class _MapScreenContentState extends State<_MapScreenContent> {
                         return Container(
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(20),
-                            color: Theme.of(context).colorScheme.tertiary,
+                            color: Colors.red,
                           ),
                           child: Center(
                             child: Text(
                               markers.length.toString(),
                               style: Theme.of(context).textTheme.labelLarge
-                                  ?.copyWith(color: Theme.of(context).colorScheme.onTertiary),
+                                  ?.copyWith(color: Colors.white),
                             ),
                           ),
                         );
@@ -192,7 +188,9 @@ class _MapScreenContentState extends State<_MapScreenContent> {
                       ? SizedBox(
                           height: 24,
                           width: 24,
-                          child: CircularProgressIndicator(color: Theme.of(context).colorScheme.onPrimary),
+                          child: CircularProgressIndicator(
+                            color: Theme.of(context).colorScheme.onPrimary,
+                          ),
                         )
                       : const Icon(Icons.my_location),
                 ),
@@ -211,23 +209,36 @@ class _MapScreenContentState extends State<_MapScreenContent> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      useSafeArea: true,
       builder: (context) {
         return DraggableScrollableSheet(
           expand: false,
           builder: (context, scrollController) {
             return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Center(
+                  child: Container(
+                    margin: const EdgeInsets.only(top: 12, bottom: 8),
+                    width: 32,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.4),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
                 Padding(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.fromLTRB(24, 8, 24, 16),
                   child: Text(
                     'Containers (${containers.length})',
-                    style: Theme.of(context).textTheme.titleLarge,
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
                 Expanded(
                   child: Padding(
-                    padding: const EdgeInsets.all(8.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
                     child: ListView.separated(
                       controller: scrollController,
                       itemCount: containers.length,

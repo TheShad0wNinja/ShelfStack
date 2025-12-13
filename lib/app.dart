@@ -7,7 +7,7 @@ import 'package:shelfstack/features/inventory/screens/container_details_screen.d
 import 'package:shelfstack/features/inventory/screens/containers_screen.dart';
 import 'package:shelfstack/features/home/home_screen.dart';
 import 'package:shelfstack/features/inventory/viewmodels/container_details_viewmodel.dart';
-import 'package:shelfstack/features/map/map_screen.dart';
+import 'package:shelfstack/features/map/screens/map_screen.dart';
 import 'package:shelfstack/features/qr/qr_scanner_screen.dart';
 import 'package:shelfstack/features/search/search_screen.dart';
 import 'package:shelfstack/features/settings/settings_screen.dart';
