@@ -172,11 +172,15 @@ class _EditContainerViewState extends State<EditContainerView> {
               children: [
                 Expanded(
                   child: FilledButton.icon(
-                    onPressed: () {
+                    onPressed: () async {
                       setState(() {
                         _didUpdate = true;
                       });
-                      context.read<EditContainerViewModel>().takePhoto();
+                      final result = await context.read<EditContainerViewModel>().takePhoto();
+                      if (!context.mounted) return;
+                      if (!result.isValid) {
+                        SnackNotificationHelper.showError(context, result.generalError ?? 'Error taking photo');
+                      }
                     },
                     icon: const Icon(Icons.camera_alt),
                     label: const Text('Take Photo'),
@@ -185,11 +189,15 @@ class _EditContainerViewState extends State<EditContainerView> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: OutlinedButton.icon(
-                    onPressed: () {
+                    onPressed: () async {
                       setState(() {
                         _didUpdate = true;
                       });
-                      context.read<EditContainerViewModel>().choosePhoto();
+                      final result = await context.read<EditContainerViewModel>().choosePhoto();
+                      if (!context.mounted) return;
+                      if (!result.isValid) {
+                        SnackNotificationHelper.showError(context, result.generalError ?? 'Error choosing photo');
+                      }
                     },
                     icon: const Icon(Icons.photo_library_outlined),
                     label: const Text('Choose'),

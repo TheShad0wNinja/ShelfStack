@@ -59,7 +59,27 @@ class _QRScannerViewState extends State<QRScannerView> {
         context: context,
         builder: (context) => AlertDialog(
           title: const Text('Invalid QR Code'),
-          content: const Text('This QR code is not a valid container code.'),
+          content: const Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.qr_code_2,
+                size: 48,
+                color: Colors.grey,
+              ),
+              SizedBox(height: 16),
+              Text(
+                'This QR code is not recognized',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+              SizedBox(height: 8),
+              Text(
+                'Make sure you\'re scanning a valid ShelfStack container QR code.',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.grey),
+              ),
+            ],
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),

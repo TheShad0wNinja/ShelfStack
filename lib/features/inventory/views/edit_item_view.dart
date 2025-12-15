@@ -252,9 +252,13 @@ class _EditItemViewContentState extends State<_EditItemViewContent> {
               children: [
                 Expanded(
                   child: FilledButton.icon(
-                    onPressed: () {
+                    onPressed: () async {
                       _markAsChanged();
-                      vm.takePhoto();
+                      final result = await vm.takePhoto();
+                      if (!context.mounted) return;
+                      if (!result.isValid) {
+                        SnackNotificationHelper.showError(context, result.generalError ?? 'Error taking photo');
+                      }
                     },
                     icon: const Icon(Icons.camera_alt),
                     label: const Text('Take Photo'),
@@ -263,9 +267,13 @@ class _EditItemViewContentState extends State<_EditItemViewContent> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: OutlinedButton.icon(
-                    onPressed: () {
+                    onPressed: () async {
                       _markAsChanged();
-                      vm.choosePhoto();
+                      final result = await vm.choosePhoto();
+                      if (!context.mounted) return;
+                      if (!result.isValid) {
+                        SnackNotificationHelper.showError(context, result.generalError ?? 'Error choosing photo');
+                      }
                     },
                     icon: const Icon(Icons.photo_library_outlined),
                     label: const Text('Choose'),

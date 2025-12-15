@@ -207,8 +207,12 @@ class _AddItemViewContentState extends State<_AddItemViewContent> {
                   children: [
                     Expanded(
                       child: FilledButton.icon(
-                        onPressed: () {
-                          vm.takePhoto();
+                        onPressed: () async {
+                          final result = await vm.takePhoto();
+                          if (!context.mounted) return;
+                          if (!result.isValid) {
+                            SnackNotificationHelper.showError(context, result.generalError ?? 'Error taking photo');
+                          }
                         },
                         icon: const Icon(Icons.camera_alt),
                         label: const Text('Take Photo'),
@@ -217,8 +221,12 @@ class _AddItemViewContentState extends State<_AddItemViewContent> {
                     const SizedBox(width: 12),
                     Expanded(
                       child: OutlinedButton.icon(
-                        onPressed: () {
-                          vm.choosePhoto();
+                        onPressed: () async {
+                          final result = await vm.choosePhoto();
+                          if (!context.mounted) return;
+                          if (!result.isValid) {
+                            SnackNotificationHelper.showError(context, result.generalError ?? 'Error choosing photo');
+                          }
                         },
                         icon: const Icon(Icons.photo_library_outlined),
                         label: const Text('Choose'),

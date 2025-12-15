@@ -129,27 +129,33 @@ class AddItemViewModel extends ChangeNotifier {
     }
   }
 
-  void choosePhoto() async {
-    final imagePath = await pickImage();
-    if (imagePath == null) {
-      _error = "Error picking image";
+  Future<FormValidationResponse> choosePhoto() async {
+    try {
+      final imagePath = await pickImage();
+      if (imagePath == null) {
+        return FormValidationResponse.generalError("Image selection cancelled");
+      }
+      final filePath = await saveImageFile(imagePath);
+      _photoUrl = filePath;
       notifyListeners();
-      return;
+      return FormValidationResponse.success();
+    } catch (e) {
+      return FormValidationResponse.generalError("Error picking image: $e");
     }
-    final filePath = await saveImageFile(imagePath);
-    _photoUrl = filePath;
-    notifyListeners();
   }
 
-  void takePhoto() async {
-    final imagePath = await takeImagePhoto();
-    if (imagePath == null) {
-      _error = "Error picking image";
+  Future<FormValidationResponse> takePhoto() async {
+    try {
+      final imagePath = await takeImagePhoto();
+      if (imagePath == null) {
+        return FormValidationResponse.generalError("Photo capture cancelled");
+      }
+      final filePath = await saveImageFile(imagePath);
+      _photoUrl = filePath;
       notifyListeners();
-      return;
+      return FormValidationResponse.success();
+    } catch (e) {
+      return FormValidationResponse.generalError("Error taking photo: $e");
     }
-    final filePath = await saveImageFile(imagePath);
-    _photoUrl = filePath;
-    notifyListeners();
   }
 }
