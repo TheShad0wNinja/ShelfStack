@@ -8,6 +8,8 @@ import 'package:shelfstack/data/repositories/container_repository.dart';
 import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
 import 'package:shelfstack/data/models/container.dart' as models;
 import 'package:shelfstack/features/inventory/widgets/container_row.dart';
+import 'package:shelfstack/features/map/util/ui_helper.dart';
+import 'package:shelfstack/features/map/widgets/location_fab.dart';
 
 import '../viewmodels/map_viewmodel.dart';
 
@@ -51,7 +53,8 @@ class _MapViewContentState extends State<_MapViewContent> {
     });
 
     if (vm.userLocation != null) {
-      _mapController.move(vm.userLocation!, 13);
+      _mapController.move(vm.userLocation!, 18);
+      _mapController.rotate(0);
     }
   }
 
@@ -80,36 +83,14 @@ class _MapViewContentState extends State<_MapViewContent> {
 
         final markerMap = <Marker, models.Container>{};
         final markers = vm.containers.map((c) {
-          final marker = Marker(
-            point: c.location.toLatLng(),
-            width: 48,
-            height: 48,
-            child: Icon(Icons.location_on_rounded, size: 48, color: Colors.red),
-          );
+          final marker = createPointMarker(c.location.toLatLng());
           markerMap[marker] = c;
           return marker;
         }).toList();
 
-        if (vm.userLocation != null) {
-          markers.add(
-            Marker(
-              point: vm.userLocation!,
-              width: 48,
-              height: 48,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.blue.withAlpha(70),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.my_location,
-                  color: Colors.blue,
-                  size: 24,
-                ),
-              ),
-            ),
-          );
-        }
+        final Marker? userLocationMarker = vm.userLocation != null
+            ? createUserLocationMarker(vm.userLocation!)
+            : null;
 
         final LatLng initialCenter;
         if (vm.userLocation != null) {
@@ -136,6 +117,8 @@ class _MapViewContentState extends State<_MapViewContent> {
                     userAgentPackageName: 'com.shelfstack',
                   ),
                   MapCompass.cupertino(),
+                  if (userLocationMarker != null)
+                    MarkerLayer(markers: [userLocationMarker]),
                   MarkerClusterLayerWidget(
                     options: MarkerClusterLayerOptions(
                       maxClusterRadius: 45,
@@ -145,6 +128,7 @@ class _MapViewContentState extends State<_MapViewContent> {
                       maxZoom: 15,
                       markers: markers,
                       zoomToBoundsOnClick: false,
+                      rotate: true,
                       spiderfyCluster: false,
                       showPolygon: false,
                       builder: (context, markers) {
@@ -182,17 +166,9 @@ class _MapViewContentState extends State<_MapViewContent> {
               Positioned(
                 bottom: 120,
                 right: 16,
-                child: FloatingActionButton(
+                child: LocationFAB(
                   onPressed: _navigateToLocation,
-                  child: _isNavigatingToLocation
-                      ? SizedBox(
-                          height: 24,
-                          width: 24,
-                          child: CircularProgressIndicator(
-                            color: Theme.of(context).colorScheme.onPrimary,
-                          ),
-                        )
-                      : const Icon(Icons.my_location),
+                  isLoading: _isNavigatingToLocation,
                 ),
               ),
             ],
@@ -222,7 +198,9 @@ class _MapViewContentState extends State<_MapViewContent> {
                     width: 32,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.4),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurfaceVariant.withAlpha(100),
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),

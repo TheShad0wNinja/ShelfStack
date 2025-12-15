@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_compass/flutter_map_compass.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:shelfstack/features/map/util/location_helper.dart';
+import 'package:shelfstack/features/map/util/ui_helper.dart';
+import 'package:shelfstack/features/map/widgets/location_fab.dart';
 
 class LocationPickerView extends StatefulWidget {
   final LatLng? initialLocation;
@@ -28,12 +30,6 @@ class _LocationPickerViewState extends State<LocationPickerView> {
     }
   }
 
-  void _onTap(TapPosition tapPosition, LatLng point) {
-    setState(() {
-      _pickedLocation = point;
-    });
-  }
-
   void _confirmSelection() {
     if (_pickedLocation != null) {
       Navigator.of(context).pop(_pickedLocation);
@@ -46,7 +42,7 @@ class _LocationPickerViewState extends State<LocationPickerView> {
     });
 
     try {
-      final position = await _getPosition();
+      final position = await getUserPosition();
       final newLocation = LatLng(position.latitude, position.longitude);
 
       setState(() {
@@ -72,29 +68,6 @@ class _LocationPickerViewState extends State<LocationPickerView> {
     }
   }
 
-  Future<Position> _getPosition() async {
-    final serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      return Future.error('Location services are disabled.');
-    }
-
-    var permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        return Future.error('Location permissions are denied');
-      }
-    }
-
-    if (permission == LocationPermission.deniedForever) {
-      return Future.error(
-        'Location permissions are permanently denied, we cannot request permissions.',
-      );
-    }
-
-    return await Geolocator.getCurrentPosition();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -111,8 +84,10 @@ class _LocationPickerViewState extends State<LocationPickerView> {
         mapController: _mapController,
         options: MapOptions(
           initialCenter: widget.initialLocation ?? const LatLng(0, 0),
-          initialZoom: 13,
-          onTap: _onTap,
+          initialZoom: 18,
+          onTap: (_, point) => setState(() {
+            _pickedLocation = point;
+          }),
         ),
         children: [
           TileLayer(
@@ -124,46 +99,16 @@ class _LocationPickerViewState extends State<LocationPickerView> {
             MarkerLayer(
               markers: [
                 if (_userLocation != null)
-                  Marker(
-                    point: _userLocation!,
-                    width: 48,
-                    height: 48,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.blue.withAlpha(70),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.my_location,
-                        color: Colors.blue,
-                        size: 24,
-                      ),
-                    ),
-                  ),
+                  createUserLocationMarker(_userLocation!),
                 if (_pickedLocation != null)
-                  Marker(
-                    point: _pickedLocation!,
-                    width: 48,
-                    height: 48,
-                    child: const Icon(
-                      Icons.location_on,
-                      color: Colors.red,
-                      size: 48,
-                    ),
-                  ),
+                  createPointMarker(_pickedLocation!),
               ],
             ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: LocationFAB(
         onPressed: _moveToCurrentLocation,
-        child: _isLocating
-            ? const SizedBox(
-                width: 24,
-                height: 24,
-                child: CircularProgressIndicator(color: Colors.white),
-              )
-            : const Icon(Icons.my_location),
+        isLoading: _isLocating,
       ),
     );
   }

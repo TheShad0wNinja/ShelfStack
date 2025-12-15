@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
@@ -6,9 +8,14 @@ import 'package:shelfstack/data/repositories/container_repository.dart';
 
 class MapViewModel extends ChangeNotifier {
   final ContainerRepository _containerRepository;
+  StreamSubscription<dynamic>? _repoSub;
 
   MapViewModel(this._containerRepository) {
     init();
+
+    _repoSub = _containerRepository.onDataChanged.listen((_) {
+      fetchContainers();
+    });
   }
 
   List<models.Container> _containers = [];
@@ -32,10 +39,12 @@ class MapViewModel extends ChangeNotifier {
     _error = null;
     notifyListeners();
 
-    await Future.wait([fetchContainers(), getCurrentLocation()]);
+    await fetchContainers();
 
     _isLoading = false;
     notifyListeners();
+
+    unawaited(getCurrentLocation());
   }
 
   Future<void> fetchContainers() async {
@@ -83,5 +92,11 @@ class MapViewModel extends ChangeNotifier {
       _error = 'Failed to get current location: $e';
       notifyListeners();
     }
+  }
+
+  @override
+  void dispose() {
+    _repoSub?.cancel();
+    super.dispose();
   }
 }
