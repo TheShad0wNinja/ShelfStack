@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart' hide FileImage;
 import 'package:latlong2/latlong.dart';
+import 'package:shelfstack/core/utils/snack_notification_helper.dart';
 import 'package:shelfstack/core/widgets/expandable_dynamic_image.dart';
 import 'package:shelfstack/features/map/views/location_picker_view.dart';
 import 'package:provider/provider.dart';
@@ -62,22 +63,18 @@ class _CreateContainerViewContentState
             IconButton(
               onPressed: () async {
                 final vm = context.read<CreateContainerViewModel>();
-                final success = await vm.createContainer();
-                if (success && mounted) {
+                final result = await vm.createContainer();
+                if (!mounted) return;
+
+                if (result.isValid) {
                   Navigator.of(context).pop();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Container created successfully'),
-                      backgroundColor: Colors.green,
-                    ),
-                  );
-                } else if (mounted && vm.error != null) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(vm.error!),
-                      backgroundColor: Theme.of(context).colorScheme.error,
-                    ),
-                  );
+                  SnackNotificationHelper.showSuccess(context, 'Container created successfully');
+                } else if (result.hasAnyError()) {
+                  if (result.hasGeneralError()) {
+                    SnackNotificationHelper.showError(context, result.generalError!);
+                  } else {
+                    SnackNotificationHelper.showErrors(context, result.getAllErrors());
+                  }
                 }
               },
               icon: const Icon(Icons.save),

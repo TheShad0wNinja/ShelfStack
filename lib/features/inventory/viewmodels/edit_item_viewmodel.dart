@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:shelfstack/core/models/form_validation_response.dart';
 import 'package:shelfstack/core/utils/files_helper.dart';
 import 'package:shelfstack/data/models/container.dart' as models;
 import 'package:shelfstack/data/models/item.dart';
@@ -33,45 +35,35 @@ class EditItemViewModel extends ChangeNotifier {
   }
 
   bool _isLoading = false;
-
   bool get isLoading => _isLoading;
 
   String? _error;
-
   String? get error => _error;
 
   Item get item => _originalItem;
 
   late String _name;
-
   String get name => _name;
 
   String? _description;
-
   String? get description => _description;
 
   late List<String> _tags;
-
   List<String> get tags => _tags;
 
   String? _photoUrl;
-
   String? get photoUrl => _photoUrl;
 
   late models.Container _selectedContainer;
-
   models.Container get selectedContainer => _selectedContainer;
 
   List<models.Container> _availableContainers = [];
-
   List<models.Container> get availableContainers => _availableContainers;
 
   List<models.Container> _filteredContainers = [];
-
   List<models.Container> get filteredContainers => _filteredContainers;
 
   String _containerSearchQuery = '';
-
   String get containerSearchQuery => _containerSearchQuery;
 
   Future<void> _loadAvailableContainers() async {
@@ -80,7 +72,9 @@ class EditItemViewModel extends ChangeNotifier {
       _filteredContainers = _availableContainers;
       notifyListeners();
     } catch (e) {
-      print('Error loading containers: $e');
+      if (kDebugMode) {
+        print('Error loading containers: $e');
+      }
     }
   }
 
@@ -121,22 +115,39 @@ class EditItemViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<bool> save() async {
+  FormValidationResponse validate() {
+    final errors = <String, String>{};
+    
+    if (_name.trim().isEmpty) {
+      errors['name'] = 'Item name is required';
+    }
+
+    if (errors.isNotEmpty) {
+      return FormValidationResponse.fieldErrors(errors);
+    }
+
+    return FormValidationResponse.success();
+  }
+
+  Future<FormValidationResponse> save() async {
+    final validationResult = validate();
+    if (!validationResult.isValid) {
+      return validationResult;
+    }
+
     _isLoading = true;
-    _error = null;
     notifyListeners();
 
     try {
       if (_selectedContainer.id != _originalItem.containerId) {
-        final success = await _moveItem(
+        final moveResult = await _moveItem(
           itemId: _originalItem.id,
           fromContainerId: _originalItem.containerId,
           toContainerId: _selectedContainer.id,
         );
 
-        if (!success) {
-          notifyListeners();
-          return false;
+        if (!moveResult.isValid) {
+          return moveResult;
         }
       }
 
@@ -153,17 +164,16 @@ class EditItemViewModel extends ChangeNotifier {
       );
 
       await _itemRepository.updateItem(updatedItem);
-      return true;
+      return FormValidationResponse.success();
     } catch (e) {
-      _error = e.toString();
-      return false;
+      return FormValidationResponse.generalError(e.toString());
     } finally {
       _isLoading = false;
       notifyListeners();
     }
   }
 
-  Future<bool> _moveItem({
+  Future<FormValidationResponse> _moveItem({
     required String itemId,
     required String fromContainerId,
     required String toContainerId,
@@ -174,10 +184,9 @@ class EditItemViewModel extends ChangeNotifier {
         fromContainerId,
         toContainerId,
       );
-      return true;
+      return FormValidationResponse.success();
     } catch (e) {
-      _error = e.toString();
-      return false;
+      return FormValidationResponse.generalError(e.toString());
     }
   }
 

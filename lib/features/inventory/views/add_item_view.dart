@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shelfstack/core/utils/dialog_helper.dart';
+import 'package:shelfstack/core/utils/snack_notification_helper.dart';
 import 'package:shelfstack/core/widgets/expandable_dynamic_image.dart';
 import 'package:shelfstack/data/models/container.dart' as models;
 import 'package:shelfstack/data/repositories/container_repository.dart';
@@ -90,19 +91,18 @@ class _AddItemViewContentState extends State<_AddItemViewContent> {
             IconButton(
               onPressed: () async {
                 final vm = context.read<AddItemViewModel>();
-                final success = await vm.save();
-                if (success && mounted) {
+                final result = await vm.save();
+                if (!mounted) return;
+
+                if (result.isValid) {
                   Navigator.of(context).pop(true);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Item added successfully')),
-                  );
-                } else if (mounted && vm.error != null) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(vm.error!),
-                      backgroundColor: Theme.of(context).colorScheme.error,
-                    ),
-                  );
+                  SnackNotificationHelper.showSuccess(context, 'Item added successfully');
+                } else if (result.hasAnyError()) {
+                  if (result.hasGeneralError()) {
+                    SnackNotificationHelper.showError(context, result.generalError!);
+                  } else {
+                    SnackNotificationHelper.showErrors(context, result.getAllErrors());
+                  }
                 }
               },
               icon: const Icon(Icons.save),

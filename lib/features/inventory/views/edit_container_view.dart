@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:shelfstack/core/utils/snack_notification_helper.dart';
 import 'package:shelfstack/features/map/views/location_picker_view.dart';
 import 'package:provider/provider.dart';
 import 'package:shelfstack/core/utils/dialog_helper.dart';
@@ -106,19 +107,13 @@ class _EditContainerViewState extends State<EditContainerView> {
               tooltip: 'Save',
               icon: const Icon(Icons.save),
               onPressed: () async {
-                try {
-                  await context.read<EditContainerViewModel>().save(context);
-                  if (mounted) {
+                final result = await context.read<EditContainerViewModel>().save();
+                if (mounted) {
+                  if (result.isValid) {
+                    SnackNotificationHelper.showSuccess(context, 'Container saved successfully');
                     Navigator.of(context).pop(true);
-                  }
-                } catch (e) {
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Error saving container: $e'),
-                        backgroundColor: Theme.of(context).colorScheme.error,
-                      ),
-                    );
+                  } else if (result.generalError != null) {
+                    SnackNotificationHelper.showError(context, result.generalError!);
                   }
                 }
               },

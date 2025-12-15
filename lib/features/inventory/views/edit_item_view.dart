@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shelfstack/core/utils/dialog_helper.dart';
+import 'package:shelfstack/core/utils/snack_notification_helper.dart';
 import 'package:shelfstack/core/widgets/expandable_dynamic_image.dart';
 import 'package:shelfstack/data/models/container.dart' as models;
 import 'package:shelfstack/data/models/item.dart';
@@ -104,18 +105,19 @@ class _EditItemViewContentState extends State<_EditItemViewContent> {
 
   Future<void> _saveChanges() async {
     final vm = context.read<EditItemViewModel>();
-    final success = await vm.save();
+    final result = await vm.save();
 
-    if (success && mounted) {
+    if (!mounted) return;
+    if (result.isValid) {
       _didUpdate = true;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Item updated successfully')),
-      );
+      SnackNotificationHelper.showSuccess(context, 'Item updated successfully');
       Navigator.of(context).pop(true);
-    } else if (mounted && vm.error != null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error: ${vm.error}')));
+    } else {
+      if (result.fieldErrors.isNotEmpty) {
+        SnackNotificationHelper.showErrors(context, result.getAllErrors());
+      } else if (result.generalError != null) {
+        SnackNotificationHelper.showError(context, result.generalError!);
+      }
     }
   }
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:shelfstack/core/models/form_validation_response.dart';
 import 'package:shelfstack/core/utils/files_helper.dart';
 import 'package:shelfstack/data/models/container.dart' as models;
 import 'package:shelfstack/data/models/location.dart';
@@ -65,17 +66,22 @@ class EditContainerViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> save(BuildContext context) async {
+  Future<FormValidationResponse> save() async {
     if (_name.trim().isEmpty) {
-      throw Exception("Container name cannot be empty");
+      return FormValidationResponse.generalError("Container name cannot be empty");
     }
-    models.Container newContainer = _container.copyWith(
-      location: _location,
-      name: _name,
-      tags: _tags,
-      photoUrl: _photoUrl,
-    );
-    await _repository.updateContainer(newContainer);
+    try {
+      models.Container newContainer = _container.copyWith(
+        location: _location,
+        name: _name,
+        tags: _tags,
+        photoUrl: _photoUrl,
+      );
+      await _repository.updateContainer(newContainer);
+      return FormValidationResponse.success();
+    } catch (e) {
+      return FormValidationResponse.generalError(e.toString());
+    }
   }
 
   void choosePhoto() async {

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_compass/flutter_map_compass.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:shelfstack/core/utils/snack_notification_helper.dart';
 import 'package:shelfstack/features/map/util/location_helper.dart';
 import 'package:shelfstack/features/map/util/ui_helper.dart';
 import 'package:shelfstack/features/map/widgets/location_fab.dart';
@@ -55,9 +56,7 @@ class _LocationPickerViewState extends State<LocationPickerView> {
       _mapController.move(newLocation, 15);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(e.toString())));
+        SnackNotificationHelper.showError(context, e.toString());
       }
     } finally {
       if (mounted) {

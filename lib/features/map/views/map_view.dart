@@ -3,6 +3,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_compass/flutter_map_compass.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
+import 'package:shelfstack/core/utils/snack_notification_helper.dart';
 import 'package:shelfstack/data/repositories/container_repository.dart';
 
 import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
@@ -67,16 +68,11 @@ class _MapViewContentState extends State<_MapViewContent> {
         }
 
         if (vm.error != null) {
+          SnackNotificationHelper.showError(context, vm.error!);
           return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text('Error: ${vm.error}'),
-                ElevatedButton(
-                  onPressed: () => vm.init(),
-                  child: const Text('Retry'),
-                ),
-              ],
+            child: ElevatedButton(
+              onPressed: () => vm.init(),
+              child: const Text('Retry'),
             ),
           );
         }

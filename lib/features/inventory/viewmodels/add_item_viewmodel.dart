@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shelfstack/core/models/form_validation_response.dart';
 import 'package:shelfstack/core/utils/files_helper.dart';
 import 'package:shelfstack/data/models/container.dart' as models;
 import 'package:shelfstack/data/models/item.dart';
@@ -76,17 +77,28 @@ class AddItemViewModel extends ChangeNotifier {
     }
   }
 
-  Future<bool> save() async {
+  FormValidationResponse validate() {
+    final errors = <String, String>{};
+
     if (_name.trim().isEmpty) {
-      _error = 'Name cannot be empty';
-      notifyListeners();
-      return false;
+      errors['name'] = 'Name cannot be empty';
     }
 
     if (_selectedContainer == null) {
-      _error = 'Please select a container';
-      notifyListeners();
-      return false;
+      errors['container'] = 'Please select a container';
+    }
+
+    if (errors.isNotEmpty) {
+      return FormValidationResponse.fieldErrors(errors);
+    }
+
+    return FormValidationResponse.success();
+  }
+
+  Future<FormValidationResponse> save() async {
+    final validationResult = validate();
+    if (!validationResult.isValid) {
+      return validationResult;
     }
 
     _isLoading = true;
@@ -109,12 +121,11 @@ class AddItemViewModel extends ChangeNotifier {
 
       _isLoading = false;
       notifyListeners();
-      return true;
+      return FormValidationResponse.success();
     } catch (e) {
-      _error = e.toString();
       _isLoading = false;
       notifyListeners();
-      return false;
+      return FormValidationResponse.generalError('Failed to add item: $e');
     }
   }
 

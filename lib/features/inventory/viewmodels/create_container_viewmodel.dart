@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:shelfstack/core/models/form_validation_response.dart';
 import 'package:shelfstack/core/utils/files_helper.dart';
 import 'package:shelfstack/data/models/container.dart' as models;
 import 'package:shelfstack/data/models/location.dart';
@@ -76,11 +77,17 @@ class CreateContainerViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<bool> createContainer() async {
+  FormValidationResponse validate() {
     if (_name.trim().isEmpty) {
-      _error = 'Container name cannot be empty';
-      notifyListeners();
-      return false;
+      return FormValidationResponse.fieldErrors({'name': 'Container name cannot be empty'});
+    }
+    return FormValidationResponse.success();
+  }
+
+  Future<FormValidationResponse> createContainer() async {
+    final validationResult = validate();
+    if (!validationResult.isValid) {
+      return validationResult;
     }
 
     _isLoading = true;
@@ -108,12 +115,11 @@ class CreateContainerViewModel extends ChangeNotifier {
 
       _isLoading = false;
       notifyListeners();
-      return true;
+      return FormValidationResponse.success();
     } catch (e) {
-      _error = e.toString();
       _isLoading = false;
       notifyListeners();
-      return false;
+      return FormValidationResponse.generalError('Failed to create container: $e');
     }
   }
 

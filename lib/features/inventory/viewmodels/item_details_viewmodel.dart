@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart' hide Container;
+import 'package:shelfstack/core/models/form_validation_response.dart';
 import 'package:shelfstack/data/models/container.dart';
 import 'package:shelfstack/data/models/item.dart';
 import 'package:shelfstack/data/repositories/container_repository.dart';
@@ -60,20 +61,20 @@ class ItemDetailsViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<bool> deleteItem() async {
+  Future<FormValidationResponse> deleteItem() async {
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
       await _itemRepository.deleteItem(_itemId);
-      return true;
-    } catch (e) {
-      _error = e.toString();
-      return false;
-    } finally {
       _isLoading = false;
       notifyListeners();
+      return FormValidationResponse.success();
+    } catch (e) {
+      _isLoading = false;
+      notifyListeners();
+      return FormValidationResponse.generalError('Failed to delete item: $e');
     }
   }
 }

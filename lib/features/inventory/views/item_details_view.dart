@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shelfstack/core/utils/snack_notification_helper.dart';
 import 'package:shelfstack/core/widgets/expandable_dynamic_image.dart';
 import 'package:shelfstack/data/models/item.dart';
 import 'package:shelfstack/data/models/container.dart' as models;
@@ -83,17 +84,20 @@ class _ItemDetailsViewContentState extends State<_ItemDetailsViewContent> {
     if (confirmed == true && mounted) {
       final vm = context.read<ItemDetailsViewModel>();
 
-      final success = await vm.deleteItem();
+      final result = await vm.deleteItem();
 
-      if (success && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Deleted item successfully")),
-        );
-        Navigator.of(context).pop(true);
-      } else if (mounted && vm.error != null) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error: ${vm.error}')));
+      if (mounted) {
+        if (result.isValid) {
+          SnackNotificationHelper.showSuccess(context, 'Item deleted successfully');
+          Navigator.of(context).pop(true);
+        } else {
+          SnackNotificationHelper.showError(
+            context,
+            result.hasGeneralError()
+                ? result.generalError!
+                : result.getAllErrors().join(', '),
+          );
+        }
       }
     }
   }

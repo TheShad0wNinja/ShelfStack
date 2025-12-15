@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shelfstack/core/utils/snack_notification_helper.dart';
 import 'package:shelfstack/features/map/util/external_map_helper.dart';
 
 import 'package:provider/provider.dart';
@@ -185,14 +186,25 @@ class _ContainerDetailsViewContentState extends State<_ContainerDetailsViewConte
                         );
 
                         if (confirm == true && context.mounted) {
-                          await context
+                          final result = await context
                               .read<ContainerDetailsViewModel>()
                               .deleteContainer(
                                 vm.container!.id,
                                 context.read<ContainerRepository>(),
                               );
                           if (context.mounted) {
-                            Navigator.of(context).pop();
+                            if (result.isValid) {
+                              SnackNotificationHelper.showSuccess(
+                                context,
+                                'Container deleted successfully',
+                              );
+                              Navigator.of(context).pop();
+                            } else if (result.generalError != null) {
+                              SnackNotificationHelper.showError(
+                                context,
+                                result.generalError!,
+                              );
+                            }
                           }
                         }
                       }

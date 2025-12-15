@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shelfstack/core/models/form_validation_response.dart';
 import 'package:shelfstack/data/models/container.dart' as models;
 import 'package:shelfstack/data/models/item.dart' as models;
 import 'package:shelfstack/data/repositories/container_repository.dart';
@@ -89,18 +90,18 @@ class ContainerDetailsViewModel extends ChangeNotifier {
     }
   }
 
-  Future<void> deleteContainer(
+  Future<FormValidationResponse> deleteContainer(
     String containerId,
     ContainerRepository repository,
   ) async {
     _isLoading = true;
-    _error = null;
     notifyListeners();
 
     try {
       await repository.deleteContainer(containerId);
+      return FormValidationResponse.success();
     } catch (e) {
-      _error = e.toString();
+      return FormValidationResponse.generalError(e.toString());
     } finally {
       _isLoading = false;
       notifyListeners();
