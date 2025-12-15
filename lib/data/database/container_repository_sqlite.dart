@@ -82,10 +82,9 @@ class ContainerRepositorySqlite implements ContainerRepository {
     final db = await _dbHelper.database;
 
     // Assign the container a UUIDv4 id
-    final containerWithId = container.copyWith(id:_uuid.v4());
+    final containerWithId = container.copyWith(id: _uuid.v4());
 
     await db.transaction((txn) async {
-      // Insert container
       await txn.insert('containers', containerWithId.toJson());
 
       // Insert tags
@@ -108,7 +107,7 @@ class ContainerRepositorySqlite implements ContainerRepository {
       // Update container
       await txn.update(
         'containers',
-        container.toJson(),
+        container.copyWith(updatedAt: DateTime.now()).toJson(),
         where: 'id = ?',
         whereArgs: [container.id],
       );
@@ -136,7 +135,6 @@ class ContainerRepositorySqlite implements ContainerRepository {
   Future deleteContainer(String id) async {
     final db = await _dbHelper.database;
     await db.delete('containers', where: 'id = ?', whereArgs: [id]);
-    // Tags and items will be cascade deleted due to foreign key constraints
 
     _streamController.add(null);
   }
@@ -264,7 +262,6 @@ class ContainerRepositorySqlite implements ContainerRepository {
     return containers;
   }
 
-  // Helper method to fetch items for a container
   Future<List<Item>> _fetchItemsForContainer(
     Database db,
     String containerId,
