@@ -36,7 +36,6 @@ void main() {
         address: '123 Main Street, New York, NY',
       );
 
-      // Step 1: Create a container
       final container = Container(
         id: 'kitchen_container_$timestamp',
         name: 'Kitchen Storage_$timestamp',
@@ -50,7 +49,6 @@ void main() {
 
       await containerRepository.createContainer(container);
 
-      // Fetch the created container from database
       final allContainers = await containerRepository.fetchContainers();
       final createdContainer = allContainers.firstWhere(
         (c) => c.name == 'Kitchen Storage_$timestamp',
@@ -61,7 +59,6 @@ void main() {
       expect(createdContainer.location.label, 'Home Kitchen');
       expect(createdContainer.tags, containsAll(['kitchen', 'storage']));
 
-      // Step 2: Create multiple items in this container
       final items = [
         Item(
           id: 'item_glasses_$timestamp',
@@ -98,12 +95,10 @@ void main() {
         ),
       ];
 
-      // Create all items
       for (final item in items) {
         await itemRepository.createItem(item);
       }
 
-      // Step 3: Verify all items are saved and linked to the container
       final containerItems = await itemRepository.fetchItemsByContainerId(
         createdContainer.id,
       );
@@ -114,7 +109,6 @@ void main() {
         containsAll(['Drinking Glasses', 'Dinner Plates', 'Silverware Set']),
       );
 
-      // Verify each item has correct container association
       for (final item in containerItems) {
         expect(item.containerId, createdContainer.id);
       }
@@ -129,7 +123,6 @@ void main() {
         address: '10 Downing Street, London',
       );
 
-      // Create container
       final container = Container(
         id: 'closet_container_$timestamp',
         name: 'Bedroom Closet_$timestamp',
@@ -148,7 +141,6 @@ void main() {
         (c) => c.name == 'Bedroom Closet_$timestamp',
       );
 
-      // Create an item
       final originalItem = Item(
         id: 'item_shirts_$timestamp',
         name: 'T-Shirts Collection',
@@ -163,7 +155,6 @@ void main() {
 
       await itemRepository.createItem(originalItem);
 
-      // Update the item
       final updatedItem = originalItem.copyWith(
         name: 'T-Shirts Collection - Updated',
         description: 'Various colored t-shirts (recently organized)',
@@ -172,7 +163,6 @@ void main() {
 
       await itemRepository.updateItem(updatedItem);
 
-      // Verify update persisted
       final items = await itemRepository.fetchItemsByContainerId(createdContainer.id);
       final retrievedItem = items.firstWhere(
         (i) => i.id == 'item_shirts_$timestamp',
@@ -202,7 +192,6 @@ void main() {
         address: 'Tokyo, Japan',
       );
 
-      // Create two containers
       final container1 = Container(
         id: 'container1_move_$timestamp',
         name: 'Living Room Box_$timestamp',
@@ -236,7 +225,6 @@ void main() {
         (c) => c.name == 'Storage Room Box_$timestamp',
       );
 
-      // Create item in source container
       final item = Item(
         id: 'item_move_$timestamp',
         name: 'Item to Move',
@@ -251,19 +239,15 @@ void main() {
 
       await itemRepository.createItem(item);
 
-      // Verify item is in source
       var sourceItems = await itemRepository.fetchItemsByContainerId(source.id);
       expect(sourceItems.any((i) => i.name == 'Item to Move'), true);
 
-      // Move item to destination
       final movedItem = item.copyWith(containerId: destination.id);
       await itemRepository.updateItem(movedItem);
 
-      // Verify item is no longer in source
       sourceItems = await itemRepository.fetchItemsByContainerId(source.id);
       expect(sourceItems.any((i) => i.id == 'item_move_$timestamp'), false);
 
-      // Verify item is in destination
       final destItems = await itemRepository.fetchItemsByContainerId(destination.id);
       expect(destItems.any((i) => i.id == 'item_move_$timestamp'), true);
       expect(
@@ -281,7 +265,6 @@ void main() {
         address: 'Paris, France',
       );
 
-      // Create container
       final container = Container(
         id: 'storage_container_$timestamp',
         name: 'Storage Unit_$timestamp',
@@ -300,7 +283,6 @@ void main() {
         (c) => c.name == 'Storage Unit_$timestamp',
       );
 
-      // Create multiple items
       final items = [
         Item(
           id: 'delete_item_1_$timestamp',
@@ -341,15 +323,12 @@ void main() {
         await itemRepository.createItem(item);
       }
 
-      // Verify all items exist
       var containerItems =
           await itemRepository.fetchItemsByContainerId(createdContainer.id);
       expect(containerItems.length, greaterThanOrEqualTo(3));
 
-      // Delete one item
       await itemRepository.deleteItem('delete_item_2_$timestamp');
 
-      // Verify item is deleted
       containerItems =
           await itemRepository.fetchItemsByContainerId(createdContainer.id);
       expect(
@@ -357,7 +336,6 @@ void main() {
         false,
       );
 
-      // Verify other items still exist
       expect(
         containerItems.map((i) => i.id),
         containsAll(['delete_item_1_$timestamp', 'delete_item_3_$timestamp']),
@@ -373,7 +351,6 @@ void main() {
         address: 'San Francisco, CA',
       );
 
-      // Create container
       final container = Container(
         id: 'garage_container_$timestamp',
         name: 'Garage Storage_$timestamp',
@@ -392,7 +369,6 @@ void main() {
         (c) => c.name == 'Garage Storage_$timestamp',
       );
 
-      // Create items with specific tags
       final items = [
         Item(
           id: 'tools_hammer_$timestamp',
@@ -433,7 +409,6 @@ void main() {
         await itemRepository.createItem(item);
       }
 
-      // Search for items with 'tools' tag
       final allItems =
           await itemRepository.fetchItemsByContainerId(createdContainer.id);
       final toolItems = allItems.where((i) => i.tags.contains('tools'));
