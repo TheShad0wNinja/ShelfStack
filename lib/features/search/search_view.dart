@@ -14,7 +14,7 @@ class SearchView extends StatelessWidget {
 
     return ChangeNotifierProvider(
       create: (_) => SearchViewModel(containerRepo, itemRepo),
-      child: const _SearchScreenContent(),
+      child: const _SearchViewContent(),
     );
   }
 
@@ -24,14 +24,14 @@ class SearchView extends StatelessWidget {
   }
 }
 
-class _SearchScreenContent extends StatefulWidget {
-  const _SearchScreenContent();
+class _SearchViewContent extends StatefulWidget {
+  const _SearchViewContent();
 
   @override
-  State<_SearchScreenContent> createState() => _SearchScreenContentState();
+  State<_SearchViewContent> createState() => _SearchViewContentState();
 }
 
-class _SearchScreenContentState extends State<_SearchScreenContent> {
+class _SearchViewContentState extends State<_SearchViewContent> {
   final _searchController = TextEditingController();
 
   @override

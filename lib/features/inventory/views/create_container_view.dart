@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart' hide FileImage;
 import 'package:latlong2/latlong.dart';
 import 'package:shelfstack/core/widgets/expandable_dynamic_image.dart';
-import 'package:shelfstack/features/map/screens/location_picker_view.dart';
+import 'package:shelfstack/features/map/views/location_picker_view.dart';
 import 'package:provider/provider.dart';
 import 'package:shelfstack/core/utils/dialog_helper.dart';
 
@@ -16,7 +16,7 @@ class CreateContainerView extends StatelessWidget {
 
     return ChangeNotifierProvider(
       create: (_) => CreateContainerViewModel(containerRepo),
-      child: const _CreateContainerScreenContent(),
+      child: const _CreateContainerViewContent(),
     );
   }
 
@@ -26,16 +26,16 @@ class CreateContainerView extends StatelessWidget {
   }
 }
 
-class _CreateContainerScreenContent extends StatefulWidget {
-  const _CreateContainerScreenContent();
+class _CreateContainerViewContent extends StatefulWidget {
+  const _CreateContainerViewContent();
 
   @override
-  State<_CreateContainerScreenContent> createState() =>
-      _CreateContainerScreenContentState();
+  State<_CreateContainerViewContent> createState() =>
+      _CreateContainerViewContentState();
 }
 
-class _CreateContainerScreenContentState
-    extends State<_CreateContainerScreenContent> {
+class _CreateContainerViewContentState
+    extends State<_CreateContainerViewContent> {
   final _tagController = TextEditingController();
 
   @override

@@ -2,14 +2,13 @@ import 'dart:convert';
 
 import 'package:latlong2/latlong.dart';
 import 'package:http/http.dart' as http;
-
-const String apiKey = "693db87f77296008698811keha00d5b";
+import 'package:shelfstack/core/constants/api_keys.dart';
 
 Future<String> fetchAddressFromLatLng(LatLng latLng) async {
   Uri uri = Uri.https("geocode.maps.co", '/reverse', {
     "lat": latLng.latitude.toString(),
     "lon": latLng.longitude.toString(),
-    "api_key": apiKey,
+    "api_key": geocodeApiKey,
   });
 
   final res = await http.get(uri);

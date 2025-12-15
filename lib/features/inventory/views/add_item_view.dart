@@ -37,19 +37,19 @@ class AddItemView extends StatelessWidget {
         }
         return vm;
       },
-      child: const _AddItemScreenContent(),
+      child: const _AddItemViewContent(),
     );
   }
 }
 
-class _AddItemScreenContent extends StatefulWidget {
-  const _AddItemScreenContent();
+class _AddItemViewContent extends StatefulWidget {
+  const _AddItemViewContent();
 
   @override
-  State<_AddItemScreenContent> createState() => _AddItemScreenContentState();
+  State<_AddItemViewContent> createState() => _AddItemViewContentState();
 }
 
-class _AddItemScreenContentState extends State<_AddItemScreenContent> {
+class _AddItemViewContentState extends State<_AddItemViewContent> {
   final _tagController = TextEditingController();
 
   @override

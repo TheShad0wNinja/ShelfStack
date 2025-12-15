@@ -19,17 +19,17 @@ class MapView extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (BuildContext context) =>
           MapViewModel(context.read<ContainerRepository>()),
-      child: _MapScreenContent(),
+      child: _MapViewContent(),
     );
   }
 }
 
-class _MapScreenContent extends StatefulWidget {
+class _MapViewContent extends StatefulWidget {
   @override
-  State<_MapScreenContent> createState() => _MapScreenContentState();
+  State<_MapViewContent> createState() => _MapViewContentState();
 }
 
-class _MapScreenContentState extends State<_MapScreenContent> {
+class _MapViewContentState extends State<_MapViewContent> {
   final MapController _mapController = MapController();
   bool _isNavigatingToLocation = false;
 

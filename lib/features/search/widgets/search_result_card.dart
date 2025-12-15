@@ -5,8 +5,8 @@ import 'package:shelfstack/data/models/container.dart' as models;
 import 'package:shelfstack/data/models/item.dart';
 import 'package:shelfstack/data/repositories/container_repository.dart';
 import 'package:shelfstack/data/repositories/item_repository.dart';
-import 'package:shelfstack/features/inventory/screens/container_details_view.dart';
-import 'package:shelfstack/features/inventory/screens/item_details_view.dart';
+import 'package:shelfstack/features/inventory/views/container_details_view.dart';
+import 'package:shelfstack/features/inventory/views/item_details_view.dart';
 import 'package:shelfstack/features/inventory/viewmodels/item_details_viewmodel.dart';
 
 class SearchResultCard extends StatelessWidget {

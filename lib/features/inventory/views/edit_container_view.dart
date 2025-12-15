@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:shelfstack/features/map/screens/location_picker_view.dart';
+import 'package:shelfstack/features/map/views/location_picker_view.dart';
 import 'package:provider/provider.dart';
 import 'package:shelfstack/core/utils/dialog_helper.dart';
 import 'package:shelfstack/core/widgets/expandable_dynamic_image.dart';
@@ -14,10 +14,10 @@ class EditContainerView extends StatefulWidget {
   const EditContainerView({super.key, required this.container});
 
   @override
-  State<EditContainerView> createState() => _EditContainerScreenState();
+  State<EditContainerView> createState() => _EditContainerViewState();
 }
 
-class _EditContainerScreenState extends State<EditContainerView> {
+class _EditContainerViewState extends State<EditContainerView> {
   late final TextEditingController _nameController;
   late final TextEditingController _locationLabelController;
   final _tagController = TextEditingController();

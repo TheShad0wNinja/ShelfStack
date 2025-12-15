@@ -6,11 +6,10 @@ import 'package:shelfstack/core/extensions/string_extensions.dart';
 import 'package:shelfstack/core/widgets/expandable_dynamic_image.dart';
 import 'package:shelfstack/data/models/container.dart' as models;
 
-import 'package:shelfstack/features/inventory/screens/add_item_view.dart';
-import 'package:shelfstack/features/inventory/screens/edit_container_view.dart';
+import 'package:shelfstack/features/inventory/views/add_item_view.dart';
+import 'package:shelfstack/features/inventory/views/edit_container_view.dart';
 import 'package:shelfstack/data/repositories/container_repository.dart';
 import 'package:shelfstack/data/repositories/item_repository.dart';
-import 'package:shelfstack/features/inventory/viewmodels/add_item_viewmodel.dart';
 import 'package:shelfstack/features/inventory/viewmodels/container_details_viewmodel.dart';
 import 'package:shelfstack/features/inventory/viewmodels/edit_container_viewmodel.dart';
 import 'package:shelfstack/features/inventory/widgets/item_card.dart';
@@ -27,7 +26,7 @@ class ContainerDetailsView extends StatelessWidget {
 
     return ChangeNotifierProvider(
       create: (_) => ContainerDetailsViewModel(containerRepo, itemRepo),
-      child: _ContainerDetailsContent(containerId: containerId),
+      child: _ContainerDetailsViewContent(containerId: containerId),
     );
   }
 
@@ -37,17 +36,17 @@ class ContainerDetailsView extends StatelessWidget {
   }
 }
 
-class _ContainerDetailsContent extends StatefulWidget {
+class _ContainerDetailsViewContent extends StatefulWidget {
   final String containerId;
 
-  const _ContainerDetailsContent({required this.containerId});
+  const _ContainerDetailsViewContent({required this.containerId});
 
   @override
-  State<_ContainerDetailsContent> createState() =>
-      _ContainerDetailsContentState();
+  State<_ContainerDetailsViewContent> createState() =>
+      _ContainerDetailsViewContentState();
 }
 
-class _ContainerDetailsContentState extends State<_ContainerDetailsContent> {
+class _ContainerDetailsViewContentState extends State<_ContainerDetailsViewContent> {
   @override
   void initState() {
     super.initState();

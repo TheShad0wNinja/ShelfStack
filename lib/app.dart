@@ -3,11 +3,11 @@ import 'package:provider/provider.dart';
 import 'package:shelfstack/core/services/deep_link_service.dart';
 import 'package:shelfstack/core/theme/theme.dart';
 import 'package:shelfstack/core/viewmodels/theme_viewmodel.dart';
-import 'package:shelfstack/features/inventory/screens/container_details_view.dart';
-import 'package:shelfstack/features/inventory/screens/containers_view.dart';
+import 'package:shelfstack/features/inventory/views/container_details_view.dart';
+import 'package:shelfstack/features/inventory/views/containers_view.dart';
 import 'package:shelfstack/features/home/home_view.dart';
 import 'package:shelfstack/features/inventory/viewmodels/container_details_viewmodel.dart';
-import 'package:shelfstack/features/map/screens/map_view.dart';
+import 'package:shelfstack/features/map/views/map_view.dart';
 import 'package:shelfstack/features/qr/qr_scanner_view.dart';
 import 'package:shelfstack/features/search/search_view.dart';
 import 'package:shelfstack/features/settings/settings_view.dart';
@@ -19,8 +19,8 @@ import 'package:shelfstack/data/repositories/item_repository.dart';
 import 'package:shelfstack/data/database/item_repository_sqlite.dart';
 import 'package:shelfstack/core/viewmodels/navigation_viewmodel.dart';
 import 'package:shelfstack/features/inventory/widgets/expandable_fab.dart';
-import 'package:shelfstack/features/inventory/screens/create_container_view.dart';
-import 'package:shelfstack/features/inventory/screens/add_item_view.dart';
+import 'package:shelfstack/features/inventory/views/create_container_view.dart';
+import 'package:shelfstack/features/inventory/views/add_item_view.dart';
 import 'package:shelfstack/features/settings/settings_viewmodel.dart';
 
 class MyApp extends StatelessWidget {
@@ -62,7 +62,7 @@ class MainView extends StatefulWidget {
 }
 
 class _MainViewState extends State<MainView> {
-  final List<Widget> screens = const [
+  final List<Widget> views = const [
     HomeView(),
     ContainersView(),
     SearchView(),
@@ -115,7 +115,7 @@ class _MainViewState extends State<MainView> {
         body: SafeArea(
           top: true,
           bottom: false,
-          child: IndexedStack(index: vm.currentIndex, children: screens),
+          child: IndexedStack(index: vm.currentIndex, children: views),
         ),
         bottomNavigationBar: const NavBar(),
         floatingActionButton: vm.currentIndex < 3

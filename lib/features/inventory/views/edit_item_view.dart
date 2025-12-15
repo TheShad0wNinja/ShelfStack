@@ -32,19 +32,19 @@ class EditItemView extends StatelessWidget {
         item,
         container,
       ),
-      child: const _EditItemScreenContent(),
+      child: _EditItemViewContent(),
     );
   }
 }
 
-class _EditItemScreenContent extends StatefulWidget {
-  const _EditItemScreenContent();
+class _EditItemViewContent extends StatefulWidget {
+  const _EditItemViewContent();
 
   @override
-  State<_EditItemScreenContent> createState() => _EditItemScreenContentState();
+  State<_EditItemViewContent> createState() => _EditItemViewContentState();
 }
 
-class _EditItemScreenContentState extends State<_EditItemScreenContent> {
+class _EditItemViewContentState extends State<_EditItemViewContent> {
   late final TextEditingController _nameController;
   late final TextEditingController _descriptionController;
   final _tagController = TextEditingController();

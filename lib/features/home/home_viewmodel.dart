@@ -3,7 +3,7 @@ import 'package:shelfstack/data/repositories/item_repository.dart';
 import 'package:shelfstack/data/repositories/container_repository.dart';
 import 'package:shelfstack/data/models/container.dart' as models;
 
-class HomeScreenViewModel extends ChangeNotifier {
+class HomeViewModel extends ChangeNotifier {
   final ContainerRepository _containerRepository;
   final ItemRepository _itemRepository;
 
@@ -22,7 +22,7 @@ class HomeScreenViewModel extends ChangeNotifier {
   List<models.Container> _recentContainers = [];
   List<models.Container> get recentContainers => _recentContainers;
 
-  HomeScreenViewModel(this._containerRepository, this._itemRepository) {
+  HomeViewModel(this._containerRepository, this._itemRepository) {
     _containerRepository.onDataChanged.listen((_) => loadData());
     _itemRepository.onDataChanged.listen((_) => loadData());
     loadData();

@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 
 import 'package:shelfstack/data/repositories/container_repository.dart';
 import 'package:shelfstack/data/repositories/item_repository.dart';
-import 'package:shelfstack/features/inventory/viewmodels/containers_screen_viewmodel.dart';
+import 'package:shelfstack/features/inventory/viewmodels/containers_viewmodel.dart';
 import 'package:shelfstack/features/inventory/widgets/container_row.dart';
 
 class ContainersView extends StatelessWidget {
@@ -11,22 +11,22 @@ class ContainersView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<ContainersScreenViewModel>(
-      create: (context) => ContainersScreenViewModel(
+    return ChangeNotifierProvider<ContainersViewModel>(
+      create: (context) => ContainersViewModel(
         context.read<ContainerRepository>(),
         context.read<ItemRepository>(),
       ),
-      child: _ContainerScreenContent(),
+      child: _ContainerViewContent(),
     );
   }
 }
 
-class _ContainerScreenContent extends StatefulWidget {
+class _ContainerViewContent extends StatefulWidget {
   @override
-  State<StatefulWidget> createState() => _ContainerScreenContentState();
+  State<StatefulWidget> createState() => _ContainerViewContentState();
 }
 
-class _ContainerScreenContentState extends State<_ContainerScreenContent> {
+class _ContainerViewContentState extends State<_ContainerViewContent> {
   final TextEditingController _searchController = TextEditingController();
 
   bool _isSearching = false;
@@ -45,7 +45,7 @@ class _ContainerScreenContentState extends State<_ContainerScreenContent> {
 
   void _onSearchChange() {
     final query = _searchController.text;
-    context.read<ContainersScreenViewModel>().updateQuery(query);
+    context.read<ContainersViewModel>().updateQuery(query);
   }
 
   void _toggleSearch() {
@@ -87,7 +87,7 @@ class _ContainerScreenContentState extends State<_ContainerScreenContent> {
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        child: Consumer<ContainersScreenViewModel>(
+        child: Consumer<ContainersViewModel>(
           builder: (context, vm, child) => ListView.separated(
             itemCount: vm.containers.length,
             itemBuilder: (context, index) =>

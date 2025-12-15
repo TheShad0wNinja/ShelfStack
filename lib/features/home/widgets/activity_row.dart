@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shelfstack/core/widgets/dynamic_image.dart';
 import 'package:shelfstack/data/models/container.dart' as models;
-import 'package:shelfstack/features/inventory/screens/container_details_view.dart';
+import 'package:shelfstack/features/inventory/views/container_details_view.dart';
 
 class ActivityRow extends StatelessWidget {
   final models.Container container;

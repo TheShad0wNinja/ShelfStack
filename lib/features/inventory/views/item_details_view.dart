@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shelfstack/core/widgets/dynamic_image.dart';
 import 'package:shelfstack/core/widgets/expandable_dynamic_image.dart';
 import 'package:shelfstack/data/models/item.dart';
 import 'package:shelfstack/data/models/container.dart' as models;
 import 'package:shelfstack/data/repositories/container_repository.dart';
 import 'package:shelfstack/data/repositories/item_repository.dart';
-import 'package:shelfstack/features/inventory/screens/container_details_view.dart';
-import 'package:shelfstack/features/inventory/screens/edit_item_view.dart';
+import 'package:shelfstack/features/inventory/views/container_details_view.dart';
+import 'package:shelfstack/features/inventory/views/edit_item_view.dart';
 import 'package:shelfstack/features/inventory/viewmodels/edit_item_viewmodel.dart';
 import 'package:shelfstack/features/inventory/viewmodels/item_details_viewmodel.dart';
 
@@ -16,18 +15,18 @@ class ItemDetailsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const _ItemDetailsContent();
+    return const _ItemDetailsViewContent();
   }
 }
 
-class _ItemDetailsContent extends StatefulWidget {
-  const _ItemDetailsContent();
+class _ItemDetailsViewContent extends StatefulWidget {
+  const _ItemDetailsViewContent();
 
   @override
-  State<_ItemDetailsContent> createState() => _ItemDetailsContentState();
+  State<_ItemDetailsViewContent> createState() => _ItemDetailsViewContentState();
 }
 
-class _ItemDetailsContentState extends State<_ItemDetailsContent> {
+class _ItemDetailsViewContentState extends State<_ItemDetailsViewContent> {
   bool _didUpdate = false;
 
   Future<void> _navigateToEdit() async {

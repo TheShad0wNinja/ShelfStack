@@ -7,16 +7,15 @@ class SettingsView extends StatefulWidget {
   const SettingsView({super.key});
 
   @override
-  State<SettingsView> createState() => _SettingsScreenState();
+  State<SettingsView> createState() => _SettingsViewState();
 }
 
-class _SettingsScreenState extends State<SettingsView> {
+class _SettingsViewState extends State<SettingsView> {
   final _usernameController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    // Load initial value after first frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final vm = context.read<SettingsViewModel>();
       _usernameController.text = vm.username;

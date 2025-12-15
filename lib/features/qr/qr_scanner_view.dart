@@ -1,18 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
-import 'package:provider/provider.dart';
 import 'package:shelfstack/core/services/deep_link_service.dart';
-import 'package:shelfstack/features/inventory/screens/container_details_view.dart';
-import 'package:shelfstack/features/inventory/viewmodels/container_details_viewmodel.dart';
+import 'package:shelfstack/features/inventory/views/container_details_view.dart';
 
 class QRScannerView extends StatefulWidget {
   const QRScannerView({super.key});
 
   @override
-  State<QRScannerView> createState() => _QRScannerScreenState();
+  State<QRScannerView> createState() => _QRScannerViewState();
 }
 
-class _QRScannerScreenState extends State<QRScannerView> {
+class _QRScannerViewState extends State<QRScannerView> {
   late MobileScannerController _scannerController;
 
   bool _hasScanned = false;
@@ -224,7 +222,6 @@ class _QRScannerScreenState extends State<QRScannerView> {
   }
 }
 
-// Custom painter for the scanning frame
 class ScannerOverlayPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {

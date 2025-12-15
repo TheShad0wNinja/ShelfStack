@@ -10,10 +10,10 @@ class LocationPickerView extends StatefulWidget {
   const LocationPickerView({super.key, this.initialLocation});
 
   @override
-  State<LocationPickerView> createState() => _LocationPickerScreenState();
+  State<LocationPickerView> createState() => _LocationPickerViewState();
 }
 
-class _LocationPickerScreenState extends State<LocationPickerView> {
+class _LocationPickerViewState extends State<LocationPickerView> {
   LatLng? _pickedLocation;
   LatLng? _userLocation;
   final MapController _mapController = MapController();
