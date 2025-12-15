@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shelfstack/core/widgets/theme_switcher.dart';
+import 'package:shelfstack/core/utils/snack_notification_helper.dart';
+import 'package:shelfstack/core/utils/restart_helper.dart';
 import 'package:shelfstack/features/settings/settings_viewmodel.dart';
 
 class SettingsView extends StatefulWidget {
@@ -12,18 +14,26 @@ class SettingsView extends StatefulWidget {
 
 class _SettingsViewState extends State<SettingsView> {
   final _usernameController = TextEditingController();
+  late final SettingsViewModel _vm;
+
+  void _onVmChanged() {
+    final name = _vm.tempUsername;
+    if (_usernameController.text != name) {
+      _usernameController.text = name;
+    }
+  }
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final vm = context.read<SettingsViewModel>();
-      _usernameController.text = vm.username;
-    });
+    _vm = context.read<SettingsViewModel>();
+    _usernameController.text = _vm.username;
+    _vm.addListener(_onVmChanged);
   }
 
   @override
   void dispose() {
+    _vm.removeListener(_onVmChanged);
     _usernameController.dispose();
     super.dispose();
   }
@@ -51,6 +61,13 @@ class _SettingsViewState extends State<SettingsView> {
               hasScrollBody: false,
               child: Consumer<SettingsViewModel>(
                 builder: (context, vm, child) {
+                  // if (!FocusScope.of(context).hasFocus) {
+                  //   final name = vm.username;
+                  //   if (_usernameController.text != name) {
+                  //     _usernameController.text = name;
+                  //   }
+                  // }
+
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Column(
@@ -170,11 +187,9 @@ class _SettingsViewState extends State<SettingsView> {
                   onPressed: () async {
                     final success = await vm.saveUsername();
                     if (success && mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Name saved successfully'),
-                        ),
-                      );
+                      SnackNotificationHelper.showSuccess(context, 'Name saved successfully');
+                    } else if (mounted) {
+                      SnackNotificationHelper.showError(context, vm.error ?? 'Failed to save name');
                     }
                   },
                   child: const Text('Save'),
@@ -248,14 +263,16 @@ class _SettingsViewState extends State<SettingsView> {
                 subtitle: const Text('Save a backup of your data'),
                 onTap: () async {
                   final success = await vm.exportDatabase();
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          success ? 'Export successful' : 'Export failed',
-                        ),
-                      ),
-                    );
+                  if (!mounted) return;
+                  if (success) {
+                    final path = vm.lastExportPath;
+                    final includedImages = vm.lastExportIncludedImages;
+                    final msg = path != null
+                        ? 'Exported to ${path.split('/').last}${includedImages ? ' (images included)' : ''}'
+                        : 'Export successful';
+                    SnackNotificationHelper.showSuccess(context, msg);
+                  } else {
+                    SnackNotificationHelper.showError(context, vm.error ?? 'Export failed');
                   }
                 },
               ),
@@ -301,16 +318,40 @@ class _SettingsViewState extends State<SettingsView> {
 
                   if (confirmed == true) {
                     final success = await vm.importDatabase();
-                    if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            success
-                                ? 'Import successful. Please restart the app.'
-                                : 'Import failed',
-                          ),
+                    if (!mounted) return;
+                    if (success) {
+                      final images = vm.importedImagesCount;
+                      final msg = images > 0
+                          ? 'Import successful — restored $images images.'
+                          : 'Import successful.';
+
+                      // Prompt the user to restart now or later
+                      if (!mounted) return;
+                      await showDialog<void>(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: const Text('Import Complete'),
+                          content: Text('$msg\n\nWould you like to restart the app now to apply changes?'),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                                SnackNotificationHelper.showSuccess(context, 'Import complete. Restart later to apply changes.');
+                              },
+                              child: const Text('Later'),
+                            ),
+                            FilledButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                                RestartWidget.restart(context);
+                              },
+                              child: const Text('Restart Now'),
+                            ),
+                          ],
                         ),
                       );
+                    } else {
+                      SnackNotificationHelper.showError(context, vm.error ?? 'Import failed');
                     }
                   }
                 },

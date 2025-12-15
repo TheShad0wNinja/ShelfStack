@@ -1,7 +1,10 @@
 import 'dart:io';
 
+import 'package:archive/archive_io.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shelfstack/data/database/database_helper.dart';
 import 'package:sqflite/sqflite.dart';
@@ -22,6 +25,15 @@ class SettingsViewModel extends ChangeNotifier {
 
   String? _error;
   String? get error => _error;
+
+  String? _lastExportPath;
+  String? get lastExportPath => _lastExportPath;
+
+  bool _lastExportIncludedImages = false;
+  bool get lastExportIncludedImages => _lastExportIncludedImages;
+
+  int _importedImagesCount = 0;
+  int get importedImagesCount => _importedImagesCount;
 
   SettingsViewModel() {
     _loadUsername();
@@ -78,29 +90,57 @@ class SettingsViewModel extends ChangeNotifier {
       // Actually, on mobile, it's easier to share the file or save to Downloads.
       // Let's try to get the database path first.
       final dbPath = await getDatabasesPath();
-      final path = '$dbPath/shelfstack.db';
-      final dbFile = File(path);
+      final dbFilePath = p.join(dbPath, 'shelfstack.db');
+      final dbFile = File(dbFilePath);
 
       if (!await dbFile.exists()) {
         _error = 'Database file not found';
         return false;
       }
 
-      // Use FilePicker to select where to save
+      final appDocDir = await getApplicationDocumentsDirectory();
+      final imagesDir = Directory(p.join(appDocDir.path, 'itemImages'));
+
+      // Ask user where to save zip
       String? outputFile = await FilePicker.platform.saveFile(
-        dialogTitle: 'Save Database Backup',
-        fileName:
-            'shelfstack_backup_${DateTime.now().millisecondsSinceEpoch}.db',
-        allowedExtensions: ['db'],
-        type: FileType.any,
+        dialogTitle: 'Save Backup (zip)',
+        fileName: 'shelfstack_backup_${DateTime.now().millisecondsSinceEpoch}.zip',
+        allowedExtensions: ['zip'],
+        type: FileType.custom,
       );
 
-      if (outputFile == null) {
-        // User canceled
+      if (outputFile == null) return false;
+
+      // Build archive manually to avoid platform-specific ZipFileEncoder issues
+      final archive = Archive();
+
+      final dbBytes = await dbFile.readAsBytes();
+      archive.addFile(ArchiveFile('shelfstack.db', dbBytes.length, dbBytes));
+
+      final imagesExist = await imagesDir.exists();
+      if (imagesExist) {
+        final files = imagesDir.listSync(recursive: true);
+        for (final f in files) {
+          if (f is File) {
+            final rel = p.relative(f.path, from: imagesDir.path);
+            final bytes = await f.readAsBytes();
+            archive.addFile(ArchiveFile(p.join('itemImages', rel), bytes.length, bytes));
+          }
+        }
+      }
+
+      final zipEncoder = ZipEncoder();
+      final zipData = zipEncoder.encode(archive);
+      if (zipData == null) {
+        _error = 'Export failed: could not encode zip';
         return false;
       }
 
-      await dbFile.copy(outputFile);
+      await File(outputFile).writeAsBytes(zipData);
+
+      _lastExportPath = outputFile;
+      _lastExportIncludedImages = imagesExist;
+
       return true;
     } catch (e) {
       _error = 'Export failed: $e';
@@ -118,29 +158,82 @@ class SettingsViewModel extends ChangeNotifier {
 
     try {
       final result = await FilePicker.platform.pickFiles(
-        dialogTitle: 'Select Database Backup',
-        type: FileType
-            .any, // .db extension might not be recognized on all platforms
+        dialogTitle: 'Select Backup (.zip)',
+        type: FileType.custom,
+        allowedExtensions: ['zip'],
       );
 
-      if (result == null || result.files.single.path == null) {
-        return false;
-      }
+      if (result == null || result.files.single.path == null) return false;
 
       final importPath = result.files.single.path!;
 
       // Close existing database connection
       await DatabaseHelper().close();
 
+      final tempDir = await getTemporaryDirectory();
+      final extractDir = Directory(p.join(tempDir.path, 'shelfstack_import_${DateTime.now().millisecondsSinceEpoch}'));
+      await extractDir.create(recursive: true);
+
+      // Extract zip
+      try {
+        final zipDecoder = ZipDecoder();
+        final bytes = File(importPath).readAsBytesSync();
+        final archive = zipDecoder.decodeBytes(bytes);
+        for (final file in archive) {
+          final filename = file.name;
+          final outPath = p.join(extractDir.path, filename);
+          if (file.isFile) {
+            final outFile = File(outPath);
+            await outFile.create(recursive: true);
+            await outFile.writeAsBytes(file.content as List<int>);
+          } else {
+            await Directory(outPath).create(recursive: true);
+          }
+        }
+      } catch (e) {
+        _error = 'Failed to extract backup: $e';
+        return false;
+      }
+
+      // Find .db file in extracted files
+      final extractedDb = extractDir
+          .listSync(recursive: true)
+          .whereType<File>()
+          .firstWhere((f) => f.path.toLowerCase().endsWith('.db'), orElse: () => File(''));
+
+      if (!await extractedDb.exists()) {
+        _error = 'No database file found in backup';
+        return false;
+      }
+
       final dbPath = await getDatabasesPath();
-      final path = '$dbPath/shelfstack.db';
+      final targetDbPath = p.join(dbPath, 'shelfstack.db');
 
-      // Backup current db just in case? Maybe later.
+      // Copy DB
+      await extractedDb.copy(targetDbPath);
 
-      // Copy imported file to db location
-      await File(importPath).copy(path);
+      // Copy images if present
+      _importedImagesCount = 0;
+      final appDocDir = await getApplicationDocumentsDirectory();
+      final targetImagesDir = Directory(p.join(appDocDir.path, 'itemImages'));
+      await targetImagesDir.create(recursive: true);
 
-      // Re-open database (DatabaseHelper handles lazy opening)
+      final extractedImagesDir = extractDir.listSync().firstWhere(
+        (e) => e is Directory && p.basename(e.path) == 'itemImages',
+        orElse: () => Directory(''),
+      );
+
+      if (extractedImagesDir is Directory && await extractedImagesDir.exists()) {
+        for (final f in extractedImagesDir.listSync(recursive: true)) {
+          if (f is File) {
+            final rel = p.relative(f.path, from: extractedImagesDir.path);
+            final dest = File(p.join(targetImagesDir.path, rel));
+            await dest.parent.create(recursive: true);
+            await f.copy(dest.path);
+            _importedImagesCount++;
+          }
+        }
+      }
 
       return true;
     } catch (e) {

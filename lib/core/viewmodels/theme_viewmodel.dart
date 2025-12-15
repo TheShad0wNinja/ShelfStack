@@ -26,7 +26,12 @@ class ThemeViewModel with ChangeNotifier {
   void toggleTheme(ThemeMode themeMode) async {
     _themeMode = themeMode;
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('themeMode', themeMode.toString());
+    final value = _themeMode == ThemeMode.light
+        ? 'light'
+        : _themeMode == ThemeMode.dark
+            ? 'dark'
+            : 'system';
+    await prefs.setString('themeMode', value);
     notifyListeners();
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shelfstack/app.dart';
 import 'package:shelfstack/data/database/database_helper.dart';
+import 'package:shelfstack/core/utils/restart_helper.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -8,5 +9,5 @@ void main() async {
   final dbHelper = DatabaseHelper();
   await dbHelper.database;
 
-  runApp(const MyApp());
+  runApp(RestartWidget(child: const MyApp()));
 }
