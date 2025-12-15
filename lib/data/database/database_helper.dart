@@ -17,9 +17,13 @@ class DatabaseHelper {
     return _database!;
   }
 
+  Future<String> getDatabaseFilePath() async {
+    return join(await getDatabasesPath(), 'shelfstack.db');
+  }
+
+
   Future<Database> _initDatabase() async {
-    final databasePath = await getDatabasesPath();
-    final path = join(databasePath, 'shelfstack.db');
+    final path = await getDatabaseFilePath();
 
     return await openDatabase(
       path,
