@@ -83,15 +83,6 @@ class _SettingsViewState extends State<SettingsView> {
                             padding: EdgeInsets.all(16.0),
                             child: Center(child: LinearProgressIndicator()),
                           ),
-                        if (vm.error != null)
-                          Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Text(
-                              vm.error!,
-                              style: TextStyle(color: theme.colorScheme.error),
-                            ),
-                          ),
-                        const SizedBox(height: 80), // Bottom padding for nav
                       ],
                     ),
                   );
@@ -343,7 +334,7 @@ class _SettingsViewState extends State<SettingsView> {
                             FilledButton(
                               onPressed: () {
                                 Navigator.of(context).pop();
-                                RestartWidget.restart(context);
+                                RestartWidget.promptRestart(context);
                               },
                               child: const Text('Restart Now'),
                             ),

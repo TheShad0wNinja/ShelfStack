@@ -9,9 +9,18 @@ class RestartWidget extends StatefulWidget {
 
   const RestartWidget({required this.child, super.key});
 
-  static void restart(BuildContext context) {
-    final _RestartWidgetState? state = context.findAncestorStateOfType<_RestartWidgetState>();
-    state?.restartApp();
+  static Future<void> promptRestart(BuildContext context) async {
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: true,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Restart required'),
+        content: const Text('Please restart the app to apply changes.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('OK')),
+        ],
+      ),
+    );
   }
 
   @override
@@ -19,16 +28,8 @@ class RestartWidget extends StatefulWidget {
 }
 
 class _RestartWidgetState extends State<RestartWidget> {
-  Key _key = UniqueKey();
-
-  void restartApp() {
-    setState(() {
-      _key = UniqueKey();
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
-    return KeyedSubtree(key: _key, child: widget.child);
+    return widget.child;
   }
 }
