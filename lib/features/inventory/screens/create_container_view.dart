@@ -1,22 +1,28 @@
 import 'package:flutter/material.dart' hide FileImage;
 import 'package:latlong2/latlong.dart';
 import 'package:shelfstack/core/widgets/expandable_dynamic_image.dart';
-import 'package:shelfstack/features/map/screens/location_picker_screen.dart';
+import 'package:shelfstack/features/map/screens/location_picker_view.dart';
 import 'package:provider/provider.dart';
 import 'package:shelfstack/core/utils/dialog_helper.dart';
 
 import 'package:shelfstack/data/repositories/container_repository.dart';
 import 'package:shelfstack/features/inventory/viewmodels/create_container_viewmodel.dart';
 
-class CreateContainerScreen extends StatelessWidget {
-  const CreateContainerScreen({super.key});
+class CreateContainerView extends StatelessWidget {
+  const CreateContainerView({super.key});
+
+  Widget _content(BuildContext context) {
+    final containerRepo = context.read<ContainerRepository>();
+
+    return ChangeNotifierProvider(
+      create: (_) => CreateContainerViewModel(containerRepo),
+      child: const _CreateContainerScreenContent(),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => CreateContainerViewModel(),
-      child: const _CreateContainerScreenContent(),
-    );
+    return _content(context);
   }
 }
 
@@ -56,9 +62,7 @@ class _CreateContainerScreenContentState
             IconButton(
               onPressed: () async {
                 final vm = context.read<CreateContainerViewModel>();
-                final success = await vm.createContainer(
-                  context.read<ContainerRepository>(),
-                );
+                final success = await vm.createContainer();
                 if (success && mounted) {
                   Navigator.of(context).pop();
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -271,7 +275,7 @@ class _CreateContainerScreenContentState
                   : () async {
                       final result = await Navigator.of(context).push(
                         MaterialPageRoute(
-                          builder: (context) => const LocationPickerScreen(),
+                          builder: (context) => const LocationPickerView(),
                         ),
                       );
                       if (result is LatLng) {
@@ -318,7 +322,7 @@ class _CreateContainerScreenContentState
                     : () async {
                         final result = await Navigator.of(context).push(
                           MaterialPageRoute(
-                            builder: (context) => const LocationPickerScreen(),
+                            builder: (context) => const LocationPickerView(),
                           ),
                         );
                         if (result is LatLng) {

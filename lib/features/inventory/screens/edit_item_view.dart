@@ -9,21 +9,42 @@ import 'package:shelfstack/data/repositories/item_repository.dart';
 import 'package:shelfstack/features/inventory/viewmodels/edit_item_viewmodel.dart';
 import 'package:shelfstack/features/inventory/widgets/container_selection_dialog.dart';
 
-class EditItemScreen extends StatefulWidget {
+class EditItemView extends StatelessWidget {
   final Item item;
   final models.Container container;
 
-  const EditItemScreen({
+  const EditItemView({
     super.key,
     required this.item,
     required this.container,
   });
 
   @override
-  State<EditItemScreen> createState() => _EditItemScreenState();
+  Widget build(BuildContext context) {
+    return _content(context);
+  }
+
+  Widget _content(BuildContext context) {
+    return ChangeNotifierProvider(
+      create: (context) => EditItemViewModel(
+        context.read<ItemRepository>(),
+        context.read<ContainerRepository>(),
+        item,
+        container,
+      ),
+      child: const _EditItemScreenContent(),
+    );
+  }
 }
 
-class _EditItemScreenState extends State<EditItemScreen> {
+class _EditItemScreenContent extends StatefulWidget {
+  const _EditItemScreenContent();
+
+  @override
+  State<_EditItemScreenContent> createState() => _EditItemScreenContentState();
+}
+
+class _EditItemScreenContentState extends State<_EditItemScreenContent> {
   late final TextEditingController _nameController;
   late final TextEditingController _descriptionController;
   final _tagController = TextEditingController();
@@ -220,7 +241,7 @@ class _EditItemScreenState extends State<EditItemScreen> {
                 ),
                 child: ExpandableDynamicImage(
                   imageUrl: vm.photoUrl,
-                  heroTag: 'item_edit_${widget.item.id}_image',
+                  heroTag: 'item_edit_${vm.item.id}_image',
                 ),
               ),
             ),

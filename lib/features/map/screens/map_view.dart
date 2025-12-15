@@ -11,8 +11,8 @@ import 'package:shelfstack/features/inventory/widgets/container_row.dart';
 
 import '../viewmodels/map_viewmodel.dart';
 
-class MapScreen extends StatelessWidget {
-  const MapScreen({super.key});
+class MapView extends StatelessWidget {
+  const MapView({super.key});
 
   @override
   Widget build(BuildContext context) {

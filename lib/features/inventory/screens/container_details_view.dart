@@ -6,8 +6,8 @@ import 'package:shelfstack/core/extensions/string_extensions.dart';
 import 'package:shelfstack/core/widgets/expandable_dynamic_image.dart';
 import 'package:shelfstack/data/models/container.dart' as models;
 
-import 'package:shelfstack/features/inventory/screens/add_item_screen.dart';
-import 'package:shelfstack/features/inventory/screens/edit_container_screen.dart';
+import 'package:shelfstack/features/inventory/screens/add_item_view.dart';
+import 'package:shelfstack/features/inventory/screens/edit_container_view.dart';
 import 'package:shelfstack/data/repositories/container_repository.dart';
 import 'package:shelfstack/data/repositories/item_repository.dart';
 import 'package:shelfstack/features/inventory/viewmodels/add_item_viewmodel.dart';
@@ -16,17 +16,24 @@ import 'package:shelfstack/features/inventory/viewmodels/edit_container_viewmode
 import 'package:shelfstack/features/inventory/widgets/item_card.dart';
 import 'package:shelfstack/features/qr/widgets/qr_code_dialog.dart';
 
-class ContainerDetailsScreen extends StatelessWidget {
+class ContainerDetailsView extends StatelessWidget {
   final String containerId;
 
-  const ContainerDetailsScreen({super.key, required this.containerId});
+  const ContainerDetailsView({super.key, required this.containerId});
+
+  Widget _content(BuildContext context) {
+    final containerRepo = context.read<ContainerRepository>();
+    final itemRepo = context.read<ItemRepository>();
+
+    return ChangeNotifierProvider(
+      create: (_) => ContainerDetailsViewModel(containerRepo, itemRepo),
+      child: _ContainerDetailsContent(containerId: containerId),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => ContainerDetailsViewModel(),
-      child: _ContainerDetailsContent(containerId: containerId),
-    );
+    return _content(context);
   }
 }
 
@@ -48,11 +55,7 @@ class _ContainerDetailsContentState extends State<_ContainerDetailsContent> {
   }
 
   void _loadContainer() {
-    context.read<ContainerDetailsViewModel>().loadContainer(
-      widget.containerId,
-      context.read<ContainerRepository>(),
-      context.read<ItemRepository>(),
-    );
+    context.read<ContainerDetailsViewModel>().loadContainer(widget.containerId);
   }
 
   void _showSortModal(BuildContext context) {
@@ -110,14 +113,11 @@ class _ContainerDetailsContentState extends State<_ContainerDetailsContent> {
                     onPressed: () async {
                       final updated = await Navigator.of(context).push<bool>(
                         MaterialPageRoute(
-                          builder: (context) => ChangeNotifierProvider(
-                            create: (context) => AddItemViewModel(),
-                            child: AddItemScreen(
-                              containerId: vm.container!.id,
-                              containerLocationLabel:
-                                  vm.container!.location.label,
-                              containerName: vm.container!.name,
-                            ),
+                          builder: (context) => AddItemView(
+                            containerId: vm.container!.id,
+                            containerLocationLabel:
+                                vm.container!.location.label,
+                            containerName: vm.container!.name,
                           ),
                         ),
                       );
@@ -149,7 +149,7 @@ class _ContainerDetailsContentState extends State<_ContainerDetailsContent> {
                                     vm.container!,
                                     context.read<ContainerRepository>(),
                                   ),
-                                  child: EditContainerScreen(
+                                  child: EditContainerView(
                                     container: vm.container!,
                                   ),
                                 ),

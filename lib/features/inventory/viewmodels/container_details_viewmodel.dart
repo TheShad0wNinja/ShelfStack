@@ -9,6 +9,9 @@ enum SortBy { name, dateAdded }
 enum SortOrder { ascending, descending }
 
 class ContainerDetailsViewModel extends ChangeNotifier {
+  final ContainerRepository _containerRepository;
+  final ItemRepository _itemRepository;
+  
   models.Container? _container;
   models.Container? get container => _container;
 
@@ -23,6 +26,26 @@ class ContainerDetailsViewModel extends ChangeNotifier {
 
   SortOrder _sortOrder = SortOrder.descending;
   SortOrder get sortOrder => _sortOrder;
+
+  ContainerDetailsViewModel(
+    this._containerRepository,
+    this._itemRepository,
+  ) {
+    _containerRepository.onDataChanged.listen((_) {
+      if (_container != null) {
+        loadContainer(_container!.id);
+      }
+    });
+    _itemRepository.onDataChanged.listen((_) {
+      if (_container != null) {
+        loadContainer(_container!.id);
+      }
+    });
+  }
+  
+  void initialize(String containerId) {
+    loadContainer(containerId);
+  }
 
   List<models.Item> get sortedItems {
     if (_container == null) return [];
@@ -47,20 +70,16 @@ class ContainerDetailsViewModel extends ChangeNotifier {
     return items;
   }
 
-  Future<void> loadContainer(
-    String containerId,
-    ContainerRepository containerRepository,
-    ItemRepository itemRepository,
-  ) async {
+  Future<void> loadContainer(String containerId) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
-      final container = await containerRepository.fetchContainerById(
+      final container = await _containerRepository.fetchContainerById(
         containerId,
       );
-      final items = await itemRepository.fetchItemsByContainerId(containerId);
+      final items = await _itemRepository.fetchItemsByContainerId(containerId);
       _container = container.copyWith(items: items);
     } catch (e) {
       _error = e.toString();

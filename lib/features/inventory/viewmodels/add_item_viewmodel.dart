@@ -6,6 +6,9 @@ import 'package:shelfstack/data/repositories/container_repository.dart';
 import 'package:shelfstack/data/repositories/item_repository.dart';
 
 class AddItemViewModel extends ChangeNotifier {
+  final ItemRepository _itemRepository;
+  final ContainerRepository _containerRepository;
+  
   String _name = '';
   String _description = '';
   String? _photoUrl;
@@ -13,6 +16,14 @@ class AddItemViewModel extends ChangeNotifier {
   bool _isLoading = false;
   String? _error;
   models.Container? _selectedContainer;
+  
+  AddItemViewModel(
+    this._itemRepository,
+    this._containerRepository,
+  ) {
+    _itemRepository.onDataChanged.listen((_) => {});
+    _containerRepository.onDataChanged.listen((_) => {});
+  }
 
   String get name => _name;
   String get description => _description;
@@ -54,20 +65,18 @@ class AddItemViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> loadContainer(
-    String containerId,
-    ContainerRepository repository,
-  ) async {
+  Future<void> loadContainer(String containerId) async {
     try {
-      final container = await repository.fetchContainerById(containerId);
+      final container = await _containerRepository.fetchContainerById(containerId);
       _selectedContainer = container;
       notifyListeners();
     } catch (e) {
-      // Handle error silently or log it, as this is just initial loading
+      _error = e.toString();
+      notifyListeners();
     }
   }
 
-  Future<bool> save(ItemRepository itemRepository) async {
+  Future<bool> save() async {
     if (_name.trim().isEmpty) {
       _error = 'Name cannot be empty';
       notifyListeners();
@@ -96,7 +105,7 @@ class AddItemViewModel extends ChangeNotifier {
         updatedAt: DateTime.now(),
       );
 
-      await itemRepository.createItem(newItem);
+      await _itemRepository.createItem(newItem);
 
       _isLoading = false;
       notifyListeners();

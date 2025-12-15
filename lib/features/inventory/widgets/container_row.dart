@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:shelfstack/core/extensions/string_extensions.dart';
 import 'package:shelfstack/core/widgets/dynamic_image.dart';
 import 'package:shelfstack/data/models/container.dart' as models;
-import 'package:shelfstack/features/inventory/screens/container_details_screen.dart';
+import 'package:shelfstack/features/inventory/screens/container_details_view.dart';
 import 'package:shelfstack/features/inventory/viewmodels/container_details_viewmodel.dart';
 
 class ContainerRow extends StatelessWidget {
@@ -23,10 +23,7 @@ class ContainerRow extends StatelessWidget {
         onTap: () {
           Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (context) => ChangeNotifierProvider(
-                create: (_) => ContainerDetailsViewModel(),
-                child: ContainerDetailsScreen(containerId: container.id),
-              ),
+              builder: (context) => ContainerDetailsView(containerId: container.id),
             ),
           );
         },

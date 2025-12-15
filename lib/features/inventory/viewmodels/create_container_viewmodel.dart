@@ -7,6 +7,8 @@ import 'package:shelfstack/data/repositories/container_repository.dart';
 import 'package:shelfstack/features/map/util/address_helper.dart';
 
 class CreateContainerViewModel extends ChangeNotifier {
+  final ContainerRepository _containerRepository;
+
   String _name = '';
   String _locationLabel = '';
   String? _locationAddress;
@@ -15,6 +17,10 @@ class CreateContainerViewModel extends ChangeNotifier {
   List<String> _tags = [];
   bool _isLoading = false;
   String? _error;
+
+  CreateContainerViewModel(this._containerRepository) {
+    _containerRepository.onDataChanged.listen((_) {});
+  }
 
   String get name => _name;
   String get locationLabel => _locationLabel;
@@ -70,7 +76,7 @@ class CreateContainerViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<bool> createContainer(ContainerRepository repository) async {
+  Future<bool> createContainer() async {
     if (_name.trim().isEmpty) {
       _error = 'Container name cannot be empty';
       notifyListeners();
@@ -98,7 +104,7 @@ class CreateContainerViewModel extends ChangeNotifier {
         updatedAt: DateTime.now(),
       );
 
-      await repository.createContainer(newContainer);
+      await _containerRepository.createContainer(newContainer);
 
       _isLoading = false;
       notifyListeners();

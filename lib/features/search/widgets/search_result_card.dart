@@ -5,8 +5,8 @@ import 'package:shelfstack/data/models/container.dart' as models;
 import 'package:shelfstack/data/models/item.dart';
 import 'package:shelfstack/data/repositories/container_repository.dart';
 import 'package:shelfstack/data/repositories/item_repository.dart';
-import 'package:shelfstack/features/inventory/screens/container_details_screen.dart';
-import 'package:shelfstack/features/inventory/screens/item_details_screen.dart';
+import 'package:shelfstack/features/inventory/screens/container_details_view.dart';
+import 'package:shelfstack/features/inventory/screens/item_details_view.dart';
 import 'package:shelfstack/features/inventory/viewmodels/item_details_viewmodel.dart';
 
 class SearchResultCard extends StatelessWidget {
@@ -42,7 +42,7 @@ class SearchResultCard extends StatelessWidget {
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) =>
-                  ContainerDetailsScreen(containerId: container!.id),
+                  ContainerDetailsView(containerId: container!.id),
             ),
           );
         },
@@ -66,7 +66,7 @@ class SearchResultCard extends StatelessWidget {
                   context.read<ContainerRepository>(),
                   context.read<ItemRepository>(),
                 ),
-                child: ItemDetailsScreen(),
+                child: ItemDetailsView(),
               ),
             ),
           );

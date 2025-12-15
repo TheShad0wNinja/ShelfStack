@@ -5,7 +5,7 @@ import 'package:shelfstack/core/widgets/dynamic_image.dart';
 import 'package:shelfstack/data/models/item.dart';
 import 'package:shelfstack/data/repositories/container_repository.dart';
 import 'package:shelfstack/data/repositories/item_repository.dart';
-import 'package:shelfstack/features/inventory/screens/item_details_screen.dart';
+import 'package:shelfstack/features/inventory/screens/item_details_view.dart';
 import 'package:shelfstack/features/inventory/viewmodels/item_details_viewmodel.dart';
 
 class ItemCard extends StatelessWidget {
@@ -41,7 +41,7 @@ class ItemCard extends StatelessWidget {
                   context.read<ContainerRepository>(),
                   context.read<ItemRepository>()
                 ),
-                child: ItemDetailsScreen()
+                child: ItemDetailsView()
               ),
             ),
           );

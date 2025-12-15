@@ -6,28 +6,29 @@ import 'package:shelfstack/data/models/item.dart';
 import 'package:shelfstack/data/models/container.dart' as models;
 import 'package:shelfstack/data/repositories/container_repository.dart';
 import 'package:shelfstack/data/repositories/item_repository.dart';
-import 'package:shelfstack/features/inventory/screens/container_details_screen.dart';
-import 'package:shelfstack/features/inventory/screens/edit_item_screen.dart';
+import 'package:shelfstack/features/inventory/screens/container_details_view.dart';
+import 'package:shelfstack/features/inventory/screens/edit_item_view.dart';
 import 'package:shelfstack/features/inventory/viewmodels/edit_item_viewmodel.dart';
 import 'package:shelfstack/features/inventory/viewmodels/item_details_viewmodel.dart';
 
-class ItemDetailsScreen extends StatefulWidget {
-  const ItemDetailsScreen({super.key});
+class ItemDetailsView extends StatelessWidget {
+  const ItemDetailsView({super.key});
 
   @override
-  State<ItemDetailsScreen> createState() => _ItemDetailsState();
+  Widget build(BuildContext context) {
+    return const _ItemDetailsContent();
+  }
 }
 
-class _ItemDetailsState extends State<ItemDetailsScreen> {
-  bool _didUpdate = false;
+class _ItemDetailsContent extends StatefulWidget {
+  const _ItemDetailsContent();
 
   @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback(
-      (_) => context.read<ItemDetailsViewModel>().loadItem(),
-    );
-  }
+  State<_ItemDetailsContent> createState() => _ItemDetailsContentState();
+}
+
+class _ItemDetailsContentState extends State<_ItemDetailsContent> {
+  bool _didUpdate = false;
 
   Future<void> _navigateToEdit() async {
     final vm = context.read<ItemDetailsViewModel>();
@@ -45,7 +46,7 @@ class _ItemDetailsState extends State<ItemDetailsScreen> {
             item,
             container,
           ),
-          child: EditItemScreen(item: item, container: container),
+          child: EditItemView(item: item, container: container),
         ),
       ),
     );
@@ -274,7 +275,7 @@ class _ItemDetailsState extends State<ItemDetailsScreen> {
                 Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (context) =>
-                        ContainerDetailsScreen(containerId: container.id),
+                        ContainerDetailsView(containerId: container.id),
                   ),
                 );
               },

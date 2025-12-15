@@ -5,15 +5,22 @@ import 'package:shelfstack/data/repositories/item_repository.dart';
 import 'package:shelfstack/features/search/search_viewmodel.dart';
 import 'package:shelfstack/features/search/widgets/search_result_card.dart';
 
-class SearchScreen extends StatelessWidget {
-  const SearchScreen({super.key});
+class SearchView extends StatelessWidget {
+  const SearchView({super.key});
+
+  Widget _content(BuildContext context) {
+    final containerRepo = context.read<ContainerRepository>();
+    final itemRepo = context.read<ItemRepository>();
+
+    return ChangeNotifierProvider(
+      create: (_) => SearchViewModel(containerRepo, itemRepo),
+      child: const _SearchScreenContent(),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => SearchViewModel(),
-      child: const _SearchScreenContent(),
-    );
+    return _content(context);
   }
 }
 
@@ -42,16 +49,12 @@ class _SearchScreenContentState extends State<_SearchScreenContent> {
 
   void _onSearchChanged() {
     final vm = context.read<SearchViewModel>();
-    final containerRepo = context.read<ContainerRepository>();
-    final itemRepo = context.read<ItemRepository>();
-    vm.updateQuery(_searchController.text, containerRepo, itemRepo);
+    vm.updateQuery(_searchController.text);
   }
 
   void _onFilterChanged(SearchFilter filter) {
     final vm = context.read<SearchViewModel>();
-    final containerRepo = context.read<ContainerRepository>();
-    final itemRepo = context.read<ItemRepository>();
-    vm.updateFilter(filter, containerRepo, itemRepo);
+    vm.updateFilter(filter);
   }
 
   @override

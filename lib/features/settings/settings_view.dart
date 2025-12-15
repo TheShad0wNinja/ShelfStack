@@ -3,14 +3,14 @@ import 'package:provider/provider.dart';
 import 'package:shelfstack/core/widgets/theme_switcher.dart';
 import 'package:shelfstack/features/settings/settings_viewmodel.dart';
 
-class SettingsScreen extends StatefulWidget {
-  const SettingsScreen({super.key});
+class SettingsView extends StatefulWidget {
+  const SettingsView({super.key});
 
   @override
-  State<SettingsScreen> createState() => _SettingsScreenState();
+  State<SettingsView> createState() => _SettingsScreenState();
 }
 
-class _SettingsScreenState extends State<SettingsScreen> {
+class _SettingsScreenState extends State<SettingsView> {
   final _usernameController = TextEditingController();
 
   @override

@@ -23,6 +23,13 @@ class EditItemViewModel extends ChangeNotifier {
     _photoUrl = _originalItem.photoUrl;
     _selectedContainer = _originalContainer;
     _loadAvailableContainers();
+    
+    _itemRepository.onDataChanged.listen((_) {
+      _loadAvailableContainers();
+    });
+    _containerRepository.onDataChanged.listen((_) {
+      _loadAvailableContainers();
+    });
   }
 
   bool _isLoading = false;
@@ -32,6 +39,8 @@ class EditItemViewModel extends ChangeNotifier {
   String? _error;
 
   String? get error => _error;
+
+  Item get item => _originalItem;
 
   late String _name;
 

@@ -2,17 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:provider/provider.dart';
 import 'package:shelfstack/core/services/deep_link_service.dart';
-import 'package:shelfstack/features/inventory/screens/container_details_screen.dart';
+import 'package:shelfstack/features/inventory/screens/container_details_view.dart';
 import 'package:shelfstack/features/inventory/viewmodels/container_details_viewmodel.dart';
 
-class QRScannerScreen extends StatefulWidget {
-  const QRScannerScreen({super.key});
+class QRScannerView extends StatefulWidget {
+  const QRScannerView({super.key});
 
   @override
-  State<QRScannerScreen> createState() => _QRScannerScreenState();
+  State<QRScannerView> createState() => _QRScannerScreenState();
 }
 
-class _QRScannerScreenState extends State<QRScannerScreen> {
+class _QRScannerScreenState extends State<QRScannerView> {
   late MobileScannerController _scannerController;
 
   bool _hasScanned = false;
@@ -82,10 +82,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
     if (!mounted) return;
     await Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => ChangeNotifierProvider(
-          create: (_) => ContainerDetailsViewModel(),
-          child: ContainerDetailsScreen(containerId: containerId),
-        ),
+        builder: (context) => ContainerDetailsView(containerId: containerId),
       ),
     );
 

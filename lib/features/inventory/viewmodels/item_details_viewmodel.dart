@@ -19,20 +19,39 @@ class ItemDetailsViewModel extends ChangeNotifier {
   bool _isLoading = true;
   bool get isLoading => _isLoading;
 
-  ItemDetailsViewModel(this._itemId, this._containerRepository ,this._itemRepository);
-
   String? _error;
   String? get error => _error;
 
+  ItemDetailsViewModel(
+    this._itemId,
+    this._containerRepository,
+    this._itemRepository,
+  ) {
+    _itemRepository.onDataChanged.listen((_) {
+      loadItem();
+    });
+    _containerRepository.onDataChanged.listen((_) {
+      loadItem();
+    });
+    loadItem();
+  }
+
   Future<void> loadItem() async {
     _isLoading = true;
+    _error = null;
     notifyListeners();
 
-    _item = await _itemRepository.fetchItemById(_itemId);
-    _container = await _containerRepository.fetchContainerById(_item!.containerId);
-
-    _isLoading = false;
-    notifyListeners();
+    try {
+      _item = await _itemRepository.fetchItemById(_itemId);
+      if (_item != null) {
+        _container = await _containerRepository.fetchContainerById(_item!.containerId);
+      }
+    } catch (e) {
+      _error = e.toString();
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
   void updateData(Item item, Container container) {

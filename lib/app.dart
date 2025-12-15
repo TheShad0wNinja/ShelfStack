@@ -3,14 +3,14 @@ import 'package:provider/provider.dart';
 import 'package:shelfstack/core/services/deep_link_service.dart';
 import 'package:shelfstack/core/theme/theme.dart';
 import 'package:shelfstack/core/viewmodels/theme_viewmodel.dart';
-import 'package:shelfstack/features/inventory/screens/container_details_screen.dart';
-import 'package:shelfstack/features/inventory/screens/containers_screen.dart';
-import 'package:shelfstack/features/home/home_screen.dart';
+import 'package:shelfstack/features/inventory/screens/container_details_view.dart';
+import 'package:shelfstack/features/inventory/screens/containers_view.dart';
+import 'package:shelfstack/features/home/home_view.dart';
 import 'package:shelfstack/features/inventory/viewmodels/container_details_viewmodel.dart';
-import 'package:shelfstack/features/map/screens/map_screen.dart';
-import 'package:shelfstack/features/qr/qr_scanner_screen.dart';
-import 'package:shelfstack/features/search/search_screen.dart';
-import 'package:shelfstack/features/settings/settings_screen.dart';
+import 'package:shelfstack/features/map/screens/map_view.dart';
+import 'package:shelfstack/features/qr/qr_scanner_view.dart';
+import 'package:shelfstack/features/search/search_view.dart';
+import 'package:shelfstack/features/settings/settings_view.dart';
 
 import 'package:shelfstack/core/widgets/navbar.dart';
 import 'package:shelfstack/data/repositories/container_repository.dart';
@@ -19,8 +19,8 @@ import 'package:shelfstack/data/repositories/item_repository.dart';
 import 'package:shelfstack/data/database/item_repository_sqlite.dart';
 import 'package:shelfstack/core/viewmodels/navigation_viewmodel.dart';
 import 'package:shelfstack/features/inventory/widgets/expandable_fab.dart';
-import 'package:shelfstack/features/inventory/screens/create_container_screen.dart';
-import 'package:shelfstack/features/inventory/screens/add_item_screen.dart';
+import 'package:shelfstack/features/inventory/screens/create_container_view.dart';
+import 'package:shelfstack/features/inventory/screens/add_item_view.dart';
 import 'package:shelfstack/features/settings/settings_viewmodel.dart';
 
 class MyApp extends StatelessWidget {
@@ -42,7 +42,7 @@ class MyApp extends StatelessWidget {
         builder: (context, vm, child) {
           return MaterialApp(
             title: 'ShelfStack',
-            home: const MainScreen(),
+            home: const MainView(),
             theme: const MaterialTheme(TextTheme()).light(),
             darkTheme: const MaterialTheme(TextTheme()).dark(),
             themeMode: vm.themeMode,
@@ -54,20 +54,20 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
+class MainView extends StatefulWidget {
+  const MainView({super.key});
 
   @override
-  State<MainScreen> createState() => _MainScreenState();
+  State<MainView> createState() => _MainViewState();
 }
 
-class _MainScreenState extends State<MainScreen> {
+class _MainViewState extends State<MainView> {
   final List<Widget> screens = const [
-    HomeScreen(),
-    ContainersScreen(),
-    SearchScreen(),
-    MapScreen(),
-    SettingsScreen(),
+    HomeView(),
+    ContainersView(),
+    SearchView(),
+    MapView(),
+    SettingsView(),
   ];
   final DeepLinkService _deepLinkService = DeepLinkService();
 
@@ -79,24 +79,21 @@ class _MainScreenState extends State<MainScreen> {
 
   void _navigateToCreateContainer() {
     Navigator.of(context).push(
-      MaterialPageRoute(builder: (context) => const CreateContainerScreen()),
+      MaterialPageRoute(builder: (context) => const CreateContainerView()),
     );
   }
 
   void _navigateToCreateItem() {
     Navigator.of(
       context,
-    ).push(MaterialPageRoute(builder: (context) => const AddItemScreen()));
+    ).push(MaterialPageRoute(builder: (context) => const AddItemView()));
   }
 
   void _initializeDeepLinks() {
     _deepLinkService.onContainerLink = (containerId) {
       Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (context) => ChangeNotifierProvider(
-            create: (_) => ContainerDetailsViewModel(),
-            child: ContainerDetailsScreen(containerId: containerId),
-          ),
+          builder: (context) => ContainerDetailsView(containerId: containerId),
         ),
       );
     };
@@ -107,7 +104,7 @@ class _MainScreenState extends State<MainScreen> {
   void _navigateToScanQR() {
     Navigator.of(
       context,
-    ).push(MaterialPageRoute(builder: (context) => const QRScannerScreen()));
+    ).push(MaterialPageRoute(builder: (context) => const QRScannerView()));
   }
 
   @override

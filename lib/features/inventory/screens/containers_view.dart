@@ -6,8 +6,8 @@ import 'package:shelfstack/data/repositories/item_repository.dart';
 import 'package:shelfstack/features/inventory/viewmodels/containers_screen_viewmodel.dart';
 import 'package:shelfstack/features/inventory/widgets/container_row.dart';
 
-class ContainersScreen extends StatelessWidget {
-  const ContainersScreen({super.key});
+class ContainersView extends StatelessWidget {
+  const ContainersView({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -27,6 +27,7 @@ class EditContainerViewModel extends ChangeNotifier {
     _location = _container.location;
     _tags = List.from(_container.tags);
     _photoUrl = _container.photoUrl;
+    _repository.onDataChanged.listen((_) {});
   }
 
   void updateName(String s) {

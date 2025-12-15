@@ -4,16 +4,16 @@ import 'package:flutter_map_compass/flutter_map_compass.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 
-class LocationPickerScreen extends StatefulWidget {
+class LocationPickerView extends StatefulWidget {
   final LatLng? initialLocation;
 
-  const LocationPickerScreen({super.key, this.initialLocation});
+  const LocationPickerView({super.key, this.initialLocation});
 
   @override
-  State<LocationPickerScreen> createState() => _LocationPickerScreenState();
+  State<LocationPickerView> createState() => _LocationPickerScreenState();
 }
 
-class _LocationPickerScreenState extends State<LocationPickerScreen> {
+class _LocationPickerScreenState extends State<LocationPickerView> {
   LatLng? _pickedLocation;
   LatLng? _userLocation;
   final MapController _mapController = MapController();

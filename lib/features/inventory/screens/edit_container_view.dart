@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:shelfstack/features/map/screens/location_picker_screen.dart';
+import 'package:shelfstack/features/map/screens/location_picker_view.dart';
 import 'package:provider/provider.dart';
 import 'package:shelfstack/core/utils/dialog_helper.dart';
 import 'package:shelfstack/core/widgets/expandable_dynamic_image.dart';
@@ -8,16 +8,16 @@ import 'package:shelfstack/data/models/container.dart' as models;
 
 import 'package:shelfstack/features/inventory/viewmodels/edit_container_viewmodel.dart';
 
-class EditContainerScreen extends StatefulWidget {
+class EditContainerView extends StatefulWidget {
   final models.Container container;
 
-  const EditContainerScreen({super.key, required this.container});
+  const EditContainerView({super.key, required this.container});
 
   @override
-  State<EditContainerScreen> createState() => _EditContainerScreenState();
+  State<EditContainerView> createState() => _EditContainerScreenState();
 }
 
-class _EditContainerScreenState extends State<EditContainerScreen> {
+class _EditContainerScreenState extends State<EditContainerView> {
   late final TextEditingController _nameController;
   late final TextEditingController _locationLabelController;
   final _tagController = TextEditingController();
@@ -302,7 +302,7 @@ class _EditContainerScreenState extends State<EditContainerScreen> {
   Future<dynamic> _openLocationPicker(EditContainerViewModel vm) {
     return Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => LocationPickerScreen(
+        builder: (context) => LocationPickerView(
           initialLocation: vm.location != null && vm.location!.latitude != 0
               ? LatLng(vm.location!.latitude, vm.location!.longitude)
               : null,

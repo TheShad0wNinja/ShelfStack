@@ -8,12 +8,12 @@ import 'package:shelfstack/data/repositories/item_repository.dart';
 import 'package:shelfstack/features/inventory/viewmodels/add_item_viewmodel.dart';
 import 'package:shelfstack/features/inventory/widgets/container_selection_dialog.dart';
 
-class AddItemScreen extends StatelessWidget {
+class AddItemView extends StatelessWidget {
   final String? containerId;
   final String? containerLocationLabel;
   final String? containerName;
 
-  const AddItemScreen({
+  const AddItemView({
     super.key,
     this.containerId,
     this.containerLocationLabel,
@@ -22,11 +22,18 @@ class AddItemScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return _content(context);
+  }
+
+  Widget _content(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) {
-        final vm = AddItemViewModel();
+      create: (context) {
+        final vm = AddItemViewModel(
+          context.read<ItemRepository>(),
+          context.read<ContainerRepository>(),
+        );
         if (containerId != null) {
-          vm.loadContainer(containerId!, context.read<ContainerRepository>());
+          vm.loadContainer(containerId!);
         }
         return vm;
       },
@@ -83,7 +90,7 @@ class _AddItemScreenContentState extends State<_AddItemScreenContent> {
             IconButton(
               onPressed: () async {
                 final vm = context.read<AddItemViewModel>();
-                final success = await vm.save(context.read<ItemRepository>());
+                final success = await vm.save();
                 if (success && mounted) {
                   Navigator.of(context).pop(true);
                   ScaffoldMessenger.of(context).showSnackBar(

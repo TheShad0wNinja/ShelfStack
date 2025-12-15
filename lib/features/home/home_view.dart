@@ -4,14 +4,14 @@ import 'package:provider/provider.dart';
 import 'package:shelfstack/data/repositories/container_repository.dart';
 import 'package:shelfstack/data/repositories/item_repository.dart';
 import 'package:shelfstack/features/home/home_screen_view_model.dart';
-import 'package:shelfstack/features/inventory/screens/create_container_screen.dart';
+import 'package:shelfstack/features/inventory/screens/create_container_view.dart';
 import 'package:shelfstack/features/home/widgets/activity_row.dart';
 import 'package:shelfstack/data/models/container.dart' as models;
 import 'package:shelfstack/data/models/location.dart';
 import 'package:shelfstack/features/settings/settings_viewmodel.dart';
 
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+class HomeView extends StatelessWidget {
+  const HomeView({super.key});
 
   @override
   Widget build(BuildContext context) {
